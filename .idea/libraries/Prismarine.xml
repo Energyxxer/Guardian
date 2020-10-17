@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Prismarine">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../Prismarine/Prismarine.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
