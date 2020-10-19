@@ -6,11 +6,11 @@ import com.energyxxer.enxlex.report.Report;
 import com.energyxxer.enxlex.report.Reported;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.theme.change.ThemeChangeListener;
-import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.util.ImageManager;
 import com.energyxxer.util.Lazy;
 import com.energyxxer.util.logger.Debug;
@@ -147,21 +147,22 @@ public class Commons {
     }
 
     public static void compile(Project project) {
-        AbstractProcess process = project.createBuildProcess();
-        process.addStartListener(p -> GuardianWindow.consoleBoard.batchSubmitCommand(project.getPreActions()));
-        if(process instanceof Reported) {
-            Report report = ((Reported) process).getReport();
-            process.addCompletionListener((p, success) -> {
-                GuardianWindow.noticeExplorer.setNotices(report.group());
-                if (report.getTotal() > 0) GuardianWindow.noticeBoard.open();
-                report.getWarnings().forEach(Console.warn::println);
-                report.getErrors().forEach(Console.err::println);
-            });
+        if(project == null) {
+            GuardianWindow.showPopupMessage("No project selected");
+            return;
         }
+        AbstractProcess process = project.createProjectCompiler();
+        process.addStartListener(p -> GuardianWindow.consoleBoard.batchSubmitCommand(project.getPreActions()));
+        Report report = ((Reported) process).getReport();
+        process.addCompletionListener((p, success) -> {
+            GuardianWindow.noticeExplorer.setNotices(report.group());
+            if (report.getTotal() > 0) GuardianWindow.noticeBoard.open();
+            report.getWarnings().forEach(Console.warn::println);
+            report.getErrors().forEach(Console.err::println);
+        });
         process.addCompletionListener((p, success) -> {
             GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostActions());
         });
-
 
         ProcessManager.queueProcess(process);
     }

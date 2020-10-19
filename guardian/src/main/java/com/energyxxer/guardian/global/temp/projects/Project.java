@@ -3,26 +3,22 @@ package com.energyxxer.guardian.global.temp.projects;
 import com.energyxxer.commodore.versioning.Version;
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummarizer;
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummary;
-import com.energyxxer.enxlex.pattern_matching.ParsingSignature;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.guardian.langinterface.ProjectType;
-import com.energyxxer.util.processes.AbstractProcess;
+import com.energyxxer.prismarine.PrismarineCompiler;
 
 import java.awt.*;
 import java.io.File;
-import java.util.HashMap;
 
 public interface Project {
+	ProjectType getProjectType();
+
 	TokenPatternMatch getFileStructure();
 	ProjectSummary getSummary();
 	File getRootDirectory();
-	HashMap<String, ParsingSignature> getSourceCache();
-	HashMap<String, ParsingSignature> getResourceCache();
 	String getName();
 	File getServerDataRoot();
 	File getClientDataRoot();
-	void updateServerDataCache(HashMap<String, ParsingSignature> sourceCache);
-	void updateClientDataCache(HashMap<String, ParsingSignature> sourceCache);
 	void updateSummary(ProjectSummary summary);
 	void updateConfig();
     Version getTargetVersion();
@@ -31,10 +27,8 @@ public interface Project {
 	Iterable<String> getPreActions();
 	Iterable<String> getPostActions();
 
-	ProjectType getProjectType();
+	PrismarineCompiler createProjectCompiler();
 	ProjectSummarizer createProjectSummarizer();
-
-	AbstractProcess createBuildProcess();
 
 	long getInstantiationTime();
 

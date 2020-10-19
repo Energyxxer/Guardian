@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class SnippetLexerProfile extends LexerProfile { //TODO figure out why this isn't working
+public class SnippetLexerProfile extends LexerProfile {
 
     private static final TokenType END_MARKER = new TokenType("END_MARKER"); // $END$
 

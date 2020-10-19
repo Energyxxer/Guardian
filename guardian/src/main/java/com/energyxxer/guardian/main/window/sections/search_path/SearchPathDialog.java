@@ -47,6 +47,7 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
     private StyledDropdownMenu<String> rootPicker;
     private StyledCheckBox fileMaskEnabled;
     private StyledTextField fileMask;
+    private Pattern fileMaskPattern;
 
     private JPanel footerPanel;
     private JPanel previewPanel;
@@ -91,11 +92,13 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
         controlsPanel.add(new Padding(16));
 
         this.fileMaskEnabled = new StyledCheckBox("File Mask:", "FindInPath.header");
+        this.fileMaskEnabled.addActionListener(l -> updateFileMask());
         controlsPanel.add(this.fileMaskEnabled);
 
         this.fileMask = new StyledTextField("", "FindInPath.header", tlm);
         this.fileMask.setPreferredSize(new ScalableDimension(60, 24));
-        this.fileMask.setText("*.tdn");
+        this.fileMask.setText("*.json");
+        this.fileMask.addActionListener(l -> updateFileMask());
         controlsPanel.add(this.fileMask);
 
         controlsPanel.add(this.rootPicker = new StyledDropdownMenu<>(filterOptions, "FindInPath"));
@@ -150,7 +153,7 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
         this.wordsOnly.setSelected(Preferences.get("findInPath.words","false").equals("true"));
         this.regex.setSelected(Preferences.get("findInPath.regex","false").equals("true"));
         this.fileMaskEnabled.setSelected(Preferences.get("findInPath.fileMaskEnabled","false").equals("true"));
-        this.fileMask.setText(Preferences.get("findInPath.fileMask","*.tdn"));
+        this.fileMask.setText(Preferences.get("findInPath.fileMask","*.json"));
 
         this.fileMask.setEnabled(this.fileMaskEnabled.isSelected());
 
@@ -222,6 +225,15 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
         resizer.setResizable(true, true, true, true);
     }
 
+    private void updateFileMask() {
+        try {
+            fileMaskPattern = com.energyxxer.prismarine.util.PathMatcher.compile(fileMask.getText());
+            Debug.log("Updated file mask: " + fileMaskPattern);
+        } catch (PatternSyntaxException x) {
+            GuardianWindow.showError("Invalid file mask: " + fileMask.getText());
+        }
+    }
+
     private void search() {
         explorer.clear();
         QueryDetails query = new QueryDetails(field.getText(), matchCase.isSelected(), wordsOnly.isSelected(), regex.isSelected(), getRootFile());
@@ -291,10 +303,7 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
 
     private boolean shouldRead(File file) {
         if(fileMaskEnabled.isSelected()) {
-            String nameRegex = fileMask.getText();
-            nameRegex = Pattern.quote(nameRegex);
-            nameRegex = nameRegex.replace("\\*", ".*");
-            return file.getName().matches(nameRegex);
+            return fileMaskPattern.matcher(file.getName()).matches();
         } else {
             for(String extension : commonTextFileEndings) {
                 if(file.getName().endsWith(extension)) return true;

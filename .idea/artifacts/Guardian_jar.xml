@@ -3,11 +3,10 @@
     <output-path>$PROJECT_DIR$</output-path>
     <root id="archive" name="Guardian.jar">
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/companion/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="enx-swing" />
       <element id="module-output" name="guardian" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../Prismarine/Prismarine.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

@@ -8,6 +8,7 @@ import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.CompoundEdit
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DragInsertionEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.SetCaretProfileEdit;
+import com.energyxxer.guardian.ui.editor.highlighters.BracePairHighlighter;
 import com.energyxxer.guardian.util.Range;
 import com.energyxxer.util.Lazy;
 import com.energyxxer.util.StringLocation;
