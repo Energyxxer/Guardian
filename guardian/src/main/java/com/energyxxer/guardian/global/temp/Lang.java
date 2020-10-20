@@ -31,6 +31,7 @@ import com.energyxxer.guardian.ui.editor.inspector.InspectionItem;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaLexerProfile;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaProductions;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
+import com.energyxxer.prismarine.summaries.SymbolSuggestion;
 import com.energyxxer.util.Factory;
 import com.energyxxer.util.logger.Debug;
 
@@ -249,8 +250,10 @@ public class Lang {
         throw new UnsupportedOperationException();
     }
 
-    public boolean expandSuggestion(ComplexSuggestion suggestion, ArrayList<SuggestionToken> tokens, SuggestionDialog dialog, SuggestionModule suggestionModule) {
-        return false;
+    public void expandComplexSuggestion(ComplexSuggestion suggestion, ArrayList<SuggestionToken> tokens, SuggestionDialog dialog, SuggestionModule suggestionModule) {
+    }
+
+    public void expandSymbolSuggestion(SymbolSuggestion suggestion, ArrayList<SuggestionToken> tokens, SuggestionDialog dialog, SuggestionModule suggestionModule) {
     }
 
     public Image getIconForFile(File file) {
