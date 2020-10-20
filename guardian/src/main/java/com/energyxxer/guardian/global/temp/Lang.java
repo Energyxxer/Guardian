@@ -30,6 +30,7 @@ import com.energyxxer.guardian.ui.editor.completion.snippets.Snippet;
 import com.energyxxer.guardian.ui.editor.inspector.InspectionItem;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaLexerProfile;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaProductions;
+import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.Factory;
 import com.energyxxer.util.logger.Debug;
 
@@ -240,7 +241,7 @@ public class Lang {
         return false;
     }
 
-    public SummaryModule createSummaryModule() {
+    public PrismarineSummaryModule createSummaryModule() {
         return null;
     }
 

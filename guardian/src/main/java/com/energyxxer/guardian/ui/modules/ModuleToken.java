@@ -55,6 +55,10 @@ public interface ModuleToken {
         return 0;
     }
 
+    default float getAlpha() {
+        return 1;
+    }
+
     class Static {
         public static List<ModuleTokenFactory> tokenFactories = new ArrayList<>();
 

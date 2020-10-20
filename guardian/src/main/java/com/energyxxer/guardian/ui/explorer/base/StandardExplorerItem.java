@@ -1,10 +1,8 @@
 package com.energyxxer.guardian.ui.explorer.base;
 
-import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
-import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.modules.NonStandardModuleToken;
 import com.energyxxer.guardian.ui.theme.Theme;
@@ -32,7 +30,6 @@ public class StandardExplorerItem extends ExplorerElement {
     protected int x = 0;
 
     private boolean detailed = false;
-    private boolean translucent;
 
     private ArrayList<MouseListener> mouseListeners = new ArrayList<>();
 
@@ -49,8 +46,6 @@ public class StandardExplorerItem extends ExplorerElement {
         this.parent = parent;
         if(parent != null) this.setDetailed(parent.detailed);
         this.token = token;
-
-        this.translucent = (token instanceof FileModuleToken) && Commons.isProjectFile(((FileModuleToken) token).getFile());
 
         updateIcon();
 
@@ -166,8 +161,9 @@ public class StandardExplorerItem extends ExplorerElement {
         Graphics2D g2d = (Graphics2D) g;
         Composite oldComposite = g2d.getComposite();
 
-        if(translucent) {
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        float alpha = token.getAlpha();
+        if(alpha != 1) {
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         }
 
         if(token.getTitle() != null) {
@@ -188,7 +184,7 @@ public class StandardExplorerItem extends ExplorerElement {
             String subTitle = token.getSubTitle();
             if(subTitle != null) {
                 g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), (int)(g.getColor().getAlpha() * 0.75)));
-                x += 8;
+                x += 16;
                 g.drawString(subTitle, x, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight())/2));
                 x += metrics.stringWidth(subTitle);
             }

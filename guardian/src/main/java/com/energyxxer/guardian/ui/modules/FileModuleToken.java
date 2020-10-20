@@ -119,6 +119,11 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     }
 
     @Override
+    public float getAlpha() {
+        return Commons.isProjectFile(file) ? 0.6f : 1f;
+    }
+
+    @Override
     public Image getIcon() {
         if(overrideIconName != null) return Commons.getIcon(overrideIconName);
         Project associatedProject = ProjectManager.getAssociatedProject(file);

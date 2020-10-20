@@ -6,6 +6,7 @@ import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummary;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.prismarine.PrismarineCompiler;
+import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 
 import java.awt.*;
 import java.io.File;
@@ -14,7 +15,7 @@ public interface Project {
 	ProjectType getProjectType();
 
 	TokenPatternMatch getFileStructure();
-	ProjectSummary getSummary();
+	PrismarineProjectSummary getSummary();
 	File getRootDirectory();
 	String getName();
 	File getServerDataRoot();

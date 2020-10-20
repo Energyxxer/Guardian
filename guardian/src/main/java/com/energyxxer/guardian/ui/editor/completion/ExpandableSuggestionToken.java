@@ -2,12 +2,12 @@ package com.energyxxer.guardian.ui.editor.completion;
 
 import com.energyxxer.enxlex.suggestions.LiteralSuggestion;
 import com.energyxxer.enxlex.suggestions.Suggestion;
-import com.energyxxer.guardian.ui.display.DisplayModule;
-import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.temp.Lang;
 import com.energyxxer.guardian.ui.Tab;
+import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.editor.EditorModule;
+import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -27,9 +27,10 @@ public class ExpandableSuggestionToken implements SuggestionToken, ModuleToken {
     protected String iconKey;
 
     protected boolean enabled = true;
-    protected boolean darkened;
     protected int backspaces = 0;
     protected int endIndex = -1;
+
+    protected float alpha = 1f;
 
     protected boolean caseSensitive = true;
 
@@ -152,16 +153,12 @@ public class ExpandableSuggestionToken implements SuggestionToken, ModuleToken {
         return enabled;
     }
 
-    public void setDarkened(boolean darkened) {
-        this.darkened = darkened;
-    }
-
-    public boolean isDarkened() {
-        return darkened;
-    }
-
     public void setBackspaces(int backspaces) {
         this.backspaces = backspaces;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public int getBackspaces() {
@@ -174,6 +171,15 @@ public class ExpandableSuggestionToken implements SuggestionToken, ModuleToken {
 
     public void setEndIndex(int endIndex) {
         this.endIndex = endIndex;
+    }
+
+    @Override
+    public float getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(float alpha) {
+        this.alpha = alpha;
     }
 
     @Override

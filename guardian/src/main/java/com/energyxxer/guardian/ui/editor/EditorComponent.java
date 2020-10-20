@@ -1,7 +1,6 @@
 package com.energyxxer.guardian.ui.editor;
 
 import com.energyxxer.enxlex.lexical_analysis.LazyLexer;
-import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSection;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
@@ -16,6 +15,7 @@ import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.IndentationManager;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.guardian.ui.editor.inspector.Inspector;
+import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.Nullable;
 
@@ -165,7 +165,11 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             Project project = parent.file != null ? ProjectManager.getAssociatedProject(parent.file) : null;
 
             SuggestionModule suggestionModule = (SHOW_SUGGESTIONS.get() && project != null && lang.usesSuggestionModule()) ? new SuggestionModule(this.getCaretWordPosition(), this.getCaretPosition()) : null;
-            SummaryModule summaryModule = project != null ? lang.createSummaryModule() : null;
+            PrismarineSummaryModule summaryModule = project != null ? lang.createSummaryModule() : null;
+
+            if(summaryModule != null) {
+                lang.joinToProjectSummary(summaryModule, parent.file, project);
+            }
 
             File file = parent.getFileForAnalyzer();
             Lang.LangAnalysisResponse analysis = file != null ? lang.analyze(file, text, suggestionModule, summaryModule) : null;
@@ -184,9 +188,6 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             if(analysis.response != null) suggestionBox.setSummary(analysis.lexer.getSummaryModule(), analysis.response.matched);
             if(analysis.lexer.getSuggestionModule() != null) {
-                if(project != null && analysis.lexer.getSummaryModule() != null) {
-                    lang.joinToProjectSummary(analysis.lexer.getSummaryModule(), parent.file, project);
-                }
                 suggestionBox.showSuggestions(analysis.lexer.getSuggestionModule());
             }
 
