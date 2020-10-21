@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.editor.highlighters;
 
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.find.FileOccurrence;
@@ -9,7 +10,6 @@ import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorSelectionPainter;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
-import com.energyxxer.prismarine.Prismarine;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.prismarine.summaries.SummarySymbol;
 import com.energyxxer.util.StringBounds;
@@ -23,7 +23,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter, MouseMotionListener, MouseListener {
 
@@ -199,10 +198,12 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                 } else {
                     //Looking at usage
                     StringBounds bounds = selectedSymbol.getDeclarationPattern().getStringBounds();
-                    if(Objects.equals(selectedSymbol.getDeclarationPattern().getFile(), Prismarine.NULL_FILE)) {
+                    TokenSource source = selectedSymbol.getDeclarationPattern().getSource();
+                    File exactFile = source.getExactFile();
+                    if(exactFile == null) {
                         GuardianWindow.showPopupMessage("Symbol '" + selectedSymbol.getName() + "' is native, or its declaration can't be found in any file");
                     } else {
-                        GuardianWindow.tabManager.openTab(new FileModuleToken(selectedSymbol.getDeclarationPattern().getFile()), bounds.start.index, bounds.end.index-bounds.start.index);
+                        GuardianWindow.tabManager.openTab(new FileModuleToken(exactFile), bounds.start.index, bounds.end.index-bounds.start.index);
                     }
                 }
                 e.consume();
@@ -216,15 +217,20 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
         } else if(selectedSymbolUsages.size() == 1) {
             TokenPattern<?> pattern = selectedSymbolUsages.get(0).pattern;
             StringBounds bounds = pattern.getStringBounds();
-            GuardianWindow.tabManager.openTab(new FileModuleToken(pattern.getFile()), bounds.start.index, bounds.end.index-bounds.start.index);
+            File exactFile = pattern.getSource().getExactFile();
+            if(exactFile != null) {
+                GuardianWindow.tabManager.openTab(new FileModuleToken(exactFile), bounds.start.index, bounds.end.index-bounds.start.index);
+            }
         } else {
             FindResults results = new FindResults();
 
             for(PrismarineSummaryModule.SymbolUsage usage : selectedSymbolUsages) {
-                File file = usage.pattern.getFile();
-                StringBounds bounds = usage.pattern.getStringBounds();
-                FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, usage.pattern.flatten(false), 0);
-                results.insertResult(fileOccurrence);
+                File file = usage.pattern.getSource().getExactFile();
+                if(file != null) {
+                    StringBounds bounds = usage.pattern.getStringBounds();
+                    FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, usage.pattern.flatten(false), 0);
+                    results.insertResult(fileOccurrence);
+                }
             }
 
             GuardianWindow.toolBoard.open(GuardianWindow.findBoard);

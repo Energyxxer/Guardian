@@ -2,13 +2,13 @@ package com.energyxxer.guardian.ui.explorer;
 
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.StackTrace;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerMaster;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
-import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
-import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
+import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 
 import java.awt.*;
@@ -153,7 +153,7 @@ public class NoticeItem extends ExplorerElement {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(e.getButton() == MouseEvent.BUTTON1 && !isPlatformControlDown(e) && e.getClickCount() % 2 == 0 && notice.getFilePath() != null) {
+        if(e.getButton() == MouseEvent.BUTTON1 && !isPlatformControlDown(e) && e.getClickCount() % 2 == 0) {
             interact();
         }
     }
@@ -166,7 +166,12 @@ public class NoticeItem extends ExplorerElement {
                 return;
             }
         }
-        GuardianWindow.tabManager.openTab(new FileModuleToken(new File(notice.getFilePath())), notice.getLocationIndex(), notice.getLocationLength());
+        File file = notice.getSource().getExactFile();
+        if(file != null) {
+            GuardianWindow.tabManager.openTab(new FileModuleToken(file), notice.getLocationIndex(), notice.getLocationLength());
+        } else {
+            GuardianWindow.showPopupMessage("This file is either inside a zip or\nbuilt-in, and cannot be opened");
+        }
     }
 
     @Override

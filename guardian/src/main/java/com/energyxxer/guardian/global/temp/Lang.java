@@ -5,6 +5,7 @@ import com.energyxxer.enxlex.lexical_analysis.LazyLexer;
 import com.energyxxer.enxlex.lexical_analysis.Lexer;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
 import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
+import com.energyxxer.enxlex.lexical_analysis.token.SourceFile;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenStream;
 import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
@@ -183,7 +184,7 @@ public class Lang {
             lexer.setSuggestionModule(suggestionModule);
             suggestionModule.setLexer(lexer);
         }
-        lexer.start(file, text, createProfile());
+        lexer.start(new SourceFile(file), text, createProfile());
 
         lexer.getStream().tokens.remove(0);
 

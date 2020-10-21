@@ -7,9 +7,11 @@ import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
+import com.energyxxer.util.StringBounds;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 public class NoticeStackTraceItem extends ExplorerElement {
     private NoticeItem parent;
@@ -118,7 +120,7 @@ public class NoticeStackTraceItem extends ExplorerElement {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(e.getButton() == MouseEvent.BUTTON1 && !AdvancedEditor.isPlatformControlDown(e) && e.getClickCount() % 2 == 0 && traceElement.getPattern().getFile() != null) {
+        if(e.getButton() == MouseEvent.BUTTON1 && !AdvancedEditor.isPlatformControlDown(e) && e.getClickCount() % 2 == 0) {
             interact();
         }
     }
@@ -129,10 +131,14 @@ public class NoticeStackTraceItem extends ExplorerElement {
 
     @Override
     public void interact() {
-        if(traceElement.getFileMessage() != null) {
-            GuardianWindow.showPopupMessage("Cannot view stack trace element:\n" + traceElement.getFileMessage());
+        File file = traceElement.getPattern().getSource().getExactFile();
+        if(file != null) {
+            StringBounds bounds = traceElement.getPattern().getStringBounds();
+            int start = bounds.start.index;
+            int length = bounds.end.index - bounds.start.index;
+            GuardianWindow.tabManager.openTab(new FileModuleToken(file), start, length);
         } else {
-            GuardianWindow.tabManager.openTab(new FileModuleToken(traceElement.getPattern().getFile()), traceElement.getPattern().getStringLocation().index, traceElement.getPattern().getStringBounds().end.index - traceElement.getPattern().getStringBounds().start.index);
+            GuardianWindow.showPopupMessage("This file is either inside a zip or\nbuilt-in, and cannot be opened");
         }
     }
 

@@ -9,7 +9,6 @@ import com.energyxxer.guardian.ui.modules.ModuleToken;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.List;
 
 import static com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor.isPlatformControlDown;
@@ -31,8 +30,8 @@ public class NoticeGroupElement extends ExplorerElement {
         this.label = label;
         this.notices = notices;
 
-        if(notices.size() > 0 && notices.get(0).getFilePath() != null) {
-            this.icon = new FileModuleToken(new File(notices.get(0).getFilePath())).getIcon();
+        if(notices.size() > 0 && notices.get(0).getSource().getRelatedFile() != null) {
+            this.icon = new FileModuleToken(notices.get(0).getSource().getRelatedFile()).getIcon();
         }
 
         this.x = master.getInitialIndent() + (indentation * master.getIndentPerLevel());

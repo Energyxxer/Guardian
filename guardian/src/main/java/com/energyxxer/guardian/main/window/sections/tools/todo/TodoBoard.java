@@ -5,17 +5,17 @@ import com.energyxxer.enxlex.lexical_analysis.token.TokenSection;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
+import com.energyxxer.guardian.main.window.sections.tools.ToolBoard;
+import com.energyxxer.guardian.main.window.sections.tools.ToolBoardMaster;
+import com.energyxxer.guardian.main.window.sections.tools.find.FileOccurrence;
+import com.energyxxer.guardian.main.window.sections.tools.find.FindExplorerFilter;
 import com.energyxxer.guardian.main.window.sections.tools.find.FindResultExplorerItem;
+import com.energyxxer.guardian.main.window.sections.tools.find.FindResults;
 import com.energyxxer.guardian.ui.ToolbarButton;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.ButtonHintHandler;
 import com.energyxxer.guardian.ui.styledcomponents.Padding;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.energyxxer.guardian.main.window.sections.tools.ToolBoard;
-import com.energyxxer.guardian.main.window.sections.tools.ToolBoardMaster;
-import com.energyxxer.guardian.main.window.sections.tools.find.FileOccurrence;
-import com.energyxxer.guardian.main.window.sections.tools.find.FindExplorerFilter;
-import com.energyxxer.guardian.main.window.sections.tools.find.FindResults;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.hints.Hint;
@@ -107,14 +107,17 @@ public class TodoBoard extends ToolBoard {
                             break;
                         }
                     }
-                    FileOccurrence occurrence = new FileOccurrence(
-                            new File(todo.getToken().file),
-                            bounds.start.index + section.start,
-                            section.length,
-                            bounds.start.line,
-                            todo.getText(),
-                            0);
-                    projectResult.insertResult(occurrence);
+                    File file = todo.getToken().getSource().getExactFile();
+                    if(file != null) {
+                        FileOccurrence occurrence = new FileOccurrence(
+                                file,
+                                bounds.start.index + section.start,
+                                section.length,
+                                bounds.start.line,
+                                todo.getText(),
+                                0);
+                        projectResult.insertResult(occurrence);
+                    }
                 }
                 FindResultExplorerItem projectItem = new FindResultExplorerItem(projectResult, explorer, k -> true);
                 explorer.addElement(projectItem);
