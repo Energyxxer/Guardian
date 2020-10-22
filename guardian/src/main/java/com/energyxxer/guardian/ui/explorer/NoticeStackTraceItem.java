@@ -131,14 +131,16 @@ public class NoticeStackTraceItem extends ExplorerElement {
 
     @Override
     public void interact() {
-        File file = traceElement.getPattern().getSource().getExactFile();
-        if(file != null) {
-            StringBounds bounds = traceElement.getPattern().getStringBounds();
-            int start = bounds.start.index;
-            int length = bounds.end.index - bounds.start.index;
-            GuardianWindow.tabManager.openTab(new FileModuleToken(file), start, length);
-        } else {
-            GuardianWindow.showPopupMessage("This file is either inside a zip or\nbuilt-in, and cannot be opened");
+        if(traceElement.getPattern() != null && traceElement.getPattern().getSource() != null) {
+            File file = traceElement.getPattern().getSource().getExactFile();
+            if(file != null) {
+                StringBounds bounds = traceElement.getPattern().getStringBounds();
+                int start = bounds.start.index;
+                int length = bounds.end.index - bounds.start.index;
+                GuardianWindow.tabManager.openTab(new FileModuleToken(file), start, length);
+            } else {
+                GuardianWindow.showPopupMessage("This file is either inside a zip or\nbuilt-in, and cannot be opened");
+            }
         }
     }
 

@@ -166,11 +166,13 @@ public class NoticeItem extends ExplorerElement {
                 return;
             }
         }
-        File file = notice.getSource().getExactFile();
-        if(file != null) {
-            GuardianWindow.tabManager.openTab(new FileModuleToken(file), notice.getLocationIndex(), notice.getLocationLength());
-        } else {
-            GuardianWindow.showPopupMessage("This file is either inside a zip or\nbuilt-in, and cannot be opened");
+        if(notice.getSource() != null) {
+            File file = notice.getSource().getExactFile();
+            if(file != null) {
+                GuardianWindow.tabManager.openTab(new FileModuleToken(file), notice.getLocationIndex(), notice.getLocationLength());
+            } else {
+                GuardianWindow.showPopupMessage("This file is either inside a zip or\nbuilt-in, and cannot be opened");
+            }
         }
     }
 
