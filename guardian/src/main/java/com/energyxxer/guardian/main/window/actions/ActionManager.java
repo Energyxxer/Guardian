@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.main.window.actions;
 
 import com.energyxxer.guardian.global.Commons;
+import com.energyxxer.guardian.global.FileManager;
 import com.energyxxer.guardian.global.Resources;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.global.keystrokes.SpecialMapping;
@@ -191,42 +192,42 @@ public class ActionManager {
                     "Undo", "Undo the last change",
                     KeyMap.UNDO,
                     "undo"
-                ).setGlobalUsage(false).setIconKey("undo")
+                ).setUsableFunction(ProgramAction.USABLE_NOWHERE).setIconKey("undo")
         );
         actions.put("REDO",
                 new ProgramAction(
                     "Redo", "Redo the last change undone",
                     KeyMap.REDO,
                     "redo"
-                ).setGlobalUsage(false).setIconKey("redo")
+                ).setUsableFunction(ProgramAction.USABLE_NOWHERE).setIconKey("redo")
         );
         actions.put("COPY",
                 new ProgramAction(
                     "Copy", "Copy selected text",
                     KeyMap.COPY,
                     "copy"
-                ).setGlobalUsage(false)
+                ).setUsableFunction(ProgramAction.USABLE_NOWHERE)
         );
         actions.put("CUT",
                 new ProgramAction(
                     "Cut", "Cut selected text",
                     KeyMap.CUT,
                     "cut"
-                ).setGlobalUsage(false)
+                ).setUsableFunction(ProgramAction.USABLE_NOWHERE)
         );
         actions.put("PASTE",
                 new ProgramAction(
                     "Paste", "Paste text from clipboard",
                     KeyMap.PASTE,
                     "paste"
-                ).setGlobalUsage(false)
+                ).setUsableFunction(ProgramAction.USABLE_NOWHERE)
         );
         actions.put("DELETE",
                 new ProgramAction(
                     "Delete", "Delete selected text",
                     KeyMap.requestMapping("delete", KeyMap.identifierToStrokes(KeyEvent.VK_DELETE + ";" + KeyEvent.VK_BACK_SPACE)).setGroupName("Editor"),
                     "delete"
-                ).setGlobalUsage(false)
+                ).setUsableFunction(ProgramAction.USABLE_NOWHERE)
         );
         for(ProjectType type : ProjectType.values()) {
             actions.put("NEW_PROJECT_" + type.getCode(),
@@ -302,6 +303,20 @@ public class ActionManager {
                         () -> GuardianWindow.processBoard.open()
                 ).setIconKey("process")
         );
+        actions.put("RENAME_EXPLORER_FILE",
+                new ProgramAction(
+                        "Rename file", "Rename the file currently selected in the explorer",
+                        KeyMap.requestMapping("rename_explorer_file", KeyMap.identifierToStrokes("" + KeyEvent.VK_F2)).setGroupName("Explorer"),
+                        FileManager::renameSelected
+                ).setUsableFunction(p -> GuardianWindow.projectExplorer.hasFocus()).setIconKey("rename")
+        );
+        actions.put("DELETE_EXPLORER_FILE",
+                new ProgramAction(
+                        "Delete file", "Delete the file currently selected in the explorer",
+                        KeyMap.requestMapping("delete_explorer_file", KeyMap.identifierToStrokes("" + KeyEvent.VK_DELETE)).setGroupName("Explorer"),
+                        FileManager::deleteSelected
+                ).setUsableFunction(p -> GuardianWindow.projectExplorer.hasFocus())
+        );
         actions.put("ABOUT",
                 new ProgramAction(
                         "About", "About this program",
@@ -343,7 +358,7 @@ public class ActionManager {
             }
             if(!altGraphCaught) {
                 for(ProgramAction action : actions.values()) {
-                    if(action.getShortcut() != null && action.isGlobalUsage()) {
+                    if(action.getShortcut() != null && action.isUsable()) {
                         if(action.getShortcut().wasPerformedExact(e)) {
                             if(e.getID() == KeyEvent.KEY_PRESSED) {
                                 action.perform();

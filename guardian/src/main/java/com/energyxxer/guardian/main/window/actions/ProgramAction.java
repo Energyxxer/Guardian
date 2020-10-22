@@ -12,14 +12,19 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class ProgramAction implements ModuleToken {
+    public static final Predicate<ProgramAction> USABLE_EVERYWHERE = a -> true;
+    public static final Predicate<ProgramAction> USABLE_NOWHERE = a -> false;
+
     private String displayName;
     private String description;
     private UserKeyBind shortcut;
     private Runnable action;
     private String iconKey = null;
     private boolean globalUsage = true;
+    private Predicate<ProgramAction> usableFunction = USABLE_EVERYWHERE;
 
     public ProgramAction(String displayName, String description, UserKeyBind shortcut, String moduleActionKey) {
         this(displayName, description, shortcut, () -> {
@@ -139,12 +144,12 @@ public class ProgramAction implements ModuleToken {
         return Objects.hash(displayName, description, shortcut, action);
     }
 
-    public boolean isGlobalUsage() {
-        return globalUsage;
+    public boolean isUsable() {
+        return usableFunction.test(this);
     }
 
-    public ProgramAction setGlobalUsage(boolean globalUsage) {
-        this.globalUsage = globalUsage;
+    public ProgramAction setUsableFunction(Predicate<ProgramAction> usableFunction) {
+        this.usableFunction = usableFunction;
         return this;
     }
 

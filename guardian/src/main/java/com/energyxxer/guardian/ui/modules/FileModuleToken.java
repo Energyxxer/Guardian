@@ -375,43 +375,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
             StyledMenuItem renameItem = MenuItems.fileItem(MenuItems.FileMenuItem.RENAME);
             renameItem.addActionListener(e -> {
                 if(selectedFileTokens.size() != 1) return;
-
-                String pathToRename = selectedFileTokens.get(0).getPath();
-                String name = new File(pathToRename).getName();
-                String rawName = name.substring(0, name.contains(".") ? name.lastIndexOf(".") : name.length());
-                final String pathToParent = pathToRename.substring(0, pathToRename.lastIndexOf(name));
-
-                String newName = new PromptDialog("Rename", "Enter a new name for the file:", name) {
-                    @Override
-                    protected boolean validate(String str) {
-                        return str.trim().length() > 0 && FileCommons.validateFilename(str)
-                                && !new File(pathToParent + str).exists();
-                    }
-
-                    @Override
-                    protected int getSelectionEnd() {
-                        return rawName.length();
-                    }
-                }.result;
-
-                if (newName != null) {
-                    if (ProjectManager.renameFile(new File(pathToRename), newName)) {
-                        GuardianWindow.projectExplorer.refresh();
-                        GuardianWindow.tabManager.openTabs.forEach(
-                                tab -> {
-                                    if(tab.token instanceof FileModuleToken && ((FileModuleToken) tab.token).getFile().equals(this.getFile())) {
-                                        tab.transform(new FileModuleToken(new File(pathToParent + newName)));
-                                    }
-                                }
-                        );
-                        GuardianWindow.tabManager.saveOpenTabs();
-                        GuardianWindow.tabList.repaint();
-                    } else {
-                        JOptionPane.showMessageDialog(null,
-                                "<html>The action can't be completed because the folder or file is open in another program.<br>Close the folder and try again.</html>",
-                                "An error occurred.", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
+                this.showRenameDialog();
             });
             menu.add(renameItem);
 
@@ -432,6 +396,45 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
         menu.add(openInSystemItem);
 
         return menu;
+    }
+
+    public void showRenameDialog() {
+        String pathToRename = this.getPath();
+        String name = new File(pathToRename).getName();
+        String rawName = name.substring(0, name.contains(".") ? name.lastIndexOf(".") : name.length());
+        final String pathToParent = pathToRename.substring(0, pathToRename.lastIndexOf(name));
+
+        String newName = new PromptDialog("Rename", "Enter a new name for the file:", name) {
+            @Override
+            protected boolean validate(String str) {
+                return str.trim().length() > 0 && FileCommons.validateFilename(str)
+                        && !new File(pathToParent + str).exists();
+            }
+
+            @Override
+            protected int getSelectionEnd() {
+                return rawName.length();
+            }
+        }.result;
+
+        if (newName != null) {
+            if (ProjectManager.renameFile(new File(pathToRename), newName)) {
+                GuardianWindow.projectExplorer.refresh();
+                GuardianWindow.tabManager.openTabs.forEach(
+                        tab -> {
+                            if(tab.token instanceof FileModuleToken && ((FileModuleToken) tab.token).getFile().equals(this.getFile())) {
+                                tab.transform(new FileModuleToken(new File(pathToParent + newName)));
+                            }
+                        }
+                );
+                GuardianWindow.tabManager.saveOpenTabs();
+                GuardianWindow.tabList.repaint();
+            } else {
+                JOptionPane.showMessageDialog(null,
+                        "<html>The action can't be completed because the folder or file is open in another program.<br>Close the folder and try again.</html>",
+                        "An error occurred.", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     public File getFile() {

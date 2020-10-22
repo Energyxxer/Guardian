@@ -3,6 +3,7 @@ package com.energyxxer.guardian.global;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
+import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.util.FileCommons;
 import com.energyxxer.guardian.util.ProjectUtil;
 
@@ -10,6 +11,7 @@ import java.awt.*;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -169,5 +171,31 @@ public class FileManager {
             }
         }
         return folder.delete();
+    }
+
+    public static void renameSelected() {
+        ArrayList<FileModuleToken> selectedFileTokens = new ArrayList<>();
+        for(ModuleToken token : GuardianWindow.projectExplorer.getSelectedTokens()) {
+            if(token instanceof FileModuleToken) {
+                selectedFileTokens.add((FileModuleToken) token);
+            }
+        }
+
+        if(selectedFileTokens.size() == 1) {
+            selectedFileTokens.get(0).showRenameDialog();
+        }
+    }
+
+    public static void deleteSelected() {
+        ArrayList<String> selectedPaths = new ArrayList<>();
+        for(ModuleToken token : GuardianWindow.projectExplorer.getSelectedTokens()) {
+            if(token instanceof FileModuleToken) {
+                selectedPaths.add(((FileModuleToken) token).getFile().getPath());
+            }
+        }
+
+        if(!selectedPaths.isEmpty()) {
+            FileManager.delete(selectedPaths);
+        }
     }
 }
