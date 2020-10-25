@@ -21,6 +21,7 @@ import com.energyxxer.guardian.ui.styledcomponents.StyledMenu;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.util.FileCommons;
+import com.energyxxer.util.Lazy;
 import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,12 +64,10 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     private boolean isProjectRoot;
     private String overrideIconName = null;
 
-    private String subTitle;
     private File associatedProjectRoot;
-
-    public FileModuleToken(File file) {
-        this.file = file;
-
+    private Lazy<String> subTitle = new Lazy<>(() -> {
+        String subTitle;
+        File file = this.getFile();
         Project associatedProject = ProjectManager.getAssociatedProject(file);
         if(associatedProject != null) {
             this.associatedProjectRoot = associatedProject.getRootDirectory();
@@ -82,8 +81,17 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
                 subTitle = "(" + subTitle + ")";
             }
         } else {
-            subTitle = "(" + file.getParentFile().toPath().toString() + ")";
+            if(file.getParentFile() != null) {
+                subTitle = "(" + file.getParentFile().toPath().toString() + ")";
+            } else {
+                subTitle = "";
+            }
         }
+        return subTitle;
+    });
+
+    public FileModuleToken(File file) {
+        this.file = file;
 
         this.isProjectRoot = ProjectType.isAnyProjectRoot(file);
     }
@@ -91,7 +99,15 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     @Override
     public String getTitle(TokenContext context) {
         if((context == TokenContext.EXPLORER && SHOW_EXTENSIONS_EXPLORER.get()) || (context == TokenContext.TAB && SHOW_EXTENSIONS_TAB.get())) {
-            return file.getName();
+            if(file.getParentFile() == null) {
+                String name = file.getPath();
+                if(name.endsWith(File.separator)) {
+                    name = name.substring(0, name.length()-1);
+                }
+                return name;
+            } else {
+                return file.getName();
+            }
         } else {
             return getNameWithoutExtension();
         }
@@ -105,7 +121,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
 
     @Override
     public String getSubTitle() {
-        return subTitle;
+        return subTitle.getValue();
     }
 
     @Override
@@ -121,6 +137,12 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     @Override
     public float getAlpha() {
         return Commons.isProjectFile(file) ? 0.6f : 1f;
+    }
+
+    private boolean hideFolderIcon = false;
+
+    public void setHideFolderIcon(boolean hideFolderIcon) {
+        this.hideFolderIcon = hideFolderIcon;
     }
 
     @Override
@@ -147,7 +169,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
                     return projectType.getIconForRoot(file);
                 }
             }
-            return Commons.getIcon("folder");
+            return hideFolderIcon ? null : Commons.getIcon("folder");
         } else {
             String extension = "";
             if(file.getName().lastIndexOf(".") >= 0) {
@@ -238,11 +260,6 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
         while(recentFiles.size() >= MAX_RECENT_FILES) {
             recentFiles.remove(MAX_RECENT_FILES-1);
         }
-    }
-
-    @Override
-    public void onInteract() {
-
     }
 
     @Override
@@ -391,7 +408,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
 
 
         StyledMenuItem openInSystemItem = new StyledMenuItem("Show in System Explorer", "explorer");
-        openInSystemItem.addActionListener(e -> Commons.showInExplorer(path));
+        openInSystemItem.addActionListener(e -> Commons.showInSystemExplorer(path));
 
         menu.add(openInSystemItem);
 
@@ -462,7 +479,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
 
     public File getDragDestination() {
         File destination = getFile().isDirectory() ? getFile() : getFile().getParentFile();
-        return destination.exists() ? destination : null;
+        return destination != null && destination.exists() ? destination : null;
     }
 
     @Override

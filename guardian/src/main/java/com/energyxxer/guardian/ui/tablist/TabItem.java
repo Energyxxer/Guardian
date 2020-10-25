@@ -1,9 +1,9 @@
 package com.energyxxer.guardian.ui.tablist;
 
-import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.global.TabManager;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
+import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.guardian.util.ImageUtil;
@@ -74,12 +74,12 @@ public class TabItem extends TabListElement {
         this.x = master.getOffsetX();
         this.lastRecordedOffset = x;
         int h = (int)Math.floor(master.getHeight() / ScalableGraphics2D.SCALE_FACTOR);
-        int w = iconOnly ? (Math.max(32, h)) + (token.isTabCloseable() ? 16 : 0) : 8 + 16 + 2 + fm.stringWidth(this.name) + 10 + 6 + 15;
+        int w = iconOnly ? ((Math.max(32, h)) + (token.isTabCloseable() ? 16 : 0)) : (8 + (icon != null ? 16 + 2 : 0) + fm.stringWidth(this.name) + (token.isTabCloseable() ? 16 : 0) + 15);
 
         /*
             // 8px margin
             // + 16px icon
-            // + 5px
+            // + 2px
             // + name px
             // + 10px
             // + 6px close button
@@ -125,7 +125,8 @@ public class TabItem extends TabListElement {
         if(iconOnly) {
             offsetX += 24;
         } else {
-            offsetX += 29;
+            if(icon != null) offsetX += 18;
+            offsetX += 11;
 
             if(this.selected) {
                 g.setColor(master.getColors().get("tab.selected.foreground"));
@@ -137,11 +138,12 @@ public class TabItem extends TabListElement {
 
             g.drawString(this.name, offsetX, (h+fm.getAscent()-fm.getDescent())/2);
 
-            offsetX += fm.stringWidth(this.name) + 10;
+            offsetX += fm.stringWidth(this.name);
         }
 
 
         if(token.isTabCloseable()) {
+            offsetX += 10;
             if(this.closeRollover) {
                 g.setColor(master.getColors().get("tab.close.rollover.color"));
             } else {
@@ -192,6 +194,9 @@ public class TabItem extends TabListElement {
             if(this.associatedTab != null) {
                 if(e.getButton() == MouseEvent.BUTTON1) {
                     manager.setSelectedTab(this.associatedTab);
+                    if(e.getClickCount() % 2 == 0) {
+                        token.onInteract();
+                    }
                 }
             } else {
                 selected = true;
@@ -204,7 +209,6 @@ public class TabItem extends TabListElement {
     public void mouseReleased(MouseEvent e) {
         if(this.associatedTab == null && e.getButton() == MouseEvent.BUTTON1) {
             selected = false;
-            token.onInteract();
         }
         if(e.isPopupTrigger()) {
             StyledPopupMenu menu = this.generatePopup();

@@ -40,25 +40,51 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
     private boolean mayRearrange = true;
 
     public TabListMaster() {
-        tlm.addThemeChangeListener(t -> {
-            colors.put("background",t.getColor(Color.WHITE, "TabList.background"));
-            colors.put("tab.background",t.getColor(new Color(0,0,0,0), "TabList.tab.background"));
-            colors.put("tab.foreground",t.getColor(Color.BLACK, "TabList.tab.foreground","General.foreground"));
-            colors.put("tab.close.color",t.getColor(Color.DARK_GRAY, "TabList.tab.close.color"));
-            colors.put("tab.close.rollover.color",t.getColor(Color.LIGHT_GRAY, "TabList.tab.close.hover.color"));
-            colors.put("tab.selected.background",t.getColor(Color.BLUE, "TabList.tab.selected.background","TabList.tab.background"));
-            colors.put("tab.selected.foreground",t.getColor(Color.BLACK, "TabList.tab.selected.foreground","TabList.tab.hover.foreground","TabList.tab.foreground","General.foreground"));
-            colors.put("tab.rollover.background",t.getColor(new Color(0,0,0,0), "TabList.tab.hover.background","TabList.tab.background"));
-            colors.put("tab.rollover.foreground",t.getColor(Color.BLACK, "TabList.tab.hover.foreground","TabList.tab.foreground","General.foreground"));
+        this(null);
+    }
 
-            selectionStyle = t.getString("TabList.tab.selectionStyle","default:FULL");
-            selectionLineThickness = Math.max(t.getInteger(2,"TabList.tab.selectionLineThickness"), 0);
-            height = Math.max(t.getInteger(5,"TabList.height"),5);
+    public TabListMaster(String namespace) {
+        if(namespace != null) {
+            tlm.addThemeChangeListener(t -> {
+                colors.put("background",t.getColor(Color.WHITE, namespace+".background","TabList.background"));
+                colors.put("tab.background",t.getColor(new Color(0,0,0,0), namespace+".tab.background","TabList.tab.background"));
+                colors.put("tab.foreground",t.getColor(Color.BLACK, namespace+".tab.foreground","TabList.tab.foreground","General.foreground"));
+                colors.put("tab.close.color",t.getColor(Color.DARK_GRAY, namespace+".tab.close.color","TabList.tab.close.color"));
+                colors.put("tab.close.rollover.color",t.getColor(Color.LIGHT_GRAY, namespace+".tab.close.hover.color","TabList.tab.close.hover.color"));
+                colors.put("tab.selected.background",t.getColor(Color.BLUE, namespace+".tab.selected.background","TabList.tab.selected.background",namespace+".tab.background","TabList.tab.background"));
+                colors.put("tab.selected.foreground",t.getColor(Color.BLACK, namespace+".tab.selected.foreground","TabList.tab.selected.foreground",namespace+".tab.hover.foreground","TabList.tab.hover.foreground",namespace+".tab.foreground","TabList.tab.foreground","General.foreground"));
+                colors.put("tab.rollover.background",t.getColor(new Color(0,0,0,0), namespace+".tab.hover.background","TabList.tab.hover.background",namespace+".tab.background","TabList.tab.background"));
+                colors.put("tab.rollover.foreground",t.getColor(Color.BLACK, namespace+".tab.hover.foreground","TabList.tab.hover.foreground",namespace+".tab.foreground","TabList.tab.foreground","General.foreground"));
 
-            this.setFont(t.getFont("TabList.tab","General"));
+                selectionStyle = t.getString(namespace+".tab.selectionStyle","TabList.tab.selectionStyle","default:FULL");
+                selectionLineThickness = Math.max(t.getInteger(2,namespace+".tab.selectionLineThickness","TabList.tab.selectionLineThickness"), 0);
+                height = Math.max(t.getInteger(5,namespace+".height","TabList.height"),5);
 
-            children.forEach(e -> e.themeChanged(t));
-        });
+                this.setFont(t.getFont(namespace+".tab","TabList.tab","General"));
+
+                children.forEach(e -> e.themeChanged(t));
+            });
+        } else {
+            tlm.addThemeChangeListener(t -> {
+                colors.put("background",t.getColor(Color.WHITE, "TabList.background"));
+                colors.put("tab.background",t.getColor(new Color(0,0,0,0), "TabList.tab.background"));
+                colors.put("tab.foreground",t.getColor(Color.BLACK, "TabList.tab.foreground","General.foreground"));
+                colors.put("tab.close.color",t.getColor(Color.DARK_GRAY, "TabList.tab.close.color"));
+                colors.put("tab.close.rollover.color",t.getColor(Color.LIGHT_GRAY, "TabList.tab.close.hover.color"));
+                colors.put("tab.selected.background",t.getColor(Color.BLUE, "TabList.tab.selected.background","TabList.tab.background"));
+                colors.put("tab.selected.foreground",t.getColor(Color.BLACK, "TabList.tab.selected.foreground","TabList.tab.hover.foreground","TabList.tab.foreground","General.foreground"));
+                colors.put("tab.rollover.background",t.getColor(new Color(0,0,0,0), "TabList.tab.hover.background","TabList.tab.background"));
+                colors.put("tab.rollover.foreground",t.getColor(Color.BLACK, "TabList.tab.hover.foreground","TabList.tab.foreground","General.foreground"));
+
+                selectionStyle = t.getString("TabList.tab.selectionStyle","default:FULL");
+                selectionLineThickness = Math.max(t.getInteger(2,"TabList.tab.selectionLineThickness"), 0);
+                height = Math.max(t.getInteger(5,"TabList.height"),5);
+
+                this.setFont(t.getFont("TabList.tab","General"));
+
+                children.forEach(e -> e.themeChanged(t));
+            });
+        }
 
         hint.setOutDelay(1);
 
@@ -100,8 +126,8 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
         }
     }
 
-    public void addTab(TabItem item) {
-        this.children.add(item);
+    public void addTab(TabListElement elem) {
+        this.children.add(elem);
     }
 
     int getOffsetX() {

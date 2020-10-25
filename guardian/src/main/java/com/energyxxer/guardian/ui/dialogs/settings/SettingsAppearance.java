@@ -102,7 +102,7 @@ class SettingsAppearance extends JPanel {
                     public void actionPerformed(ActionEvent e) {
                         ThemeManager.THEME_DIR_PATH.resolve("gui").toFile().mkdirs();
                         ThemeManager.THEME_DIR_PATH.resolve("syntax").toFile().mkdirs();
-                        Commons.openInExplorer(ThemeManager.THEME_DIR_PATH.resolve("gui").toString());
+                        Commons.openInSystemExplorer(ThemeManager.THEME_DIR_PATH.resolve("gui").toString());
                     }
 
                 });

@@ -10,10 +10,11 @@ import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
+import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.ui.tablist.TabItem;
 import com.energyxxer.guardian.ui.tablist.TabListMaster;
-import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,6 +46,9 @@ public class TabManager {
 	
 	private StyledPopupMenu menu;
 
+	@Nullable
+	private Integer overrideTabLimit = null;
+
 	public TabManager(@NotNull TabListMaster tabList, @NotNull ContentSwapper moduleComponent) {
 		this.tabList = tabList;
 		this.moduleComponent = moduleComponent;
@@ -68,8 +72,9 @@ public class TabManager {
 			}
 		}
 		//Have to open a new one
-		if(TAB_LIMIT.get() > 0 && openTabs.size() >= TAB_LIMIT.get()) {
-			int toClose = (openTabs.size()+1) - TAB_LIMIT.get();
+		int tabLimit = overrideTabLimit != null ? overrideTabLimit : TAB_LIMIT.get();
+		if(tabLimit > 0 && openTabs.size() >= tabLimit) {
+			int toClose = (openTabs.size()+1) - tabLimit;
 			openTabs.stream().filter(Tab::isSaved).sorted(Comparator.comparing(t -> t.openedTimeStamp)).limit(toClose).forEach(this::closeTab);
 		}
 		Tab nt = new Tab(token);
@@ -176,7 +181,7 @@ public class TabManager {
             moduleComponent.setContent(null);
 		}
 
-		Commons.updateActiveProject();
+		if(changeWindowInfo) Commons.updateActiveFile();
 		saveOpenTabs();
 	}
 
@@ -270,5 +275,9 @@ public class TabManager {
 			}
 		}
 		return true;
+	}
+
+	public void setOverrideTabLimit(@Nullable Integer overrideTabLimit) {
+		this.overrideTabLimit = overrideTabLimit;
 	}
 }

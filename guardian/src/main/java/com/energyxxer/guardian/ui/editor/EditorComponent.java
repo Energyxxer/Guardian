@@ -186,7 +186,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
         try {
             Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 
-            if(analysis.response != null) suggestionBox.setSummary(analysis.lexer.getSummaryModule(), analysis.response.matched);
+            if(analysis.response != null) suggestionBox.setSummary((PrismarineSummaryModule) analysis.lexer.getSummaryModule(), analysis.response.matched);
             if(analysis.lexer.getSuggestionModule() != null) {
                 suggestionBox.showSuggestions(analysis.lexer.getSuggestionModule());
             }

@@ -59,11 +59,6 @@ public abstract class QueryResult implements ModuleToken {
     }
 
     @Override
-    public void onInteract() {
-
-    }
-
-    @Override
     public StyledPopupMenu generateMenu(@NotNull ModuleToken.TokenContext context) {
         return null;
     }

@@ -35,10 +35,6 @@ public interface CompoundActionModuleToken extends ModuleToken {
     }
 
     @Override
-    default void onInteract() {
-    }
-
-    @Override
     default String getIdentifier() {
         return null;
     }

@@ -132,10 +132,10 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         ProjectManager.loadWorkspace();
 
         clearSelected();
-        refresh(new ArrayList<>(this.getExpandedElements().stream().map(ModuleToken::getIdentifier).collect(Collectors.toSet())));
+        refresh(this.getExpandedElements().stream().map(ModuleToken::getIdentifier).distinct().collect(Collectors.toCollection(ArrayList::new)));
     }
 
-    private void refresh(ArrayList<String> toOpen) {
+    public void refresh(ArrayList<String> toOpen) {
         children.clear();
         flatList.clear();
         this.getExpandedElements().clear();
@@ -153,7 +153,7 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
     @Override
     protected void selectionUpdated() {
         super.selectionUpdated();
-        Commons.updateActiveProject();
+        Commons.updateActiveFile();
     }
 
     public void saveExplorerTree() {

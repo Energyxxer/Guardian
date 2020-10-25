@@ -1,21 +1,21 @@
 package com.energyxxer.guardian.ui.editor.completion;
 
-import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.suggestions.Suggestion;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
-import com.energyxxer.guardian.ui.editor.completion.snippets.Snippet;
-import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetManager;
-import com.energyxxer.guardian.ui.modules.ModuleToken;
-import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.CompoundEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.InsertionEdit;
+import com.energyxxer.guardian.ui.editor.completion.snippets.Snippet;
+import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetManager;
+import com.energyxxer.guardian.ui.modules.ModuleToken;
+import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.Lazy;
 import com.energyxxer.util.StringUtil;
 import com.energyxxer.util.logger.Debug;
@@ -39,8 +39,8 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
-    private SummaryModule summary = null;
-    private SummaryModule lastSuccessfulSummary = null;
+    private PrismarineSummaryModule summary = null;
+    private PrismarineSummaryModule lastSuccessfulSummary = null;
 
     private boolean locked = false;
     private boolean forceLocked = false;
@@ -336,16 +336,16 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         }
     }
 
-    public void setSummary(SummaryModule summary, boolean matched) {
+    public void setSummary(PrismarineSummaryModule summary, boolean matched) {
         this.summary = summary;
         if(lastSuccessfulSummary == null || matched) lastSuccessfulSummary = summary;
     }
 
-    public SummaryModule getSummary() {
+    public PrismarineSummaryModule getSummary() {
         return summary;
     }
 
-    public SummaryModule getLastSuccessfulSummary() {
+    public PrismarineSummaryModule getLastSuccessfulSummary() {
         return lastSuccessfulSummary;
     }
 

@@ -64,11 +64,6 @@ public class ProcessToken implements ModuleToken {
     }
 
     @Override
-    public void onInteract() {
-
-    }
-
-    @Override
     public StyledPopupMenu generateMenu(@NotNull ModuleToken.TokenContext context) {
         StyledPopupMenu menu = new StyledPopupMenu();
         StyledMenuItem stopItem = new StyledMenuItem("Kill Process");

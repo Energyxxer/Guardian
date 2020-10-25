@@ -27,7 +27,7 @@ public interface ModuleToken {
     boolean isExpandable();
     boolean isModuleSource();
     DisplayModule createModule(Tab tab);
-    void onInteract();
+    default void onInteract() {}
     StyledPopupMenu generateMenu(@NotNull ModuleToken.TokenContext context);
 
     default boolean isTabCloseable() {

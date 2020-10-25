@@ -1,8 +1,8 @@
 package com.energyxxer.guardian.ui.explorer.base;
 
 import com.energyxxer.guardian.main.window.GuardianWindow;
-import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.HintStylizer;
+import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
@@ -91,6 +91,11 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
             this.setPreferredSize(newSize);
             this.getParent().revalidate();
         }
+
+        for(Runnable r : scheduledForNextPaint) {
+            SwingUtilities.invokeLater(r);
+        }
+        scheduledForNextPaint.clear();
     }
 
     @Override
@@ -420,6 +425,12 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
 
     public void addToFlatList(ExplorerElement element) {
         this.flatList.add(element);
+    }
+
+    private ArrayList<Runnable> scheduledForNextPaint = new ArrayList<>();
+
+    public void scheduleAfterNextPaint(Runnable r) {
+        scheduledForNextPaint.add(r);
     }
 
     public void renderOffset(int height) {

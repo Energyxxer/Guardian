@@ -34,24 +34,28 @@ public class Tab {
 	public Tab(@NotNull ModuleToken token) {
 		this.token = token;
 		//this.linkedProject = ProjectManager.getAssociatedProject(new File(path));
-		module = token.createModule(this);
-		if(module == null) {
-			throw new RuntimeException("File cannot be opened in a tab: " + token);
+		if(token.isModuleSource()) {
+			module = token.createModule(this);
+			if(module == null) {
+				throw new RuntimeException("File cannot be opened in a tab: " + token);
+			}
+			savedValue = module.getValue();
 		}
-		savedValue = module.getValue();
 		openedTimeStamp = new Date().getTime();
 		this.name = token.getTitle();
 	}
 
 	public void onSelect() {
 		openedTimeStamp = new Date().getTime();
-		module.focus();
-		module.onSelect();
-		module.displayCaretInfo();
+		if(module != null) {
+			module.focus();
+			module.onSelect();
+			module.displayCaretInfo();
+		}
 	}
 
 	public void onEdit() {
-		this.setSaved(savedValue == null || savedValue.equals(module.getValue()));
+		if(module != null) this.setSaved(savedValue == null || savedValue.equals(module.getValue()));
 	}
 
 	public void updateName() {
@@ -71,6 +75,7 @@ public class Tab {
 	}
 
 	public void save() {
+		if(module == null) return;
 		if(!module.canSave()) return;
 
 		Object val = module.save();

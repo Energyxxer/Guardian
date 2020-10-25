@@ -8,6 +8,8 @@ import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
+import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
+import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.theme.change.ThemeChangeListener;
@@ -22,8 +24,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Commons {
 
@@ -63,7 +67,7 @@ public class Commons {
         return "\b\r\n\t\f\u007F\u001B".contains("" + ch);
     }
 
-    public static void showInExplorer(String path) {
+    public static void showInSystemExplorer(String path) {
         try {
             if(System.getProperty("os.name").startsWith("Windows")) {
                 Runtime.getRuntime().exec("Explorer.exe /select," + path);
@@ -78,7 +82,7 @@ public class Commons {
         }
     }
 
-    public static void openInExplorer(String path) {
+    public static void openInSystemExplorer(String path) {
         try {
             if(System.getProperty("os.name").startsWith("Windows")) {
                 Runtime.getRuntime().exec("Explorer.exe \"" + path + "\""); //can't believe you don't have to escape it
@@ -101,9 +105,36 @@ public class Commons {
         return ImageManager.load(getIconPath(name));
     }
 
-    public static void updateActiveProject() {
-        if(GuardianWindow.toolbar != null && GuardianWindow.projectExplorer != null)
-            GuardianWindow.toolbar.setActiveProject(getActiveProject());
+    public static void updateActiveFile() {
+        if(GuardianWindow.toolbar != null && GuardianWindow.projectExplorer != null) {
+            GuardianWindow.toolbar.setActiveFile(getActiveFile());
+        }
+    }
+
+    public static void showInProjectExplorer(File file) {
+        ArrayList<String> toOpen = GuardianWindow.projectExplorer.getExpandedElements().stream().map(ModuleToken::getIdentifier).distinct().collect(Collectors.toCollection(ArrayList::new));
+
+        Path fullPath = file.toPath();
+        for(int i = 0; i < fullPath.getNameCount(); i++) {
+            File ancestor;
+            if(i == 0) {
+                ancestor = fullPath.getRoot().toFile();
+            } else {
+                ancestor = fullPath.getRoot().resolve(fullPath.subpath(0, i)).toFile();
+            }
+
+            toOpen.add(new FileModuleToken(ancestor).getIdentifier());
+        }
+
+        GuardianWindow.projectExplorer.refresh(toOpen);
+        GuardianWindow.projectExplorer.scheduleAfterNextPaint(() -> {
+            for(ExplorerElement element : GuardianWindow.projectExplorer.getFlatList()) {
+                if(element instanceof StandardExplorerItem && element.getToken() instanceof FileModuleToken && ((FileModuleToken) element.getToken()).getFile().equals(file)) {
+                    GuardianWindow.projectExplorer.setSelected(element, null);
+                    break;
+                }
+            }
+        });
     }
 
     public static File getActiveFile() {

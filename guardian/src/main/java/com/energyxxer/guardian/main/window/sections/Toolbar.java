@@ -1,20 +1,26 @@
 package com.energyxxer.guardian.main.window.sections;
 
+import com.energyxxer.guardian.global.TabManager;
 import com.energyxxer.guardian.global.temp.projects.Project;
+import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.langinterface.ProjectType;
-import com.energyxxer.guardian.ui.ToolbarButton;
-import com.energyxxer.guardian.ui.ToolbarSeparator;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.actions.ActionManager;
 import com.energyxxer.guardian.main.window.actions.ProgramAction;
-import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
+import com.energyxxer.guardian.main.window.sections.toolbar.PathViewToken;
+import com.energyxxer.guardian.ui.ToolbarButton;
+import com.energyxxer.guardian.ui.ToolbarSeparator;
+import com.energyxxer.guardian.ui.tablist.TabListMaster;
+import com.energyxxer.guardian.ui.tablist.TabSeparator;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.xswing.Padding;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.hints.TextHint;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Created by User on 12/15/2016.
@@ -22,19 +28,41 @@ import java.awt.*;
 public class Toolbar extends JPanel {
 
     public TextHint hint = GuardianWindow.hintManager.createTextHint("");
-    private StyledLabel projectLabel;
+    private TabSeparator sharedSeparator = null;
 
     public ThemeListenerManager tlm;
 
-    public void setActiveProject(Project project) {
-        if(project != null) {
-            projectLabel.setText(project.getName());
-            projectLabel.setIconName(project.getProjectType().getDefaultProjectIconName());
-        } else {
-            projectLabel.setText("");
-            projectLabel.setIconName(null);
+    public void setActiveFile(File file) {
+        pathIndicatorTabManager.closeAllTabs(true);
+        pathIndicatorTabManager.getTabList().removeAllTabs();
+        if(file != null) {
+            Project associatedProject = ProjectManager.getAssociatedProject(file);
+
+            Path root = associatedProject != null ? associatedProject.getRootDirectory().toPath() : null;
+
+            Path shownPath = file.toPath();
+
+            if(root != null) {
+                shownPath = root.relativize(shownPath);
+            }
+            for(int i = 0; i <= shownPath.getNameCount(); i++) {
+                File fileToShow;
+                if(i == 0) {
+                    if(root != null) fileToShow = root.toFile();
+                    else fileToShow = shownPath.getRoot().toFile();
+                } else {
+                    if(root != null) fileToShow = root.resolve(shownPath.subpath(0, i)).toFile();
+                    else fileToShow = shownPath.getRoot().resolve(shownPath.subpath(0, i)).toFile();
+                }
+                pathIndicatorTabManager.openTab(new PathViewToken(fileToShow));
+                if(i != shownPath.getNameCount()) {
+                    pathIndicatorTabManager.getTabList().addTab(sharedSeparator);
+                }
+            }
         }
     }
+
+    private final TabManager pathIndicatorTabManager;
     
     {
         this.tlm = new ThemeListenerManager();
@@ -46,15 +74,23 @@ public class Toolbar extends JPanel {
         this.setLayout(new BorderLayout());
 
         JPanel projectIndicator = new JPanel(new GridBagLayout());
-        projectIndicator.setOpaque(false);
+        //projectIndicator.setOpaque(false);
 
-        this.add(projectIndicator, BorderLayout.WEST);
+        //this.add(projectIndicator, BorderLayout.WEST);
 
         projectIndicator.add(new Padding(10));
 
-        projectLabel = new StyledLabel("", "Toolbar.projectIndicator", tlm);
-        projectLabel.setTextThemeDriven(false);
-        projectIndicator.add(projectLabel);
+        TabListMaster pathIndicatorList = new TabListMaster("Toolbar.pathIndicator");
+        this.pathIndicatorTabManager = new TabManager(pathIndicatorList, c -> {});
+        pathIndicatorTabManager.setChangeWindowInfo(false);
+        pathIndicatorTabManager.setOverrideTabLimit(-1);
+        sharedSeparator = new TabSeparator(pathIndicatorList);
+        pathIndicatorList.setMayRearrange(false);
+
+        projectIndicator.add(new Padding(10));
+        this.add(pathIndicatorList, BorderLayout.WEST);
+        //projectIndicator.add(pathIndicatorList);
+
 
         JPanel buttonBar = new JPanel(new GridBagLayout());
         tlm.addThemeChangeListener(t -> {
@@ -114,4 +150,6 @@ public class Toolbar extends JPanel {
         button.addActionListener(e -> action.perform());
         return button;
     }
+
+
 }
