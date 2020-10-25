@@ -210,7 +210,7 @@ public class TabItem extends TabListElement {
         if(this.associatedTab == null && e.getButton() == MouseEvent.BUTTON1) {
             selected = false;
         }
-        if(e.isPopupTrigger()) {
+        if(e.isPopupTrigger() && token.isTabCloseable()) {
             StyledPopupMenu menu = this.generatePopup();
             menu.show(e.getComponent(), e.getX(), e.getY());
         }
