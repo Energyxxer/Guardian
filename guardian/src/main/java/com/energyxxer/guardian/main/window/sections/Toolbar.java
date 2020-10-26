@@ -21,6 +21,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Created by User on 12/15/2016.
@@ -32,7 +33,13 @@ public class Toolbar extends JPanel {
 
     public ThemeListenerManager tlm;
 
+    private File lastActiveFile = null;
+
     public void setActiveFile(File file) {
+        if(Objects.equals(lastActiveFile, file)) {
+            return;
+        }
+        lastActiveFile = file;
         pathIndicatorTabManager.closeAllTabs(true);
         pathIndicatorTabManager.getTabList().removeAllTabs();
         if(file != null) {
