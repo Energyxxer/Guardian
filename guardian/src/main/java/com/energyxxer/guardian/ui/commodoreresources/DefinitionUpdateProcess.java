@@ -80,7 +80,7 @@ public class DefinitionUpdateProcess extends AbstractProcess {
             scanCommitOverview(typeMapCommitsURL, typeMapChanges, "typemaps/zipped/", ".zip");
 
             updateStatus("Updating definition packs");
-            syncChanges(defPackChanges, "defpacks/zipped/minecraft_*.zip", "resources" + File.separator + "defpacks" + File.separator + "*.zip");
+            syncChanges(defPackChanges, "defpacks/zipped/minecraft_*.zip", "resources" + File.separator + "defpacks" + File.separator + "minecraft_*.zip");
             updateStatus("Updating feature maps");
             syncChanges(featMapChanges, "featuremaps/*.json", "resources" + File.separator + "featmaps" + File.separator + "*.json");
             updateStatus("Updating type maps");
