@@ -3,7 +3,7 @@ package com.energyxxer.guardian.files;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.FileDialog;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.FolderDialog;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
-import com.energyxxer.prismarine.util.SortedList;
+import com.energyxxer.util.SortedList;
 
 import java.util.function.Predicate;
 

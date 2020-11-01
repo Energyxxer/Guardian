@@ -456,6 +456,12 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         braceHighlightColor = color;
     }
 
+    public void caretChanged() {
+        if(suggestionInterface != null) {
+            suggestionInterface.dismiss(false);
+        }
+    }
+
     private enum CharType {
         ALPHA(true, 1), WHITESPACE(true, 0), SYMBOL(false), NULL(false);
 

@@ -23,6 +23,7 @@ public class KeyMap {
     public static final UserKeyBind COMMENT = new UserKeyBind("comment", identifierToStrokes("c+"+KeyEvent.VK_SLASH)).setGroupName("Editor");
 
     public static final UserKeyBind SUGGESTION_SELECT = new UserKeyBind("Expand Suggestion", "editor.suggestion.select", identifierToStrokes("" + KeyEvent.VK_TAB)).setGroupName("Editor");
+    public static final UserKeyBind INSPECTION_SELECT = new UserKeyBind("Submit Inspector Hint", "editor.inspector.select", identifierToStrokes("" + KeyEvent.VK_ENTER)).setGroupName("Editor");
 
     public static final UserKeyBind TEXT_SELECT_ALL = new UserKeyBind("Select All Text", "text.select_all", identifierToStrokes("c+A")).setGroupName("Editor");
     public static final UserKeyBind TEXT_MOVE_LINE_UP = new UserKeyBind("Move Line Up", "text.move_line_up", identifierToStrokes("a+" + KeyEvent.VK_UP)).setGroupName("Editor");

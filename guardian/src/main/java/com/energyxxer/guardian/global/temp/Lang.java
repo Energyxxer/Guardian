@@ -3,6 +3,7 @@ package com.energyxxer.guardian.global.temp;
 import com.energyxxer.enxlex.lexical_analysis.EagerLexer;
 import com.energyxxer.enxlex.lexical_analysis.LazyLexer;
 import com.energyxxer.enxlex.lexical_analysis.Lexer;
+import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionModule;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
 import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.lexical_analysis.token.SourceFile;
@@ -28,7 +29,6 @@ import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionToken;
 import com.energyxxer.guardian.ui.editor.completion.snippets.Snippet;
-import com.energyxxer.guardian.ui.editor.inspector.InspectionItem;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaLexerProfile;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaProductions;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
@@ -184,6 +184,7 @@ public class Lang {
             lexer.setSuggestionModule(suggestionModule);
             suggestionModule.setLexer(lexer);
         }
+        lexer.setInspectionModule(new InspectionModule());
         lexer.start(new SourceFile(file), text, createProfile());
 
         lexer.getStream().tokens.remove(0);
@@ -281,9 +282,6 @@ public class Lang {
 
     public String getIconKeyForSuggestionTags(Collection<String> tags) {
         return null;
-    }
-
-    public void inspect(TokenStream stream, ArrayList<InspectionItem> items) {
     }
 
     public static class LangAnalysisResponse {

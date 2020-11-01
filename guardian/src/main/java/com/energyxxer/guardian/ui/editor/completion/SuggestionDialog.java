@@ -65,7 +65,6 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         this.setContentPane(contentPane);
 
         tlm.addThemeChangeListener(t -> {
-            //titleBar.setBackground(t.getColor(new Color(230, 230, 230), "FindInPath.header.background"));
             int thickness = Math.max(t.getInteger(1, "EditorSuggestions.border.thickness"), 0);
             contentPane.setBackground(t.getColor(new Color(200, 200, 200), "EditorSuggestions.header.background"));
             contentPane.setBorder(BorderFactory.createMatteBorder(thickness, thickness, thickness, thickness, t.getColor(new Color(200, 200, 200), "EditorSuggestions.border.color")));
@@ -98,7 +97,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             for(Snippet snippet : SnippetManager.getAll()) {
                 snippet.expanderApplied = false;
             }
-            StringBuilder sb = new StringBuilder();
+            StringBuilder headerSB = new StringBuilder();
             boolean createdEverywhereSnippets = false;
             for (int i = 0; i < results.getSuggestions().size(); i++) {
                 Suggestion suggestion = results.getSuggestions().get(i);
@@ -114,8 +113,8 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
                         }
                         anyExpandable = true;
                     } else if(token instanceof ParameterNameSuggestionToken) {
-                        sb.append(((ParameterNameSuggestionToken) token).getParameterName());
-                        sb.append(", ");
+                        headerSB.append(((ParameterNameSuggestionToken) token).getParameterName());
+                        headerSB.append(", ");
                     }
                     any = true;
                 }
@@ -124,9 +123,9 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
                     createdEverywhereSnippets = true;
                 }
             }
-            if(sb.length() > 0) {
-                sb.setLength(sb.length()-2);
-                parameterLabel.setText(" <" + sb.toString() + ">");
+            if(headerSB.length() > 0) {
+                headerSB.setLength(headerSB.length()-2);
+                parameterLabel.setText(" <" + headerSB.toString() + ">");
             } else {
                 parameterLabel.setText("");
             }

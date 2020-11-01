@@ -210,6 +210,11 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
         this.requestFocus();
     }
 
+    @Override
+    public boolean moduleHasFocus() {
+        return this.hasFocus();
+    }
+
     private void adjustToMiddle() {
         Dimension middlePanelSize = new Dimension(this.getWidth()/2, this.getHeight()/2);
         Dimension middleImageSize = getScaledDimension(imgSize, middlePanelSize);

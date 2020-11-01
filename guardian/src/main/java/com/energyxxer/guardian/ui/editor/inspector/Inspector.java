@@ -1,6 +1,6 @@
 package com.energyxxer.guardian.ui.editor.inspector;
 
-import com.energyxxer.enxlex.lexical_analysis.token.TokenStream;
+import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionModule;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.HintStylizer;
@@ -23,13 +23,16 @@ import java.util.function.Function;
  */
 public class Inspector implements Highlighter.HighlightPainter, MouseMotionListener {
 
-    private volatile ArrayList<InspectionItem> items = new ArrayList<>();
+    private volatile ArrayList<InspectionItem> legacyItems = new ArrayList<>();
+    private InspectionItem rolloverItem = null;
 
     private EditorComponent editor;
 
     private TextHint hint = GuardianWindow.hintManager.createTextHint("a");
 
-    private InspectionItem rolloverItem = null;
+    private InspectionModule inspectionModule;
+    private InspectorDialog dialog;
+
 
     public Inspector(EditorComponent editor) {
         this.editor = editor;
@@ -42,20 +45,19 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
         catch(BadLocationException ble) {}
 
         hint.setInteractive(true);
+
+        dialog = new InspectorDialog(this);
     }
 
-    public void inspect(TokenStream ts) {
-        items.clear();
-
-        editor.getParentModule().getLanguage().inspect(ts, items);
-
+    public void clear() {
+        legacyItems.clear();
         editor.repaint();
     }
 
     @Override
     public void paint(Graphics g, int p0, int p1, Shape graphicBounds, JTextComponent c) {
         try {
-            for (InspectionItem item : items) {
+            for (InspectionItem item : legacyItems) {
 
                 g.setColor(GuardianWindow.getTheme().getColor("Inspector." + item.type.key));
 
@@ -111,12 +113,12 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        if(items.isEmpty()) {
+        if(legacyItems.isEmpty()) {
             rolloverItem = null;
             return;
         }
         int index = editor.viewToModel(e.getPoint());
-        for(InspectionItem item : items) {
+        for(InspectionItem item : legacyItems) {
             if(index >= item.bounds.start.index && (index < item.bounds.end.index || (item.bounds.start.index == item.bounds.end.index && index <= item.bounds.end.index))) {
                 if(rolloverItem != item) {
                     rolloverItem = item;
@@ -134,13 +136,13 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
         rolloverItem = null;
     }
 
-    public void insertNotices(ArrayList<Notice> notices) {
+    public void insertLegacyNotices(ArrayList<Notice> notices) {
         for(Notice n : notices) {
-            insertNotice(n);
+            insertLegacyNotice(n);
         }
     }
 
-    public void insertNotice(Notice n) {
+    public void insertLegacyNotice(Notice n) {
         InspectionType type = InspectionType.SUGGESTION;
         switch(n.getType()) {
             case ERROR: {
@@ -153,13 +155,38 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
             }
         }
         InspectionItem item = new InspectionItem(type, n.getMessage(), new StringBounds(editor.getLocationForOffset(n.getLocationIndex()), editor.getLocationForOffset(n.getLocationIndex() + n.getLocationLength())));
-        items.add(item);
+        legacyItems.add(item);
     }
 
     public void registerCharacterDrift(Function<Integer, Integer> h) {
-        for(InspectionItem item : items) {
+        for(InspectionItem item : legacyItems) {
             item.bounds.start = editor.getLocationForOffset(h.apply(item.bounds.start.index));
             item.bounds.end = editor.getLocationForOffset(h.apply(item.bounds.end.index));
         }
+        //TODO apply drift to inspection module
+    }
+
+    public void setInspectionModule(InspectionModule inspectionModule) {
+        this.inspectionModule = inspectionModule;
+    }
+
+    public InspectionModule getInspectionModule() {
+        return inspectionModule;
+    }
+
+    public InspectorDialog getDialog() {
+        return dialog;
+    }
+
+    public void setDialog(InspectorDialog dialog) {
+        this.dialog = dialog;
+    }
+
+    public EditorComponent getEditor() {
+        return editor;
+    }
+
+    public void showHints(int index) {
+        dialog.showHints(index);
     }
 }

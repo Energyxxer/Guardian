@@ -195,8 +195,9 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             ArrayList<String> previousTokenStyles = new ArrayList<>();
 
             if(this.inspector != null) {
-                this.inspector.inspect(analysis.lexer.getStream());
-                this.inspector.insertNotices(analysis.notices);
+                this.inspector.clear();
+                this.inspector.insertLegacyNotices(analysis.notices);
+                this.inspector.setInspectionModule(analysis.lexer.getInspectionModule());
             }
 
             if(analysis.response != null && !analysis.response.matched) {
@@ -404,5 +405,28 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     public EditorModule getParentModule() {
         return parent;
+    }
+
+    public void showHints() {
+        if(inspector != null) {
+            inspector.showHints(getCaretPosition());
+        }
+    }
+
+    public void viewportChanged() {
+        if(suggestionBox != null) {
+            suggestionBox.relocate();
+        }
+        if(inspector != null) {
+            inspector.getDialog().relocate();
+        }
+    }
+
+    @Override
+    public void caretChanged() {
+        super.caretChanged();
+        if(inspector != null) {
+            inspector.getDialog().dismiss(false);
+        }
     }
 }

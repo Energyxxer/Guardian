@@ -1,20 +1,20 @@
 package com.energyxxer.guardian.ui.editor;
 
-import com.energyxxer.guardian.main.window.GuardianWindow;
-import com.energyxxer.guardian.ui.display.DisplayModule;
-import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
-import com.energyxxer.guardian.ui.modules.FileModuleToken;
-import com.energyxxer.guardian.ui.modules.ModuleToken;
-import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPaneLayout;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.temp.Lang;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.Guardian;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.editor_search.FindAndReplaceBar;
 import com.energyxxer.guardian.ui.Tab;
+import com.energyxxer.guardian.ui.display.DisplayModule;
+import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
+import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
+import com.energyxxer.guardian.ui.modules.FileModuleToken;
+import com.energyxxer.guardian.ui.modules.ModuleToken;
+import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPaneLayout;
 import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.guardian.ui.theme.ThemeManager;
 import com.energyxxer.guardian.ui.theme.change.ThemeChangeListener;
@@ -115,7 +115,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
                 focus();
             }
         });
-        scrollPane.getViewport().addChangeListener(l -> editorComponent.getSuggestionInterface().relocate());
+        scrollPane.getViewport().addChangeListener(l -> editorComponent.viewportChanged());
 
         addThemeChangeListener();
 
@@ -193,6 +193,10 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
             }
             case "paste": {
                 editorComponent.paste();
+                break;
+            }
+            case "show_hints": {
+                editorComponent.showHints();
                 break;
             }
             case "delete": {
@@ -452,6 +456,11 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     @Override
     public void focus() {
         editorComponent.requestFocus();
+    }
+
+    @Override
+    public boolean moduleHasFocus() {
+        return this.hasFocus() || editorComponent.hasFocus();
     }
 
     @Override

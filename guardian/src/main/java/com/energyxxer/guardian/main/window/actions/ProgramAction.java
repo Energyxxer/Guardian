@@ -5,6 +5,7 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.QuickFindDialog;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.display.DisplayModule;
+import com.energyxxer.guardian.ui.editor.EditorModule;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,10 @@ import java.util.function.Predicate;
 public class ProgramAction implements ModuleToken {
     public static final Predicate<ProgramAction> USABLE_EVERYWHERE = a -> true;
     public static final Predicate<ProgramAction> USABLE_NOWHERE = a -> false;
+    public static final Predicate<ProgramAction> USABLE_IN_EDITOR = a -> {
+        Tab st = GuardianWindow.tabManager.getSelectedTab();
+        return st != null && st.module instanceof EditorModule && st.module.moduleHasFocus();
+    };
 
     private String displayName;
     private String description;

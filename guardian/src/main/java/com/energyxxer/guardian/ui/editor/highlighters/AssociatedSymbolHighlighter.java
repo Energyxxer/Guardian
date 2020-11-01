@@ -63,7 +63,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
             int wordStart = editor.getWordStart(dot);
             int wordEnd = editor.getWordEnd(dot);
             String word = editor.getText(wordStart, wordEnd-wordStart);
-            PrismarineSummaryModule lastSuccessfulSummary = ((PrismarineSummaryModule) ((SuggestionDialog) editor.getSuggestionInterface()).getLastSuccessfulSummary());
+            PrismarineSummaryModule lastSuccessfulSummary = ((SuggestionDialog) editor.getSuggestionInterface()).getLastSuccessfulSummary();
             if(lastSuccessfulSummary != null) {
                 SummarySymbol selectedSymbol = lastSuccessfulSummary.getSymbolForName(word, wordStart);
                 if(selectedSymbol == null) return;
@@ -129,7 +129,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                 int wordStart = editor.getWordStart(hoveredTextIndex);
                 int wordEnd = editor.getWordEnd(hoveredTextIndex);
                 String word = editor.getText(wordStart, wordEnd-wordStart);
-                PrismarineSummaryModule lastSuccessfulSummary = ((PrismarineSummaryModule) ((SuggestionDialog) editor.getSuggestionInterface()).getLastSuccessfulSummary());
+                PrismarineSummaryModule lastSuccessfulSummary = ((SuggestionDialog) editor.getSuggestionInterface()).getLastSuccessfulSummary();
                 if(lastSuccessfulSummary != null && lastSuccessfulSummary.getParentSummary() != null) {
                     lastSuccessfulSummary = lastSuccessfulSummary.getParentSummary().getSummaryForLocation(lastSuccessfulSummary.getFileLocation());
                 }
@@ -145,7 +145,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
 
                             if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
 
-                            if(bounds.start.index == wordStart && bounds.end.index == wordEnd) { //If this usage refers to the identifier that's currently selected...
+                            if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getDeclarationPattern() != null) { //If this usage refers to the identifier that's currently selected...
                                 this.selectedSymbol = selectedSymbol;
                                 selectedDeclaration = bounds.start.index == selectedSymbol.getDeclarationPattern().getStringLocation().index;
                                 hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds()).stream().findFirst().get();

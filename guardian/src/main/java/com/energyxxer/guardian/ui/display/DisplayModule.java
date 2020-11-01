@@ -11,7 +11,9 @@ public interface DisplayModule {
     boolean canSave();
     Object save();
     void focus();
+    boolean moduleHasFocus();
     default void onSelect() {}
+
     default void performModuleAction(String key) {}
 
     boolean transform(ModuleToken newToken);

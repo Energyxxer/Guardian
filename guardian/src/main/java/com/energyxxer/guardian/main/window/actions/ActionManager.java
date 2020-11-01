@@ -229,6 +229,13 @@ public class ActionManager {
                     "delete"
                 ).setUsableFunction(ProgramAction.USABLE_NOWHERE)
         );
+        actions.put("SHOW_HINTS",
+                new ProgramAction(
+                        "Show Hints", "Show hints for currently selected text",
+                        KeyMap.requestMapping("show_hints", KeyMap.identifierToStrokes("a+" + KeyEvent.VK_ENTER)).setGroupName("Editor"),
+                        "show_hints"
+                ).setUsableFunction(ProgramAction.USABLE_IN_EDITOR)
+        );
         for(ProjectType type : ProjectType.values()) {
             actions.put("NEW_PROJECT_" + type.getCode(),
                     new ProgramAction(

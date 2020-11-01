@@ -12,7 +12,6 @@ import com.energyxxer.guardian.ui.editor.highlighters.BracePairHighlighter;
 import com.energyxxer.guardian.util.Range;
 import com.energyxxer.util.Lazy;
 import com.energyxxer.util.StringLocation;
-import com.energyxxer.util.Using;
 import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.NotNull;
 
@@ -114,9 +113,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
     }
 
     private void update() {
-        Using.using(editor.getSuggestionInterface()).notIfNull().run(
-                d -> d.dismiss(false)
-        );
+        editor.caretChanged();
         visible = true;
         flasher.restart();
         readjustRect();
