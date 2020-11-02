@@ -212,6 +212,10 @@ public class Lang {
             }
         }
 
+        if(summaryModule != null) {
+            ((PrismarineSummaryModule) summaryModule).runFileAwareProcessors();
+        }
+
         return new LangAnalysisResponse(lexer, response, lexer.getStream().tokens, notices);
     }
 
