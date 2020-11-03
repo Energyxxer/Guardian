@@ -17,7 +17,7 @@ public class JSONLexerProfile extends LexerProfile {
      * */
     private Token tokenBuffer = null;
 
-    private static final Pattern numberRegex = Pattern.compile("(-?\\d+(\\.\\d+)?)");
+    private static final Pattern numberRegex = Pattern.compile("(-?(?:\\d*(\\.\\d+)|\\d+)(?:E[+-]\\d+)?)");
 
     public static final TokenType
             BRACE = new TokenType("BRACE"), // (, ), {, }...
