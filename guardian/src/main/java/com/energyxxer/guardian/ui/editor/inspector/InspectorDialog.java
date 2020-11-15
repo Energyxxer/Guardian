@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.ui.editor.inspector;
 
 import com.energyxxer.enxlex.lexical_analysis.inspections.Inspection;
+import com.energyxxer.enxlex.lexical_analysis.inspections.ReplacementInspectionAction;
 import com.energyxxer.enxlex.lexical_analysis.inspections.SuggestionInspection;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
@@ -107,7 +108,7 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
         }
     }
 
-    public void submit(SuggestionInspection inspection) {
+    public void submit(ReplacementInspectionAction inspection) {
         this.setVisible(false);
 
         int replacementStartIndex = inspection.getReplacementStartIndex();
