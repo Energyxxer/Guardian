@@ -119,8 +119,6 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         readjustRect();
         editor.repaint();
         this.fireStateChanged();
-
-        dotsShouldntBeEmpty();
     }
 
     public void setPosition(int pos) {
@@ -334,7 +332,11 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         if(dragSelectMode == RECTANGLE) return dots.get(Math.min(rectangleDotCursorIndex, dots.size()-1)).index;
         int upperBound = dots.size()-1;
         if(dragSelectMode == CHAR) upperBound = rectangleDotsStartIndex -1;
-        dotsShouldntBeEmpty();
+        if(dots.isEmpty()) {
+            if(bufferedDot != null) return bufferedDot.index;
+//            GuardianWindow.showPopupMessage("Dots were empty, returned 0");
+            return 0;
+        }
         return dots.get(Math.min(upperBound, dots.size()-1)).index;
     }
 
@@ -735,11 +737,5 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         super.deinstall(c);
         flasher.stop();
         flasher.removeActionListener(flasherHandler);
-    }
-
-    private void dotsShouldntBeEmpty() {
-        if(dots.isEmpty()) {
-            Debug.log("Dots are empty!");
-        }
     }
 }

@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="enx-swing:jar">
+    <output-path>$PROJECT_DIR$</output-path>
+    <root id="archive" name="enx-swing.jar">
+      <element id="module-output" name="enx-swing" />
+      <element id="library" level="project" name="Prismarine" />
+    </root>
+  </artifact>
+</component>
