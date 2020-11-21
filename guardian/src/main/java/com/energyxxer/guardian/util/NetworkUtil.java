@@ -23,7 +23,7 @@ public class NetworkUtil {
 
         InputStream authenticatedResult = null;
         try {
-            authenticatedResult = retrieveStreamForURL((AUTHENTICATED_REQUEST_API + url).replace("&","%38"), true);
+            authenticatedResult = retrieveStreamForURL((AUTHENTICATED_REQUEST_API + url).replace("&","%26"), true);
         } catch(IOException x) {
             Debug.log("Failed authenticated request (and it wasn't 404). Please notify Energyxxer.", Debug.MessageType.ERROR);
             GuardianWindow.showError("Failed authenticated request (and it wasn't 404). Please notify Energyxxer.");
