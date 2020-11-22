@@ -120,6 +120,9 @@ public class DefinitionUpdateProcess extends AbstractProcess {
         for(JsonElement commitOverviewRaw : defPackCommits) {
             JsonObject commitOverview = commitOverviewRaw.getAsJsonObject();
 
+            String commitMessage = commitOverview.getAsJsonObject("commit").get("message").getAsString();
+            if(!commitMessage.startsWith("[!]")) continue;
+
             String commitDateRaw = commitOverview.getAsJsonObject("commit").getAsJsonObject("committer").get("date").getAsString();
             if(Objects.equals(commitDateRaw, lastCheckedDefCommit)) continue;
             Date commitDate = ISO8601Utils.parse(commitDateRaw, new ParsePosition(0));
