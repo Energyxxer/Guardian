@@ -10,5 +10,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="enx-swing" />
     <orderEntry type="library" name="Prismarine" level="project" />
+    <orderEntry type="library" name="sound" level="project" />
   </component>
 </module>

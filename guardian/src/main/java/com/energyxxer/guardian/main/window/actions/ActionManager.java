@@ -2,6 +2,7 @@ package com.energyxxer.guardian.main.window.actions;
 
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.FileManager;
+import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.Resources;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.global.keystrokes.SpecialMapping;
@@ -27,6 +28,7 @@ import com.energyxxer.util.logger.Debug;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -160,10 +162,21 @@ public class ActionManager {
         );
         actions.put("CHANGE_WORKSPACE",
                 new ProgramAction(
-                        "Change Workspace", "Select a directory to put projects in",
+                        "Select Workspace", "Select a directory to put your projects in",
                         KeyMap.requestMapping("change_workspace").setGroupName("Projects"),
                         WorkspaceDialog::prompt
                 ).setIconKey("folder")
+        );
+        actions.put("CLEAR_WORKSPACE_HISTORY",
+                new ProgramAction(
+                        "Clear Workspace History", "Clear the list of previously used workspaces",
+                        KeyMap.requestMapping("clear_workspace_history").setGroupName("Projects"),
+                        () -> {
+                            File currentWorkspace = Preferences.getWorkspace();
+                            Preferences.WORKSPACE_HISTORY.clear();
+                            Preferences.setWorkspace(currentWorkspace);
+                        }
+                )
         );
         actions.put("RELOAD_WORKSPACE",
                 new ProgramAction(

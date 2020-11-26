@@ -1,20 +1,25 @@
 package com.energyxxer.guardian.ui.common;
 
+import com.energyxxer.guardian.files.FileType;
+import com.energyxxer.guardian.global.Commons;
+import com.energyxxer.guardian.global.Preferences;
+import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
-import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
-import com.energyxxer.guardian.files.FileType;
-import com.energyxxer.guardian.global.Commons;
-import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenu;
+import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 
 import java.io.File;
+
+import static com.energyxxer.guardian.main.window.sections.MenuBar.createItemForAction;
 
 /**
  * Provides managers that create menu components for file and project management.
  */
 public class MenuItems {
+	private static StyledMenu CHANGE_WORKSPACE_MENU;
+
 	public static StyledMenu newMenu(String title) {
 		StyledMenu newMenu = new StyledMenu(title);
 
@@ -128,5 +133,47 @@ public class MenuItems {
 
 		return newMenu;
 
+	}
+
+	public static StyledMenu changeWorkspaceMenu() {
+		CHANGE_WORKSPACE_MENU = new StyledMenu("Change Workspace", "folder");
+		return regenerateChangeWorkspaceMenu();
+	}
+
+	public static StyledMenu regenerateChangeWorkspaceMenu() {
+		if(CHANGE_WORKSPACE_MENU == null) return null;
+
+		CHANGE_WORKSPACE_MENU.removeAll();
+
+		CHANGE_WORKSPACE_MENU.add(createItemForAction("CHANGE_WORKSPACE"));
+		CHANGE_WORKSPACE_MENU.addSeparator();
+
+		String[] workspaceHistoryReversed = Preferences.WORKSPACE_HISTORY.toArray(new String[0]);
+
+		for(int i = workspaceHistoryReversed.length-1; i >= 0; i--) {
+			String path = workspaceHistoryReversed[i];
+			StyledMenuItem item = new StyledMenuItem(path);
+			item.addActionListener(a -> {
+				File dir = new File(path);
+				if(dir.exists() && dir.isDirectory()) {
+					Preferences.setWorkspace(dir);
+				} else {
+					GuardianWindow.showError("Folder '" + path + "' no longer exists.");
+					Preferences.WORKSPACE_HISTORY.remove(path);
+					regenerateChangeWorkspaceMenu();
+				}
+			});
+			if(i == workspaceHistoryReversed.length-1) {
+				item.setIconName("triangle_right");
+			}
+			CHANGE_WORKSPACE_MENU.add(item);
+		}
+
+		if(workspaceHistoryReversed.length > 1) {
+			CHANGE_WORKSPACE_MENU.addSeparator();
+			CHANGE_WORKSPACE_MENU.add(createItemForAction("CLEAR_WORKSPACE_HISTORY"));
+		}
+
+		return CHANGE_WORKSPACE_MENU;
 	}
 }

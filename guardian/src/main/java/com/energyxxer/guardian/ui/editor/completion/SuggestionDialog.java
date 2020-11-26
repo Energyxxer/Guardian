@@ -132,7 +132,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         }
 
         if(any) {
-            Debug.log("Received " + explorer.getTotalCount() + " suggestions");
+//            Debug.log("Received " + explorer.getTotalCount() + " suggestions");
             //Debug.log(explorer.getChildren().stream().map(ExplorerElement::getToken).collect(Collectors.toList()));
             this.setVisible(true);
             filter();
@@ -140,11 +140,11 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             for(ExpandableSuggestionToken token : activeTokens) {
                 if(token.isEnabled()) shownTokens += 1;
             }
-            Debug.log("After filtering: " + shownTokens);
+//            Debug.log("After filtering: " + shownTokens);
             relocate(Math.min(results.getSuggestionIndex(), editor.getDocument().getLength()));
             editor.requestFocus();
         } else {
-            Debug.log("No suggestions received");
+//            Debug.log("No suggestions received");
             this.setVisible(false);
         }
     }

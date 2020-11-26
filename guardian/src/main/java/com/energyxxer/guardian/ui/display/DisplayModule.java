@@ -13,6 +13,7 @@ public interface DisplayModule {
     void focus();
     boolean moduleHasFocus();
     default void onSelect() {}
+    default void onClose() {}
 
     default void performModuleAction(String key) {}
 

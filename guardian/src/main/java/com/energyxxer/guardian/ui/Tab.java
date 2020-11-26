@@ -128,6 +128,7 @@ public class Tab {
 	}
 
 	public void dispose() {
+		if(module != null) module.onClose();
 		if(module instanceof Disposable) {
 			((Disposable) module).dispose();
 		}

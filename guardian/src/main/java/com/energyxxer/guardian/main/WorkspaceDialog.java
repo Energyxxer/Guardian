@@ -64,6 +64,7 @@ public class WorkspaceDialog {
         input.add(field, BorderLayout.CENTER);
 
         field.getField().getDocument().addUndoableEditListener(e -> validateInput());
+        field.getField().setPreferredSize(new ScalableDimension(250, 0));
 
         content.add(input, BorderLayout.CENTER);
 
@@ -88,7 +89,7 @@ public class WorkspaceDialog {
         //</editor-fold>
 
         dialog.setContentPane(pane);
-        dialog.setResizable(false);
+        dialog.setResizable(true);
 
         dialog.setTitle("Setup Workspace");
 
@@ -101,8 +102,7 @@ public class WorkspaceDialog {
         if(!valid) return;
 
         //field.getFile().mkdirs();
-        Preferences.put("workspace_dir",field.getFile().getAbsolutePath());
-        GuardianWindow.projectExplorer.refresh();
+        Preferences.setWorkspace(field.getFile());
         dialog.setVisible(false);
     }
 

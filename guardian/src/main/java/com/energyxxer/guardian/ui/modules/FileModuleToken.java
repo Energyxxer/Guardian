@@ -10,6 +10,7 @@ import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
+import com.energyxxer.guardian.ui.audio.AudioPlayer;
 import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.dialogs.PromptDialog;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
@@ -184,7 +185,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
                 }
             }
             switch(extension) {
-                case ".mp3":
+                case ".wav":
                 case ".ogg":
                 case ".fsb":
                     return Commons.getIcon("audio");
@@ -239,8 +240,8 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
             if(name.endsWith(".png")) {
                 addRecentFile(file);
                 return new ImageViewer(file);
-            } else if(name.endsWith(".ogg") || name.endsWith(".mp3")) {
-
+            } else if(name.endsWith(".ogg") || name.endsWith(".wav")) {
+                return new AudioPlayer(file);
             } else {
                 addRecentFile(file);
                 return new EditorModule(tab, file);

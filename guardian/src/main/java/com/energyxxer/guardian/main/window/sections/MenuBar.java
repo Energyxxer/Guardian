@@ -1,12 +1,12 @@
 package com.energyxxer.guardian.main.window.sections;
 
 import com.energyxxer.guardian.global.keystrokes.SimpleMapping;
-import com.energyxxer.guardian.ui.common.MenuItems;
-import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.main.window.actions.ActionManager;
 import com.energyxxer.guardian.main.window.actions.ProgramAction;
+import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenu;
+import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.xswing.ScalableDimension;
 
 import javax.swing.*;
@@ -36,7 +36,7 @@ public class MenuBar extends JMenuBar {
             // --------------------------------------------------
 
             menu.add(MenuItems.newMenu("New"));
-            menu.add(createItemForAction("CHANGE_WORKSPACE"));
+            menu.add(MenuItems.changeWorkspaceMenu());
             menu.add(createItemForAction("RELOAD_WORKSPACE"));
 
             menu.addSeparator();
@@ -148,7 +148,7 @@ public class MenuBar extends JMenuBar {
         }
     }
 
-    private static StyledMenuItem createItemForAction(String actionKey) {
+    public static StyledMenuItem createItemForAction(String actionKey) {
         ProgramAction action = ActionManager.getAction(actionKey);
         StyledMenuItem item = new StyledMenuItem(action.getTitle(), action.getIconKey());
         if(action.getShortcut() != null && action.getShortcut().getFirstMapping() instanceof SimpleMapping) item.setAccelerator(((SimpleMapping) action.getShortcut().getFirstMapping()).getKeyStroke());

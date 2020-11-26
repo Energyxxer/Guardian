@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 
 public class DefinitionPacks {
     private static HashMap<String, DefinitionPack> loadedDefinitionPacks = new LinkedHashMap<>();
-    private static final Pattern javaPackKey = Pattern.compile("minecraft_j_1_(\\d+)");
-    private static final Pattern bedrockPackKey = Pattern.compile("minecraft_b_1_(\\d+)");
+    private static final Pattern javaPackKey = Pattern.compile("minecraft_j_1_(\\d+)(?:_(\\d+))?");
+    private static final Pattern bedrockPackKey = Pattern.compile("minecraft_b_1_(\\d+)(?:_(\\d+))?");
 
     private static JavaEditionVersion latestKnownJavaVersion = new JavaEditionVersion(1, 13, 0);
     private static BedrockEditionVersion latestKnownBedrockVersion = new BedrockEditionVersion(1, 13, 0);
@@ -56,34 +56,51 @@ public class DefinitionPacks {
     }
 
     private static void updateLatestKnownVersion(String packName) {
-        Matcher match = javaPackKey.matcher(packName);
-        if(match.matches()) {
-            JavaEditionVersion thisVersion = new JavaEditionVersion(1, Integer.parseInt(match.group(1)), 0);
-            if(latestKnownJavaVersion.compare(thisVersion) < 0) {
-                latestKnownJavaVersion = thisVersion;
+        Version version = getVersionForPackName(packName);
+        if(version == null) return;
+        if(version instanceof JavaEditionVersion) {
+            if(latestKnownJavaVersion.compare(version) < 0) {
+                latestKnownJavaVersion = (JavaEditionVersion) version;
                 knownVersionList = null;
             }
         }
-        match = bedrockPackKey.matcher(packName);
-        if(match.matches()) {
-            BedrockEditionVersion thisVersion = new BedrockEditionVersion(1, Integer.parseInt(match.group(1)), 0);
-            if(latestKnownBedrockVersion.compare(thisVersion) < 0) {
-                latestKnownBedrockVersion = thisVersion;
+        if(version instanceof BedrockEditionVersion) {
+            if(latestKnownBedrockVersion.compare(version) < 0) {
+                latestKnownBedrockVersion = (BedrockEditionVersion) version;
                 knownVersionList = null;
             }
         }
     }
 
+    private static Version getVersionForPackName(String packName) {
+        Matcher match = javaPackKey.matcher(packName);
+        if(match.matches()) {
+            int minor = Integer.parseInt(match.group(1));
+            int patch = 0;
+            if(match.group(2) != null) {
+                patch = Integer.parseInt(match.group(2));
+            }
+            return new JavaEditionVersion(1, minor, patch);
+        }
+        match = bedrockPackKey.matcher(packName);
+        if(match.matches()) {
+            int minor = Integer.parseInt(match.group(1));
+            int patch = 0;
+            if(match.group(2) != null) {
+                patch = Integer.parseInt(match.group(2));
+            }
+            return new BedrockEditionVersion(1, minor, patch);
+        }
+        return null;
+    }
+
     public static Version[] getKnownVersions() {
         if(knownVersionList != null) return knownVersionList;
-        knownVersionList = new Version[Math.max(0, latestKnownJavaVersion.getMinor() - 13 + 1) + Math.max(0, latestKnownBedrockVersion.getMinor() - 13 + 1)];
-        int j = 0;
-        for(int i = 13; i <= latestKnownJavaVersion.getMinor(); i++) {
-            knownVersionList[j++] = new JavaEditionVersion(1, i, 0);
+        LinkedHashSet<Version> all = new LinkedHashSet<>();
+        for(String key : loadedDefinitionPacks.keySet()) {
+            all.add(getVersionForPackName(key));
         }
-        for(int i = 13; i <= latestKnownBedrockVersion.getMinor(); i++) {
-            knownVersionList[j++] = new BedrockEditionVersion(1, i, 0);
-        }
+        knownVersionList = all.toArray(new Version[0]);
         return knownVersionList;
     }
 
@@ -98,26 +115,37 @@ public class DefinitionPacks {
     public static DefinitionPack[] pickPacksForVersion(ThreeNumberVersion targetVersion) {
         if(targetVersion == null) return null;
 
-        String key = "minecraft_" + targetVersion.getEditionString().toLowerCase(Locale.ENGLISH).charAt(0) + "_" + targetVersion.getMajor() + "_" + targetVersion.getMinor();
-        Pattern vanillaKey = Pattern.compile("minecraft_" + targetVersion.getEditionString().toLowerCase(Locale.ENGLISH).charAt(0) + "_1_(\\d+)");
+        String key = "minecraft_" +
+                targetVersion.getEditionString().toLowerCase(Locale.ENGLISH).charAt(0) +
+                "_" + targetVersion.getMajor() +
+                "_" + targetVersion.getMinor() +
+                "_" + targetVersion.getPatch();
         DefinitionPack pack = loadedDefinitionPacks.get(key);
         Debug.log("key: " + key);
         if(pack != null) return new DefinitionPack[] {pack};
+
+        key = "minecraft_" +
+                targetVersion.getEditionString().toLowerCase(Locale.ENGLISH).charAt(0) +
+                "_" + targetVersion.getMajor() +
+                "_" + targetVersion.getMinor();
+        pack = loadedDefinitionPacks.get(key);
+        Debug.log("key: " + key);
+        if(pack != null) return new DefinitionPack[] {pack};
+
         Debug.log("oh no pack is null");
 
-        Map.Entry<JavaEditionVersion, DefinitionPack> latestMatch = null;
-
-        targetVersion = new JavaEditionVersion(targetVersion.getMajor(), targetVersion.getMinor(), targetVersion.getPatch());
+        Map.Entry<Version, DefinitionPack> latestMatch = null;
 
         for(Map.Entry<String, DefinitionPack> entry : loadedDefinitionPacks.entrySet()) {
-            Matcher match = vanillaKey.matcher(entry.getKey());
-            if(match.matches()) {
-                JavaEditionVersion version = new JavaEditionVersion(1, Integer.parseInt(match.group(1)), 0);
-                if(version.compare(targetVersion) <= 0) {
-                    if(latestMatch == null || version.compare(latestMatch.getKey()) > 0) {
-                        latestMatch = new AbstractMap.SimpleEntry<>(version, entry.getValue());
+            Version version = getVersionForPackName(entry.getKey());
+            if(version != null) {
+                try {
+                    if(version.compare(targetVersion) <= 0) {
+                        if (latestMatch == null || version.compare(latestMatch.getKey()) > 0) {
+                            latestMatch = new AbstractMap.SimpleEntry<>(version, entry.getValue());
+                        }
                     }
-                }
+                } catch(UnsupportedOperationException ignore) {}
             }
         }
 

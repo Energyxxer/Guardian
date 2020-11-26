@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="sound">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/sound/SoundSystem/SoundSystem.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/sound/LibraryJavaSound/LibraryJavaSound.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/sound/Codecs/CodecJOrbis/CodecJOrbis.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/sound/Codecs/CodecWav/CodecWav.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

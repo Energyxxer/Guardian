@@ -5,12 +5,15 @@ import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.WorkspaceDialog;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
+import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.theme.change.ThemeChangeListener;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableGraphics2D;
 
 import java.awt.*;
 import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.prefs.BackingStoreException;
 
@@ -34,6 +37,15 @@ public class Preferences {
         editorFontSize = Integer.parseInt(prefs.get("editor_font_size","12"));
         if(prefs.get("editor_font_size",null) == null) prefs.put("editor_font_size", "12");
         setGlobalScaleFactor(Double.parseDouble(prefs.get("global_scale_factor","1")));
+    }
+
+    public static LinkedHashSet<String> WORKSPACE_HISTORY = new LinkedHashSet<>();
+
+    static {
+        String[] savedWorkspaceHistory = Preferences.get("workspace_history","").split(File.pathSeparator, -1);
+        if (savedWorkspaceHistory.length != 1 || !savedWorkspaceHistory[0].isEmpty()) {
+            WORKSPACE_HISTORY.addAll(Arrays.asList(savedWorkspaceHistory));
+        }
     }
 
     public static void promptWorkspace() {
@@ -232,6 +244,22 @@ public class Preferences {
 
     public static File getWorkspace() {
         return new File(Preferences.get("workspace_dir", Guardian.core.getDefaultWorkspace().toString()));
+    }
+
+    public static void setWorkspace(File workspace) {
+        Preferences.put("workspace_dir", workspace.getAbsolutePath());
+        GuardianWindow.projectExplorer.refresh();
+
+        WORKSPACE_HISTORY.remove(workspace.getAbsolutePath());
+        WORKSPACE_HISTORY.add(workspace.getAbsolutePath());
+
+        saveWorkspaceHistory();
+        MenuItems.regenerateChangeWorkspaceMenu();
+    }
+
+    private static void saveWorkspaceHistory() {
+        String joined = String.join(File.pathSeparator, WORKSPACE_HISTORY);
+        Preferences.put("workspace_history", joined);
     }
 
     public static class SettingPref<T> {

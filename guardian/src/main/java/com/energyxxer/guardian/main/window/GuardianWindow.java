@@ -145,27 +145,6 @@ public class GuardianWindow {
 		jframe.getContentPane().add(toolbar = new Toolbar(), BorderLayout.NORTH);
 		jframe.setJMenuBar(menuBar = new MenuBar());
 
-		/*JWindow w = new JWindow(jframe);
-		w.setLocation(500,500);
-		w.setBackground(new Color(0,0,0,0));
-
-		w.setContentPane(new JPanel() {
-			@Override
-			protected void paintComponent(Graphics g) {
-				//super.paintComponent(g);
-				g.setColor(new Color(100,255,255,50));
-				g.fillRect(0,0,this.getWidth()/2,this.getHeight());
-			}
-		});
-		//w.setOpacity(0);
-		//w.getContentPane().add(new JLabel("Hello World"));
-		w.setSize(100,20);
-		w.setVisible(true);*/
-
-		//PopupFactory.getSharedInstance().getPopup(jframe, test, 500, 500).show();
-
-		//toolbar.setToolTipText("a");
-
 		jframe.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
