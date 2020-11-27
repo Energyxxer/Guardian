@@ -11,23 +11,27 @@ import de.ralleytn.simple.audio.AudioException;
 import de.ralleytn.simple.audio.BufferedAudio;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 
 public class AudioPlayer extends JPanel implements DisplayModule, Disposable {
 
     private File file;
     private Audio audio;
+    private boolean opened = false;
     private boolean closing = false;
 
     public AudioPlayer(File file) {
         this.file = file;
 
-
         Runnable playSound = () -> {
             try {
                 audio = new BufferedAudio(file.toURI());
                 audio.addAudioListener(l -> {
-                    if(l.getType() == AudioEvent.Type.REACHED_END) {
+                    if(closing) return;
+                    if(l.getType() == AudioEvent.Type.OPENED) {
+                        opened = true;
+                        Debug.log("Length: " + (l.getAudio().getLength() / 1000.) + "s");
                     }
                 });
                 Debug.log("Opening");
@@ -84,5 +88,17 @@ public class AudioPlayer extends JPanel implements DisplayModule, Disposable {
     @Override
     public boolean transform(ModuleToken newToken) {
         return false;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if(!opened || closing) return;
+
+        Debug.log((audio.getPosition() / 1000.) + "s / " + (audio.getLength() / 1000.) + "s");
+
+        if(audio.isPlaying()) {
+            repaint();
+        }
     }
 }
