@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/libs/SimpleAudio/SimpleAudio.iml" filepath="$PROJECT_DIR$/libs/SimpleAudio/SimpleAudio.iml" />
       <module fileurl="file://$PROJECT_DIR$/enx-swing/src/main/enx-swing.iml" filepath="$PROJECT_DIR$/enx-swing/src/main/enx-swing.iml" />
       <module fileurl="file://$PROJECT_DIR$/guardian/src/main/guardian.iml" filepath="$PROJECT_DIR$/guardian/src/main/guardian.iml" />
     </modules>

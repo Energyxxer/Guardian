@@ -1,74 +1,54 @@
 package com.energyxxer.guardian.ui.audio;
 
-import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.util.Disposable;
-import paulscode.sound.SoundSystem;
-import paulscode.sound.SoundSystemConfig;
-import paulscode.sound.SoundSystemException;
-import paulscode.sound.codecs.CodecJOrbis;
-import paulscode.sound.codecs.CodecWav;
-import paulscode.sound.libraries.LibraryJavaSound;
+import com.energyxxer.util.logger.Debug;
+import de.ralleytn.simple.audio.Audio;
+import de.ralleytn.simple.audio.AudioEvent;
+import de.ralleytn.simple.audio.AudioException;
+import de.ralleytn.simple.audio.BufferedAudio;
 
 import javax.swing.*;
 import java.io.File;
-import java.net.MalformedURLException;
 
 public class AudioPlayer extends JPanel implements DisplayModule, Disposable {
 
-    private static SoundSystem SOUND_SYSTEM;
-
     private File file;
-    private String soundId;
-
-    static {
-        GuardianWindow.setStatus("Loading sound system...");
-        SwingUtilities.invokeLater(() -> {
-            try {
-                SoundSystemConfig.addLibrary(LibraryJavaSound.class);
-                SoundSystemConfig.setCodec("wav", CodecWav.class);
-                SoundSystemConfig.setCodec("ogg", CodecJOrbis.class);
-                SOUND_SYSTEM = new SoundSystem(LibraryJavaSound.class);
-                GuardianWindow.setStatus("Sound system loaded");
-            } catch (SoundSystemException e) {
-                e.printStackTrace();
-            }
-        });
-    }
+    private Audio audio;
+    private boolean closing = false;
 
     public AudioPlayer(File file) {
         this.file = file;
 
+
         Runnable playSound = () -> {
             try {
-                soundId = SOUND_SYSTEM.quickPlay(
-                        false,
-                        file.toURI().toURL(),
-                        file.getAbsolutePath(),
-                        false,
-                        0, 0, 0,
-                        SoundSystemConfig.getDefaultAttenuation(),
-                        SoundSystemConfig.getDefaultRolloff()
-                );
-            } catch (MalformedURLException e) {
+                audio = new BufferedAudio(file.toURI());
+                audio.addAudioListener(l -> {
+                    if(l.getType() == AudioEvent.Type.REACHED_END) {
+                    }
+                });
+                Debug.log("Opening");
+                audio.open();
+                audio.play();
+            } catch (AudioException e) {
                 e.printStackTrace();
             }
         };
 
-        if(SOUND_SYSTEM == null) {
-            SwingUtilities.invokeLater(playSound);
-        } else {
-            ConcurrencyUtil.runAsync(playSound);
-        }
+        ConcurrencyUtil.runAsync(playSound);
 
     }
 
     @Override
     public void dispose() {
-        SOUND_SYSTEM.stop(soundId);
-        SOUND_SYSTEM.unloadSound(soundId);
+        closing = true;
+        ConcurrencyUtil.runAsync(() -> {
+            Debug.log("Closing");
+            audio.close();
+        });
     }
 
     @Override

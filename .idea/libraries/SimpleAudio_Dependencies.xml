@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="SimpleAudio Dependencies">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/SimpleAudio/tritonus_share.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/SimpleAudio/j-ogg.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/SimpleAudio/jl1.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/SimpleAudio/mp3spi1.9.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
