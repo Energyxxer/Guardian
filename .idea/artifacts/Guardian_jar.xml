@@ -7,6 +7,11 @@
       </element>
       <element id="module-output" name="enx-swing" />
       <element id="module-output" name="guardian" />
+      <element id="module-output" name="SimpleAudio" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/SimpleAudio/j-ogg.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/SimpleAudio/jl1.0.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/SimpleAudio/mp3spi1.9.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/SimpleAudio/tritonus_share.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

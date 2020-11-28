@@ -33,10 +33,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -972,5 +969,27 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             }
             throw new UnsupportedFlavorException(flavor);
         }
+    }
+
+    public static void copyToClipboard(String str) {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(new Transferable() {
+            @Override
+            public DataFlavor[] getTransferDataFlavors() {
+                return new DataFlavor[] {DataFlavor.stringFlavor};
+            }
+
+            @Override
+            public boolean isDataFlavorSupported(DataFlavor flavor) {
+                return flavor == DataFlavor.stringFlavor;
+            }
+
+            @NotNull
+            @Override
+            public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+                if(isDataFlavorSupported(flavor)) return str;
+                throw new UnsupportedFlavorException(flavor);
+            }
+        }, null);
     }
 }

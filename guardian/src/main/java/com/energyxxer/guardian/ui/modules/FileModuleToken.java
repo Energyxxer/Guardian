@@ -186,6 +186,12 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
             }
             switch(extension) {
                 case ".wav":
+                case ".aiff":
+                case ".aif":
+                case ".aifc":
+                case ".au":
+                case ".snd":
+                case ".mp3":
                 case ".ogg":
                 case ".fsb":
                     return Commons.getIcon("audio");
@@ -240,7 +246,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
             if(name.endsWith(".png")) {
                 addRecentFile(file);
                 return new ImageViewer(file);
-            } else if(name.endsWith(".ogg") || name.endsWith(".wav")) {
+            } else if(name.endsWith(".ogg") || name.endsWith(".wav") || name.endsWith(".mp3") || name.endsWith(".aiff") || name.endsWith(".aif") || name.endsWith(".aifc") || name.endsWith(".au") || name.endsWith(".snd")) {
                 return new AudioPlayer(file);
             } else {
                 addRecentFile(file);
