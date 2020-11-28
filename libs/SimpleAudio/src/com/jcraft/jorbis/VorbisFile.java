@@ -468,7 +468,7 @@ public class VorbisFile{
   //          0) need more date (only if readp==0)/eof
   //          1) got a packet 
 
-  int process_packet(int readp){
+  int process_packet(boolean readp){
     Page og=new Page();
 
     // handle one packet.  Try to fetch it from current stream state
@@ -529,7 +529,7 @@ public class VorbisFile{
         }
       }
 
-      if(readp==0)
+      if(!readp)
         return (0);
       if(get_next_page(og, -1)<0)
         return (0); // eof. leave unitialized
@@ -871,7 +871,7 @@ public class VorbisFile{
     // from a page has the 'granulepos' field set, and that's how the
     // helper updates the offset
 
-    switch(process_packet(1)){
+    switch(process_packet(true)){
       case 0:
         // oh, eof. There are no packets remaining.  Set the pcm offset to
         // the end of file
@@ -888,7 +888,7 @@ public class VorbisFile{
         break;
     }
     while(true){
-      switch(process_packet(0)){
+      switch(process_packet(false)){
         case 0:
           // the offset is set.  If it's a bogus bitstream with no offset
           // information, it's not but that's not our fault.  We still run
@@ -1013,7 +1013,7 @@ public class VorbisFile{
       pcm_offset+=samples;
 
       if(samples<target)
-        if(process_packet(1)==0){
+        if(process_packet(true)==0){
           pcm_offset=pcm_total(-1); // eof
         }
     }
@@ -1166,8 +1166,8 @@ public class VorbisFile{
     }
   }
 
-  int host_is_big_endian(){
-    return 1;
+  boolean host_is_big_endian(){
+    return true;
     //    short pattern = 0xbabe;
     //    unsigned char *bytewise = (unsigned char *)&pattern;
     //    if (bytewise[0] == 0xba) return 1;
@@ -1206,9 +1206,9 @@ public class VorbisFile{
   // 
   // *section) set to the logical bitstream number
 
-  public int read(byte[] buffer, int length, int bigendianp, int word, int sgned,
+  public int read(byte[] buffer, int length, boolean bigendianp, int word, boolean sgned,
       int[] bitstream){
-    int host_endian=host_is_big_endian();
+    boolean host_endian=host_is_big_endian();
     int index=0;
 
     while(true){
@@ -1222,14 +1222,15 @@ public class VorbisFile{
           // yay! proceed to pack data into the byte buffer
           int channels=getInfo(-1).channels;
           int bytespersample=word*channels;
-          if(samples>length/bytespersample)
+          if(samples>length/bytespersample) {
             samples=length/bytespersample;
+          }
 
           // a tight loop to pack each size
           {
             int val;
             if(word==1){
-              int off=(sgned!=0 ? 0 : 128);
+              int off=(sgned ? 0 : 128);
               for(int j=0; j<samples; j++){
                 for(int i=0; i<channels; i++){
                   val=(int)(pcm[i][_index[i]+j]*128.+0.5);
@@ -1242,29 +1243,29 @@ public class VorbisFile{
               }
             }
             else{
-              int off=(sgned!=0 ? 0 : 32768);
+              int off=(sgned ? 0 : 32768);
 
               if(host_endian==bigendianp){
-                if(sgned!=0){
+                if(sgned){
                   for(int i=0; i<channels; i++){ // It's faster in this order
                     int src=_index[i];
-                    int dest=i;
+                    int dest=i*word; //<== BUG WAS HERE; Used to be: int dest=i; which ignored the fact the word size was not 1;
                     for(int j=0; j<samples; j++){
-                      val=(int)(pcm[i][src+j]*32768.+0.5);
+                      val=(int)Math.round(pcm[i][src+j]*32768.0d);
                       if(val>32767)
                         val=32767;
                       else if(val<-32768)
                         val=-32768;
                       buffer[dest]=(byte)(val>>>8);
                       buffer[dest+1]=(byte)(val);
-                      dest+=channels*2;
+                      dest+=channels*word;
                     }
                   }
                 }
                 else{
                   for(int i=0; i<channels; i++){
                     float[] src=pcm[i];
-                    int dest=i;
+                    int dest=i*word; //<== BUG WAS HERE; Used to be: int dest=i; which ignored the fact the word size was not 1;
                     for(int j=0; j<samples; j++){
                       val=(int)(src[j]*32768.+0.5);
                       if(val>32767)
@@ -1273,12 +1274,12 @@ public class VorbisFile{
                         val=-32768;
                       buffer[dest]=(byte)((val+off)>>>8);
                       buffer[dest+1]=(byte)(val+off);
-                      dest+=channels*2;
+                      dest+=channels*word;
                     }
                   }
                 }
               }
-              else if(bigendianp!=0){
+              else if(bigendianp){
                 for(int j=0; j<samples; j++){
                   for(int i=0; i<channels; i++){
                     val=(int)(pcm[i][j]*32768.+0.5);
@@ -1319,7 +1320,7 @@ public class VorbisFile{
       }
 
       // suck in another packet
-      switch(process_packet(1)){
+      switch(process_packet(true)){
         case 0:
           return (0);
         case -1:

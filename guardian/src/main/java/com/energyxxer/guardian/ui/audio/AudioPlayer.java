@@ -45,7 +45,7 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
     private float progressBarWidth = 0.6f;
     private float progressBarY = 0.8f;
 
-    private boolean loop = true;
+    private boolean loop = false;
 
     public AudioPlayer(File file) {
         this.file = file;
