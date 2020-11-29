@@ -8,9 +8,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.function.Supplier;
 
-public abstract class FloatingLabel extends FloatingObject {
+public abstract class FloatingLabel extends FloatingComponent {
     private Font font = SystemDefaults.FONT;
-    private Alignment alignment = new Alignment();
 
     private Rectangle prevBounds = new Rectangle();
 
@@ -31,7 +30,7 @@ public abstract class FloatingLabel extends FloatingObject {
 
     @Override
     public void paint(Graphics2D g) {
-        g.setColor(this.getForeground());
+        g.setColor(this.foreground.getCurrent(this));
         g.setFont(font);
 
         String text = getText();
@@ -42,8 +41,8 @@ public abstract class FloatingLabel extends FloatingObject {
 
         Rectangle parentBounds = getParentBounds();
 
-        int x = parentBounds.x + alignment.getX(parentBounds.width, width);
-        int y = parentBounds.y + alignment.getY(parentBounds.height, height);
+        int x = parentBounds.x + getAlignment().getX(parentBounds.width, width);
+        int y = parentBounds.y + getAlignment().getY(parentBounds.height, height);
 
         g.drawString(text, x, y + fm.getAscent());
 
@@ -51,10 +50,6 @@ public abstract class FloatingLabel extends FloatingObject {
         prevBounds.y = y;
         prevBounds.width = width;
         prevBounds.height = height;
-    }
-
-    public Alignment getAlignment() {
-        return alignment;
     }
 
     @Override

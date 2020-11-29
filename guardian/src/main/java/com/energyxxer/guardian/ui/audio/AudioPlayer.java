@@ -8,7 +8,6 @@ import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.util.Disposable;
-import com.energyxxer.util.logger.Debug;
 import de.ralleytn.simple.audio.Audio;
 import de.ralleytn.simple.audio.AudioEvent;
 import de.ralleytn.simple.audio.AudioException;
@@ -17,11 +16,11 @@ import de.ralleytn.simple.audio.BufferedAudio;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.HashMap;
 
 import static com.energyxxer.guardian.ui.floatingcanvas.Alignment.*;
+import static com.energyxxer.guardian.ui.floatingcanvas.DynamicVector.Unit.ABSOLUTE;
 import static com.energyxxer.guardian.ui.floatingcanvas.DynamicVector.Unit.RELATIVE;
 
 public class AudioPlayer extends FloatingCanvas implements DisplayModule, Disposable, KeyListener {
@@ -31,7 +30,7 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
     private boolean opened = false;
     private boolean closing = false;
 
-    private ThemeListenerManager tlm = new ThemeListenerManager();
+    public ThemeListenerManager tlm = new ThemeListenerManager();
 
     private HashMap<String, Color> colors = new HashMap<>();
     protected HashMap<String, Integer> styleNumbers = new HashMap<>();
@@ -42,8 +41,13 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
     FloatingLabel.Fixed totalLabel;
     ProgressBar progressBar;
 
-    private float progressBarWidth = 0.6f;
-    private float progressBarY = 0.8f;
+    ToggleButton loopButton;
+    Button playButton;
+    Button volumeButton;
+
+    float progressBarWidth = 0.6f;
+    float progressBarY = 0.8f;
+    float controlsY = 0.6f;
 
     private boolean loop = false;
 
@@ -67,7 +71,6 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
                         }
                     }
                 });
-                Debug.log("Opening");
                 audio.open();
                 audio.play();
             } catch (AudioException e) {
@@ -80,11 +83,11 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
         this.file = file;
         this.addKeyListener(this);
 
-        FloatingObject content = new FloatingPanel.Aligned(new DynamicVector(0.6f, RELATIVE, 0.5f, RELATIVE), MIDDLE, MIDDLE);
+        FloatingPanel content = new FloatingPanel(new DynamicVector(0.6f, RELATIVE, 0.5f, RELATIVE));
 
         this.add(content);
 
-        content.add(progressBar = new ProgressBar());
+        content.add(progressBar = new ProgressBar(this));
 
         progressLabel = new FloatingLabel.Dynamic(() -> opened ? formatTime(audio.getPosition()) : "--:--", true);
         progressLabel.getAlignment().setAlignmentX((1-progressBarWidth)/2, RIGHT + 0.2f);
@@ -96,45 +99,69 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
         totalLabel.getAlignment().setAlignmentY(progressBarY, MIDDLE);
         content.add(totalLabel);
 
+        FloatingPanel separator = new FloatingPanel(new DynamicVector(0.8f, RELATIVE, 4, ABSOLUTE));
+        separator.background.setKeys("AudioPlayer.content.*.separator.background");
+        separator.getAlignment().setAlignmentY(0.275f, TOP);
+        content.add(separator);
+
         titleLabel = new FloatingLabel.Fixed(file.getName(), true);
         titleLabel.getAlignment().setAlignmentX(MIDDLE);
-        titleLabel.getAlignment().setAlignmentY(0.25f, MIDDLE);
+        titleLabel.getAlignment().setAlignmentY(0.2f, MIDDLE);
         content.add(titleLabel);
+
+        playButton = new PlayButton(this);
+        content.add(playButton);
+
+        loopButton = new ToggleButton(tlm, "AudioPlayer.loopButton", "AudioPlayer.toggleButton", "AudioPlayer.button");
+        content.add(loopButton);
+        loopButton.getAlignment().setAlignmentX(0.375f, Alignment.MIDDLE);
+        loopButton.getAlignment().setAlignmentY(controlsY, Alignment.MIDDLE);
+        loopButton.addClickEvent(() -> {
+            loop = loopButton.isEnabled();
+            if(loop && !audio.isPlaying() && audio.getPosition() >= audio.getLength()) {
+                audio.setPosition(0);
+                audio.play();
+            }
+        });
+        loopButton.setIconName("loop_large");
+
+        volumeButton = new VolumeButton(this);
+        content.add(volumeButton);
+        volumeButton.getAlignment().setAlignmentX(0.625f, Alignment.MIDDLE);
+        volumeButton.getAlignment().setAlignmentY(controlsY, Alignment.MIDDLE);
+
+        content.background.setKeys("AudioPlayer.content.*.background");
+        content.borderThickness.setKeys("AudioPlayer.content.*.border.thickness");
+        content.borderColor.setKeys("AudioPlayer.content.*.border.color");
+        content.cornerRadius.setKeys("AudioPlayer.content.*.cornerRadius");
+        progressLabel.foreground.setKeys("AudioPlayer.label.*.foreground", "AudioPlayer.foreground");
+        totalLabel.foreground.setKeys("AudioPlayer.label.*.foreground", "AudioPlayer.foreground");
+        titleLabel.foreground.setKeys("AudioPlayer.label.*.foreground", "AudioPlayer.foreground");
 
         tlm.addThemeChangeListener(t -> {
             this.setBackground(t.getColor(Color.WHITE, "AudioPlayer.background"));
             this.setForeground(t.getColor(Color.BLACK, "AudioPlayer.foreground"));
 
-            content.setBackground(t.getColor(Color.GRAY, "AudioPlayer.content.background"));
-
-            progressBar.setBackground(t.getColor(Color.WHITE, "AudioPlayer.progressBar.background"));
-            progressBar.setForeground(t.getColor(Color.WHITE, "AudioPlayer.progressBar.foreground"));
-            progressBar.getSizeVector().setY(t.getInteger(8, "AudioPlayer.progressBar.thickness"));
-
-            progressBar.setRolloverBackground(t.getColor(Color.WHITE, "AudioPlayer.progressBar.hover.background"));
-            progressBar.setRolloverForeground(t.getColor(Color.WHITE, "AudioPlayer.progressBar.hover.foreground"));
-
-            styleNumbers.put("progressBar.thickness", t.getInteger(10, "AudioPlayer.progressBar.thickness"));
-            styleNumbers.put("progressBar.hover.thickness", t.getInteger(10, "AudioPlayer.progressBar.hover.thickness"));
+            separator.background.themeUpdated(t);
+            content.background.themeUpdated(t);
+            content.borderThickness.themeUpdated(t);
+            content.borderColor.themeUpdated(t);
+            content.cornerRadius.themeUpdated(t);
+            progressLabel.foreground.themeUpdated(t);
+            totalLabel.foreground.themeUpdated(t);
+            titleLabel.foreground.themeUpdated(t);
 
             Font font = t.getFont("AudioPlayer", "General");
             progressLabel.setFont(font);
-            progressLabel.setForeground(this.getForeground());
             totalLabel.setFont(font);
-            totalLabel.setForeground(this.getForeground());
-
             titleLabel.setFont(t.getFont("AudioPlayer.title", "AudioPlayer", "General"));
-            titleLabel.setForeground(t.getColor(Color.BLACK, "AudioPlayer.title.foreground", "AudioPlayer.foreground"));
         });
     }
 
     @Override
     public void dispose() {
         closing = true;
-        ConcurrencyUtil.runAsync(() -> {
-            Debug.log("Closing");
-            audio.close();
-        });
+        ConcurrencyUtil.runAsync(() -> audio.close());
         tlm.dispose();
     }
 
@@ -219,59 +246,15 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
 
     }
 
-    private class ProgressBar extends FloatingPanel.Aligned {
-        public ProgressBar() {
-            super(new DynamicVector(0, 8), new Alignment(MIDDLE, MIDDLE, progressBarY, MIDDLE));
-            this.getSizeVector().setX(progressBarWidth, RELATIVE);
-        }
+    public boolean isAudioLoaded() {
+        return opened;
+    }
 
-        @Override
-        public void paint(Graphics2D g) {
-            Rectangle rect = getBounds();
+    public boolean isAudioClosing() {
+        return closing;
+    }
 
-            g.setColor(isPressed() ? this.getPressedBackground() : isRollover() ? this.getRolloverBackground() : this.getBackground());
-            g.fillRect(rect.x, rect.y, rect.width, rect.height);
-
-            g.setColor(isPressed() ? this.getPressedForeground() : isRollover() ? this.getRolloverForeground() : this.getForeground());
-            g.fillRect(rect.x, rect.y, (int) (rect.width * (opened ? (double)audio.getPosition() / audio.getLength() : 0)), rect.height);
-
-            if(this.children != null) {
-                for(FloatingObject obj : this.children) {
-                    obj.paint(g);
-                }
-            }
-
-            getRootCanvas().repaint();
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            this.getSizeVector().setY(styleNumbers.get("progressBar.hover.thickness"));
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            this.getSizeVector().setY(styleNumbers.get("progressBar.thickness"));
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            Rectangle bounds = getBounds();
-            float percent = Math.min(Math.max((float)(e.getX() - bounds.x) / bounds.width, 0), 1);
-            audio.setPosition((long) (audio.getLength()*percent));
-            audio.pause();
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            Rectangle bounds = getBounds();
-            float percent = Math.min(Math.max((float)(e.getX() - bounds.x) / bounds.width, 0), 1);
-            audio.setPosition((long) (audio.getLength()*percent));
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            audio.resume();
-        }
+    public Audio getAudio() {
+        return audio;
     }
 }

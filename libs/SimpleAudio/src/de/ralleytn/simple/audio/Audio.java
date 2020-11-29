@@ -244,15 +244,12 @@ public interface Audio extends Playable {
 						throw new AudioException("Not a plain Ogg/Vorbis audio file!");
 					}
 
-					if(true) {
-						InputStream is = resource.openStream();
-						VorbisInputStream vis = new VorbisInputStream(is, new VorbisStream(loggs));
-						audioInputStream = new AudioInputStream(vis, vis.getAudioFormat(), -1L);
-						break;
-					}
+					InputStream is = resource.openStream();
+					VorbisInputStream vis = new VorbisInputStream(is, new VorbisStream(loggs));
+					audioInputStream = new AudioInputStream(vis, vis.getAudioFormat(), -1L);
 
 					break;
-	
+
 				case AU:
 				case AIFC:
 				case SND:
@@ -260,7 +257,7 @@ public interface Audio extends Playable {
 				case WAV:
 					audioInputStream = AudioSystem.getAudioInputStream(resource);
 					break;
-					
+
 				default:
 					throw new AudioException("Unsupported file format!");
 			}

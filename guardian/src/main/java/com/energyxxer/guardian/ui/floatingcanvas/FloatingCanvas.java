@@ -10,10 +10,10 @@ import java.util.List;
 
 public class FloatingCanvas extends JPanel implements MouseListener, MouseMotionListener {
     private Dimension size = new Dimension(0,0);
-    public List<FloatingObject> objects = new ArrayList<>();
+    public List<FloatingComponent> objects = new ArrayList<>();
 
-    private FloatingObject rollover = null;
-    private FloatingObject pressed = null;
+    private FloatingComponent rollover = null;
+    private FloatingComponent pressed = null;
 
     public FloatingCanvas() {
         setup();
@@ -24,7 +24,7 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
         this.addMouseMotionListener(this);
     }
 
-    public void add(FloatingObject obj) {
+    public void add(FloatingComponent obj) {
         objects.add(obj);
         obj.parent = null;
         obj.rootCanvas = this;
@@ -37,10 +37,11 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
 
         Rectangle union = new Rectangle(0,0,0,0);
-        for(FloatingObject o : objects) {
+        for(FloatingComponent o : objects) {
             o.paint(g2d);
             union = union.union(o.getBounds());
         }
@@ -55,8 +56,8 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
         g.dispose();
     }
 
-    private FloatingObject getObjectAtMousePos(Point p) {
-        for(FloatingObject o : objects) {
+    private FloatingComponent getObjectAtMousePos(Point p) {
+        for(FloatingComponent o : objects) {
             if(o.contains(p)) {
                 return o.getObjectAtMousePos(p);
             }
@@ -66,7 +67,7 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        FloatingObject obj = getObjectAtMousePos(e.getPoint());
+        FloatingComponent obj = getObjectAtMousePos(e.getPoint());
         if(obj != null) obj.mouseClicked(e);
         repaint();
     }
@@ -80,9 +81,10 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if(pressed != null) pressed.mouseReleased(e);
+        FloatingComponent oldPressed = pressed;
         pressed = null;
         mouseMoved(e);
+        if(oldPressed != null) oldPressed.mouseReleased(e);
     }
 
     @Override
@@ -91,8 +93,9 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
 
     @Override
     public void mouseExited(MouseEvent e) {
-        if(rollover != null) rollover.mouseExited(e);
+        FloatingComponent oldRollover = rollover;
         rollover = null;
+        if(oldRollover != null) oldRollover.mouseExited(e);
         repaint();
     }
 
@@ -104,7 +107,7 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        FloatingObject previousRollover = rollover;
+        FloatingComponent previousRollover = rollover;
         rollover = getObjectAtMousePos(e.getPoint());
         if(previousRollover != rollover) {
             if(previousRollover != null) previousRollover.mouseExited(e);
@@ -123,11 +126,11 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
         repaint();
     }
 
-    public boolean isRollover(FloatingObject obj) {
+    public boolean isRollover(FloatingComponent obj) {
         return rollover == obj;
     }
 
-    public boolean isPressed(FloatingObject obj) {
+    public boolean isPressed(FloatingComponent obj) {
         return pressed == obj;
     }
 }

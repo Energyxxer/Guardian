@@ -56,7 +56,7 @@ public class DynamicVector {
         }
     }
 
-    private interface UnitConverter {
+    public interface UnitConverter {
         int convert(float magnitude, int containerPrimaryAxis, int containerSecondaryAxis);
     }
 }
