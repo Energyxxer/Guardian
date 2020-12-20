@@ -35,7 +35,7 @@ public class VolumeButton extends Button {
     }
 
     private void updateIcon() {
-        if(!audioPlayer.getAudio().isOpen()) return;
+        if(!audioPlayer.isAudioLoaded()) return;
         float volume = this.volume;
         boolean muted = audioPlayer.getAudio().isMuted();
         if(muted) volume = 0;

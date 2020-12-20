@@ -2,12 +2,12 @@ package com.energyxxer.guardian.main.window.sections.tools.find;
 
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerMaster;
 import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.modules.NonStandardModuleToken;
-import com.energyxxer.guardian.main.window.GuardianWindow;
 
 import java.awt.*;
 import java.io.File;
@@ -57,7 +57,9 @@ public class FileOccurrence extends QueryResult implements NonStandardModuleToke
     }
 
     public String getSubProjectRootName() {
-        Path relative = getProjectRoot().toPath().relativize(file.getParentFile().toPath());
+        File projectRoot = getProjectRoot();
+        if(projectRoot == null) return null;
+        Path relative = projectRoot.toPath().relativize(file.getParentFile().toPath());
         if(relative.getNameCount() > 0) {
             return relative.getName(0).toString();
         } else {

@@ -191,7 +191,6 @@ public class Lang {
 
         if(lexer instanceof LazyLexer) {
             response = ((LazyLexer) lexer).getMatchResponse();
-            notices.addAll(lexer.getNotices());
         } else {
             if(patternMatch != null) {
                 lexer.getStream().tokens.removeIf(token -> !token.type.isSignificant());
@@ -213,8 +212,10 @@ public class Lang {
         }
 
         if(summaryModule != null) {
-            ((PrismarineSummaryModule) summaryModule).runFileAwareProcessors();
+            for(int pass = 0; ((PrismarineSummaryModule) summaryModule).runFileAwareProcessors(pass); pass++);
         }
+
+        notices.addAll(lexer.getNotices());
 
         return new LangAnalysisResponse(lexer, response, lexer.getStream().tokens, notices);
     }

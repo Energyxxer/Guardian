@@ -157,6 +157,8 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
 
         this.fileMask.setEnabled(this.fileMaskEnabled.isSelected());
 
+        updateFileMask();
+
         this.matchCase.addActionListener(e -> {
             Preferences.put("findInPath.match_case", String.valueOf(this.matchCase.isSelected()));
             updateLastEdit();
