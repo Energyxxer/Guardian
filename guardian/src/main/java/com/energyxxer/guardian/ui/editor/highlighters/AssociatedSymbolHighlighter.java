@@ -65,6 +65,9 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
             String word = editor.getText(wordStart, wordEnd-wordStart);
             PrismarineSummaryModule lastSuccessfulSummary = ((SuggestionDialog) editor.getSuggestionInterface()).getLastSuccessfulSummary();
             if(lastSuccessfulSummary != null) {
+                PrismarineSummaryModule.SymbolUsage highlightedUsage = lastSuccessfulSummary.getSymbolUsageAtIndex(wordStart);
+                if(highlightedUsage == null) return;
+                if(!highlightedUsage.symbolName.equals(word)) return;
                 SummarySymbol selectedSymbol = lastSuccessfulSummary.getSymbolForName(word, wordStart);
                 if(selectedSymbol == null) return;
 
