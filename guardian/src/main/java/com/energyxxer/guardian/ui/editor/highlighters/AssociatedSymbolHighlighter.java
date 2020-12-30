@@ -68,7 +68,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                 PrismarineSummaryModule.SymbolUsage highlightedUsage = lastSuccessfulSummary.getSymbolUsageAtIndex(wordStart);
                 if(highlightedUsage == null) return;
                 if(!highlightedUsage.symbolName.equals(word)) return;
-                SummarySymbol selectedSymbol = lastSuccessfulSummary.getSymbolForName(word, wordStart);
+                SummarySymbol selectedSymbol = highlightedUsage.fetchSymbol(lastSuccessfulSummary);
                 if(selectedSymbol == null) return;
 
                 for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
@@ -76,7 +76,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
 
                     StringBounds bounds = usage.pattern.getStringBounds();
 
-                    SummarySymbol thisUsageSymbol = lastSuccessfulSummary.getSymbolForName(word, bounds.start.index);
+                    SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
 
                     if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
 
