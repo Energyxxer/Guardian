@@ -4,6 +4,7 @@ import com.energyxxer.guardian.ui.floatingcanvas.Alignment;
 import com.energyxxer.guardian.ui.floatingcanvas.DynamicVector;
 import com.energyxxer.guardian.ui.floatingcanvas.FloatingComponent;
 import com.energyxxer.guardian.ui.floatingcanvas.FloatingPanel;
+import com.energyxxer.guardian.ui.theme.Theme;
 import de.ralleytn.simple.audio.Audio;
 
 import java.awt.*;
@@ -19,7 +20,7 @@ public class VolumeButton extends Button {
     private VolumeSlider slider;
 
     public VolumeButton(AudioPlayer audioPlayer) {
-        super(audioPlayer.tlm, "AudioPlayer.volumeButton", "AudioPlayer.button");
+        super("AudioPlayer.volumeButton", "AudioPlayer.button");
         this.audioPlayer = audioPlayer;
         this.add(slider = new VolumeSlider());
         this.setIconName("volume_3");
@@ -58,13 +59,11 @@ public class VolumeButton extends Button {
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        super.mouseEntered(e);
         slider.setOpen(true);
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        super.mouseExited(e);
         if(!slider.isRollover()) {
             slider.setOpen(false);
         }
@@ -104,14 +103,6 @@ public class VolumeButton extends Button {
             this.borderThickness.setKeys("AudioPlayer.volumePanel.*.border.thickness","AudioPlayer.volumeButton.*.border.thickness","AudioPlayer.button.*.border.thickness");
             this.borderColor.setKeys("AudioPlayer.volumePanel.*.border.color","AudioPlayer.volumeButton.*.border.color","AudioPlayer.button.*.border.color");
             this.cornerRadius.setKeys("AudioPlayer.volumePanel.*.cornerRadius");
-
-            audioPlayer.tlm.addThemeChangeListener(t -> {
-                background.themeUpdated(t);
-                foreground.themeUpdated(t);
-                borderColor.themeUpdated(t);
-                borderThickness.themeUpdated(t);
-                cornerRadius.themeUpdated(t);
-            });
         }
 
         private boolean isOpen() {
@@ -138,7 +129,7 @@ public class VolumeButton extends Button {
                 int leftPadding = getParentBounds().width;
                 int borderThickness = this.borderThickness.getCurrent(this);
                 Rectangle bounds = this.getBounds();
-                int cornerRadius = RELATIVE_MIN.converter.convert(this.cornerRadius.getCurrent(this), bounds.width, bounds.height);
+                int cornerRadius = RELATIVE_MIN.convert(this.cornerRadius.getCurrent(this), bounds.width, bounds.height);
 
                 g.setColor(this.foreground.getCurrent(this));
                 g.fillRoundRect(
@@ -164,13 +155,15 @@ public class VolumeButton extends Button {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            super.mousePressed(e);
             mouseDragged(e);
         }
 
         @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
         public void mouseDragged(MouseEvent e) {
-            super.mouseDragged(e);
             Rectangle bounds = getBounds();
 
             int leftPadding = getParentBounds().width;
@@ -179,6 +172,18 @@ public class VolumeButton extends Button {
 
             updateVolume();
             updateIcon();
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void themeUpdated(Theme t) {
+            super.themeUpdated(t);
+            borderColor.themeUpdated(t);
+            borderThickness.themeUpdated(t);
+            cornerRadius.themeUpdated(t);
         }
     }
 }

@@ -10,7 +10,7 @@ public class PlayButton extends Button {
     private final AudioPlayer audioPlayer;
 
     public PlayButton(AudioPlayer audioPlayer) {
-        super(audioPlayer.tlm, "AudioPlayer.playButton", "AudioPlayer.button");
+        super("AudioPlayer.playButton", "AudioPlayer.button");
         this.audioPlayer = audioPlayer;
         this.getAlignment().setAlignmentY(audioPlayer.controlsY, Alignment.MIDDLE);
         

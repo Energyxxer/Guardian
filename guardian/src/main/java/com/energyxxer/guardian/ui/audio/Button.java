@@ -10,7 +10,6 @@ import com.energyxxer.guardian.ui.floatingcanvas.styles.ColorStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.FloatStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.IntStyleProperty;
 import com.energyxxer.guardian.ui.theme.Theme;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -26,16 +25,15 @@ public class Button extends FloatingPanel {
 
     private String iconName;
 
-    public Button(ThemeListenerManager tlm, String... keys) {
+    public Button(String... keys) {
         super(new DynamicVector(0.2f, DynamicVector.Unit.RELATIVE_MIN, 0.2f, DynamicVector.Unit.RELATIVE_MIN));
 
         setKeysNoUpdate(keys);
-        tlm.addThemeChangeListener(this::themeChanged);
     }
 
     public void setKeys(String... keys) {
         setKeysNoUpdate(keys);
-        themeChanged(GuardianWindow.getTheme());
+        themeUpdated(GuardianWindow.getTheme());
     }
 
     private void setKeysNoUpdate(String... keys) {
@@ -61,9 +59,8 @@ public class Button extends FloatingPanel {
         borderColor.setKeys(borderColorKeys);
     }
 
-    private void themeChanged(Theme t) {
-        background.themeUpdated(t);
-        foreground.themeUpdated(t);
+    public void themeUpdated(Theme t) {
+        super.themeUpdated(t);
         size.themeUpdated(t);
         borderThickness.themeUpdated(t);
         borderColor.themeUpdated(t);

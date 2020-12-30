@@ -5,7 +5,6 @@ import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.floatingcanvas.*;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.util.Disposable;
 import de.ralleytn.simple.audio.Audio;
@@ -17,7 +16,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.util.HashMap;
 
 import static com.energyxxer.guardian.ui.floatingcanvas.Alignment.*;
 import static com.energyxxer.guardian.ui.floatingcanvas.DynamicVector.Unit.ABSOLUTE;
@@ -29,12 +27,6 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
     private Audio audio;
     private boolean opened = false;
     private boolean closing = false;
-
-    public ThemeListenerManager tlm = new ThemeListenerManager();
-
-    private HashMap<String, Color> colors = new HashMap<>();
-    protected HashMap<String, Integer> styleNumbers = new HashMap<>();
-
 
     FloatingLabel.Fixed titleLabel;
     FloatingLabel progressLabel;

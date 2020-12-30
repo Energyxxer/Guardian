@@ -9,7 +9,7 @@ public class ToggleButton extends Button {
     private boolean enabled = false;
 
     public ToggleButton(ThemeListenerManager tlm, String... keys) {
-        super(tlm);
+        super();
 
         disabledKeys = new String[keys.length*2];
         enabledKeys = new String[keys.length*2];

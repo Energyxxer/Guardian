@@ -3,6 +3,7 @@ package com.energyxxer.guardian.ui.floatingcanvas;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.ColorStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.FloatStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.IntStyleProperty;
+import com.energyxxer.guardian.ui.theme.Theme;
 
 import java.awt.*;
 
@@ -28,7 +29,7 @@ public class FloatingPanel extends FloatingComponent {
     public void paint(Graphics2D g) {
         Rectangle rect = getBounds();
 
-        int cornerRadius = RELATIVE_MIN.converter.convert(this.cornerRadius.getCurrent(this), rect.width, rect.height);
+        int cornerRadius = RELATIVE_MIN.convert(this.cornerRadius.getCurrent(this), rect.width, rect.height);
 
         g.setColor(borderColor.getCurrent(this));
         int borderThickness = this.borderThickness.getCurrent(this);
@@ -61,5 +62,11 @@ public class FloatingPanel extends FloatingComponent {
         return size;
     }
 
-
+    @Override
+    public void themeUpdated(Theme t) {
+        super.themeUpdated(t);
+        borderColor.themeUpdated(t);
+        borderThickness.themeUpdated(t);
+        cornerRadius.themeUpdated(t);
+    }
 }

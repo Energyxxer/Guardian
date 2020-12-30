@@ -7,9 +7,12 @@ import com.energyxxer.guardian.global.Resources;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
+import com.energyxxer.guardian.ui.audio.AudioPlayer;
 import com.energyxxer.guardian.ui.commodoreresources.DefinitionUpdateProcess;
 import com.energyxxer.guardian.ui.common.ProgramUpdateProcess;
 import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetManager;
+import com.energyxxer.guardian.ui.imageviewer.ImageViewer;
+import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.util.LineReader;
 import com.energyxxer.util.ImageManager;
 import com.energyxxer.util.logger.Debug;
@@ -106,6 +109,19 @@ public class Guardian {
 	}
 
 	private static void loadBindings() {
+		FileModuleToken.addDisplayModuleProvider(f -> {
+			if(f.getName().endsWith(".png")) {
+				return new ImageViewer(f);
+			}
+			return null;
+		});
+		FileModuleToken.addDisplayModuleProvider(f -> {
+			String name = f.getName();
+			if(name.endsWith(".ogg") || name.endsWith(".wav") || name.endsWith(".mp3") || name.endsWith(".aiff") || name.endsWith(".aif") || name.endsWith(".aifc") || name.endsWith(".au") || name.endsWith(".snd")) {
+				return new AudioPlayer(f);
+			}
+			return null;
+		});
 		try {
 			ArrayList<String> lr = LineReader.read("/guardian_bindings.txt");
 			for(String className : lr) {

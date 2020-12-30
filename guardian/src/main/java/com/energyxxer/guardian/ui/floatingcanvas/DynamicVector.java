@@ -36,27 +36,19 @@ public class DynamicVector {
     }
 
     public int getAbsoluteX(int containerWidth, int containerHeight) {
-        return unitX.converter.convert(x, containerWidth, containerHeight);
+        return unitX.convert(x, containerWidth, containerHeight);
     }
 
     public int getAbsoluteY(int containerWidth, int containerHeight) {
-        return unitY.converter.convert(y, containerHeight, containerWidth);
+        return unitY.convert(y, containerHeight, containerWidth);
     }
 
-    public enum Unit {
-        ABSOLUTE((m, cpa, csa) -> (int) m),
-        RELATIVE((m, cpa, csa) -> (int) (m*cpa)),
-        RELATIVE_MIN((m, cpa, csa) -> (int) (m*Math.min(cpa, csa))),
-        RELATIVE_MAX((m, cpa, csa) -> (int) (m*Math.max(cpa, csa)));
+    public interface Unit {
+        Unit ABSOLUTE = (m, cpa, csa) -> (int) m;
+        Unit RELATIVE = (m, cpa, csa) -> (int) (m*cpa);
+        Unit RELATIVE_MIN = (m, cpa, csa) -> (int) (m*Math.min(cpa, csa));
+        Unit RELATIVE_MAX = (m, cpa, csa) -> (int) (m*Math.max(cpa, csa));
 
-        public final UnitConverter converter;
-
-        Unit(UnitConverter converter) {
-            this.converter = converter;
-        }
-    }
-
-    public interface UnitConverter {
         int convert(float magnitude, int containerPrimaryAxis, int containerSecondaryAxis);
     }
 }

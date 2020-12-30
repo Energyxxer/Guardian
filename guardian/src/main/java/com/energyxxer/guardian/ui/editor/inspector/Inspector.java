@@ -1,6 +1,8 @@
 package com.energyxxer.guardian.ui.editor.inspector;
 
+import com.energyxxer.enxlex.lexical_analysis.inspections.Inspection;
 import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionModule;
+import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionSeverity;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.HintStylizer;
@@ -16,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.Locale;
 import java.util.function.Function;
 
 /**
@@ -23,8 +26,7 @@ import java.util.function.Function;
  */
 public class Inspector implements Highlighter.HighlightPainter, MouseMotionListener {
 
-    private volatile ArrayList<InspectionItem> legacyItems = new ArrayList<>();
-    private InspectionItem rolloverItem = null;
+    private Inspection rolloverItem = null;
 
     private EditorComponent editor;
 
@@ -50,20 +52,23 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
     }
 
     public void clear() {
-        legacyItems.clear();
         editor.repaint();
     }
 
     @Override
     public void paint(Graphics g, int p0, int p1, Shape graphicBounds, JTextComponent c) {
         try {
-            for (InspectionItem item : legacyItems) {
+            if(inspectionModule != null)
+            for (Inspection item : inspectionModule.getInspections()) {
+                if(item.getSeverity() == null || item.getSeverity() == InspectionSeverity.HIDDEN) continue;
 
-                g.setColor(GuardianWindow.getTheme().getColor("Inspector." + item.type.key));
+                g.setColor(GuardianWindow.getTheme().getColor("Inspector." + item.getSeverity().name().toLowerCase()));
 
                 try {
-
-                    StringBounds bounds = item.bounds;
+                    StringBounds bounds = new StringBounds(
+                            editor.getLocationForOffset(item.getStartIndex()),
+                            editor.getLocationForOffset(item.getEndIndex())
+                    );
 
                     for (int l = bounds.start.line; l <= bounds.end.line; l++) {
                         Rectangle rectangle;
@@ -90,7 +95,7 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
                             rectangle.width = c.getFont().getSize();
                         }
 
-                        if (item.type.line) {
+                        if ("SQUIGGLE".equals(GuardianWindow.getTheme().getString("Inspector." + item.getSeverity().name().toLowerCase() + ".style", "default:HIGHLIGHT").toUpperCase(Locale.ENGLISH))) {
                             for (int x = rectangle.x; x < rectangle.x + rectangle.width; x += 4) {
                                 g.drawLine(x, rectangle.y + rectangle.height, x + 2, rectangle.y + rectangle.height - 2);
                                 g.drawLine(x + 2, rectangle.y + rectangle.height - 2, x + 4, rectangle.y + rectangle.height);
@@ -113,18 +118,25 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        if(legacyItems.isEmpty()) {
-            rolloverItem = null;
-            return;
-        }
         int index = editor.viewToModel(e.getPoint());
-        for(InspectionItem item : legacyItems) {
-            if(index >= item.bounds.start.index && (index < item.bounds.end.index || (item.bounds.start.index == item.bounds.end.index && index <= item.bounds.end.index))) {
-                if(rolloverItem != item) {
-                    rolloverItem = item;
+        if(inspectionModule != null)
+        for(Inspection inspection : inspectionModule.getInspections()) {
+            if(inspection.getSeverity() != null
+                    && inspection.getSeverity() != InspectionSeverity.HIDDEN
+                    && index >= inspection.getStartIndex()
+                    && (
+                    index < inspection.getEndIndex()
+                            || (
+                            inspection.getStartIndex() == inspection.getEndIndex()
+                                    && index <= inspection.getEndIndex()
+                    )
+            )
+            ) {
+                if(rolloverItem != inspection) {
+                    rolloverItem = inspection;
                     if(!hint.isShowing()) {
-                        hint.setText(item.message);
-                        HintStylizer.style(hint, item.type.key);
+                        hint.setText(inspection.getDescription());
+                        HintStylizer.style(hint, inspection.getSeverity().name().toLowerCase(Locale.ENGLISH));
                         hint.show(e.getLocationOnScreen(), () -> rolloverItem != null && editor.isShowing());
                     }
                 } else if(!hint.isShowing()) {
@@ -136,33 +148,35 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
         rolloverItem = null;
     }
 
-    public void insertLegacyNotices(ArrayList<Notice> notices) {
+    public void insertNotices(ArrayList<Notice> notices) {
         for(Notice n : notices) {
-            insertLegacyNotice(n);
+            insertNotice(n);
         }
     }
 
-    public void insertLegacyNotice(Notice n) {
-        InspectionType type = InspectionType.SUGGESTION;
+    public void insertNotice(Notice n) {
+        InspectionSeverity type = InspectionSeverity.SUGGESTION;
         switch(n.getType()) {
             case ERROR: {
-                type = InspectionType.ERROR;
+                type = InspectionSeverity.ERROR;
                 break;
             }
             case WARNING: {
-                type = InspectionType.WARNING;
+                type = InspectionSeverity.WARNING;
                 break;
             }
         }
-        InspectionItem item = new InspectionItem(type, n.getMessage(), new StringBounds(editor.getLocationForOffset(n.getLocationIndex()), editor.getLocationForOffset(n.getLocationIndex() + n.getLocationLength())));
-        legacyItems.add(item);
+        Inspection item = new Inspection(n.getMessage());
+        item.setBounds(n.getLocationIndex(), n.getLocationIndex() + n.getLocationLength());
+        item.setSeverity(type);
+        inspectionModule.addInspection(item);
     }
 
     public void registerCharacterDrift(Function<Integer, Integer> h) {
-        for(InspectionItem item : legacyItems) {
-            item.bounds.start = editor.getLocationForOffset(h.apply(item.bounds.start.index));
-            item.bounds.end = editor.getLocationForOffset(h.apply(item.bounds.end.index));
-        }
+//        for(InspectionItem item : legacyItems) {
+//            item.bounds.start = editor.getLocationForOffset(h.apply(item.bounds.start.index));
+//            item.bounds.end = editor.getLocationForOffset(h.apply(item.bounds.end.index));
+//        }
         //TODO apply drift to inspection module
     }
 

@@ -1,7 +1,9 @@
 package com.energyxxer.guardian.ui.floatingcanvas;
 
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.ColorStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.StyleProperty;
+import com.energyxxer.guardian.ui.theme.Theme;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -56,7 +58,7 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
         this.children.add(obj);
     }
 
-    private void setRootCanvas(FloatingCanvas rootCanvas) {
+    void setRootCanvas(FloatingCanvas rootCanvas) {
         if(this.rootCanvas == rootCanvas) return;
         this.rootCanvas = rootCanvas;
         if(this.children != null) {
@@ -64,6 +66,7 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
                 child.setRootCanvas(rootCanvas);
             }
         }
+        themeUpdated(GuardianWindow.getTheme());
     }
 
     public FloatingCanvas getRootCanvas() {
@@ -94,32 +97,29 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        if(parent != null) parent.mouseClicked(e);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        if(parent != null) parent.mousePressed(e);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        if(parent != null) parent.mouseReleased(e);
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-
     }
 
     @Override
@@ -129,6 +129,16 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+        if(parent != null) parent.mouseWheelMoved(e);
+    }
 
+    public void themeUpdated(Theme t) {
+        background.themeUpdated(t);
+        foreground.themeUpdated(t);
+        if(children != null) {
+            for(FloatingComponent child : children) {
+                child.themeUpdated(t);
+            }
+        }
     }
 }

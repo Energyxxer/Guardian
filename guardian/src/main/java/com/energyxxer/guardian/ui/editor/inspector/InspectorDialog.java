@@ -1,8 +1,9 @@
 package com.energyxxer.guardian.ui.editor.inspector;
 
+import com.energyxxer.enxlex.lexical_analysis.inspections.CodeAction;
+import com.energyxxer.enxlex.lexical_analysis.inspections.CodeChainAction;
+import com.energyxxer.enxlex.lexical_analysis.inspections.CodeReplacementAction;
 import com.energyxxer.enxlex.lexical_analysis.inspections.Inspection;
-import com.energyxxer.enxlex.lexical_analysis.inspections.ReplacementInspectionAction;
-import com.energyxxer.enxlex.lexical_analysis.inspections.SuggestionInspection;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
@@ -29,6 +30,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class InspectorDialog extends JDialog implements KeyListener, FocusListener {
     private EditorComponent editor;
@@ -83,8 +86,8 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
 
         List<Inspection> inspections = inspector.getInspectionModule().collectInspectionsForIndex(index);
         for(Inspection inspection : inspections) {
-            if(inspection instanceof SuggestionInspection) {
-                ExecutableInspectionToken token = new ExecutableInspectionToken(this, (SuggestionInspection) inspection);
+            for(CodeAction action : inspection.getActions()) {
+                ExecutableInspectionToken token = new ExecutableInspectionToken(this, action);
                 StandardExplorerItem item = new StandardExplorerItem(token, explorer, null);
                 explorer.addElement(item);
                 activeTokens.add(token);
@@ -108,9 +111,23 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
         }
     }
 
-    public void submit(ReplacementInspectionAction inspection) {
+    public void submit(CodeAction action) {
         this.setVisible(false);
 
+        if(action instanceof CodeReplacementAction) {
+            submit((CodeReplacementAction) action);
+        } else if(action instanceof CodeChainAction) {
+            for(CodeAction subAction : ((CodeChainAction) action).getActions()) {
+                submit(subAction);
+            }
+        } else {
+            Debug.log("Unknown code action class: " + action.getClass(), Debug.MessageType.ERROR);
+        }
+    }
+
+    private static final Pattern INDENT_REPLACEMENT_PATTERN = Pattern.compile("\bINDENT([-+]\\d+)\b");
+
+    public void submit(CodeReplacementAction inspection) {
         int replacementStartIndex = inspection.getReplacementStartIndex();
         int replacementEndIndex = inspection.getReplacementEndIndex();
         String replacementText = inspection.getReplacementText();
@@ -120,7 +137,27 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
         if(replacementStartIndex != replacementEndIndex) {
             edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor)));
         }
-        edit.appendEdit(new Lazy<>(() -> new InsertionEdit(replacementText, editor)));
+
+        if(replacementText.contains("\b")) {
+            int indentationLevel = editor.getIndentationManager().getSuggestedIndentationLevelAt(replacementStartIndex);
+            StringBuffer sb = new StringBuffer();
+            Matcher indentMatcher = INDENT_REPLACEMENT_PATTERN.matcher(replacementText);
+            while(indentMatcher.find()) {
+                int extraIndent = 0;
+                if(indentMatcher.groupCount() >= 1) {
+                    extraIndent = Integer.parseInt(indentMatcher.group(1));
+                }
+                indentMatcher.appendReplacement(sb, editor.getIndentationManager().indent(indentationLevel + extraIndent));
+            }
+            indentMatcher.appendTail(sb);
+
+            replacementText = sb.toString();
+        }
+
+        final String finalReplacementText = replacementText;
+
+        edit.appendEdit(new Lazy<>(() -> new InsertionEdit(finalReplacementText, editor)));
+
         editor.getEditManager().insertEdit(edit);
     }
 

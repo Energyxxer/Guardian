@@ -10,14 +10,12 @@ import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
-import com.energyxxer.guardian.ui.audio.AudioPlayer;
 import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.dialogs.PromptDialog;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.editor.EditorModule;
 import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
-import com.energyxxer.guardian.ui.imageviewer.ImageViewer;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenu;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
@@ -38,9 +36,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToken, DropTargetExplorerModuleToken {
-    public static ModuleTokenFactory<FileModuleToken> factory = str -> {
+    public static final ModuleTokenFactory<FileModuleToken> FACTORY = str -> {
         if(!str.startsWith("file://")) return null;
         String path = str.substring("file://".length());
         File file = new File(path);
@@ -60,6 +59,8 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
         }
     };
     public static final boolean MOVE_TO_TRASH_VERSION_AVAILABLE = !System.getProperty("java.version").startsWith("1.8.");
+
+    private static final ArrayList<Function<File, DisplayModule>> DISPLAY_MODULE_PROVIDERS = new ArrayList<>();
 
     private final File file;
     private boolean isProjectRoot;
@@ -213,8 +214,6 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
 
     @Override
     public Collection<ModuleToken> getSubTokens() {
-        Project associatedProject = ProjectManager.getAssociatedProject(file);
-
         ArrayList<ModuleToken> children = new ArrayList<>();
         int firstFileIndex = 0;
         File[] subFiles = file.listFiles();
@@ -242,16 +241,14 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     @Override
     public DisplayModule createModule(Tab tab) {
         if(file.isFile()) {
-            String name = file.getName();
-            if(name.endsWith(".png")) {
-                addRecentFile(file);
-                return new ImageViewer(file);
-            } else if(name.endsWith(".ogg") || name.endsWith(".wav") || name.endsWith(".mp3") || name.endsWith(".aiff") || name.endsWith(".aif") || name.endsWith(".aifc") || name.endsWith(".au") || name.endsWith(".snd")) {
-                return new AudioPlayer(file);
-            } else {
-                addRecentFile(file);
-                return new EditorModule(tab, file);
+            addRecentFile(file);
+            for(Function<File, DisplayModule> provider : DISPLAY_MODULE_PROVIDERS) {
+                DisplayModule result = provider.apply(file);
+                if(result != null) {
+                    return result;
+                }
             }
+            return new EditorModule(tab, file);
         }
         return null;
     }
@@ -520,5 +517,9 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     @Override
     public File getTransferData() {
         return file;
+    }
+
+    public static void addDisplayModuleProvider(Function<File, DisplayModule> provider) {
+        if(provider != null) DISPLAY_MODULE_PROVIDERS.add(provider);
     }
 }

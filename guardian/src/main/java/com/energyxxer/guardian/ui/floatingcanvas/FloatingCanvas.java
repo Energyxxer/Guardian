@@ -1,19 +1,21 @@
 package com.energyxxer.guardian.ui.floatingcanvas;
 
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FloatingCanvas extends JPanel implements MouseListener, MouseMotionListener {
+public class FloatingCanvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
     private Dimension size = new Dimension(0,0);
     public List<FloatingComponent> objects = new ArrayList<>();
 
     private FloatingComponent rollover = null;
     private FloatingComponent pressed = null;
+
+    protected final ThemeListenerManager tlm = new ThemeListenerManager();
 
     public FloatingCanvas() {
         setup();
@@ -22,12 +24,19 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
     private void setup() {
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
+        this.addMouseWheelListener(this);
+
+        tlm.addThemeChangeListener(t -> {
+            for(FloatingComponent child : objects) {
+                child.themeUpdated(t);
+            }
+        });
     }
 
     public void add(FloatingComponent obj) {
         objects.add(obj);
         obj.parent = null;
-        obj.rootCanvas = this;
+        obj.setRootCanvas(this);
     }
 
     protected void paintComponent(Graphics g) {
@@ -124,6 +133,22 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
         }
 
         repaint();
+    }
+
+    public void updateCursor() {
+        if(rollover != null) {
+            this.setCursor(rollover.getCursor());
+        } else {
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        if(rollover != null) {
+            rollover.mouseWheelMoved(e);
+            repaint();
+        }
     }
 
     public boolean isRollover(FloatingComponent obj) {

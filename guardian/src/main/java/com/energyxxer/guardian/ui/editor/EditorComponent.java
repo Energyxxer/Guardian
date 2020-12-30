@@ -196,8 +196,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             if(this.inspector != null) {
                 this.inspector.clear();
-                this.inspector.insertLegacyNotices(analysis.notices);
                 this.inspector.setInspectionModule(analysis.lexer.getInspectionModule());
+                this.inspector.insertNotices(analysis.notices);
             }
 
             if(analysis.response != null && !analysis.response.matched) {

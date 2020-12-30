@@ -1,8 +1,6 @@
 package com.energyxxer.guardian.ui.editor.inspector;
 
-import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionAction;
-import com.energyxxer.enxlex.lexical_analysis.inspections.ReplacementInspectionAction;
-import com.energyxxer.enxlex.lexical_analysis.inspections.SuggestionInspection;
+import com.energyxxer.enxlex.lexical_analysis.inspections.CodeAction;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.display.DisplayModule;
@@ -15,16 +13,16 @@ import java.util.Collection;
 
 public class ExecutableInspectionToken implements ModuleToken {
     private InspectorDialog dialog;
-    private SuggestionInspection inspection;
+    private CodeAction action;
 
-    public ExecutableInspectionToken(InspectorDialog dialog, SuggestionInspection inspection) {
+    public ExecutableInspectionToken(InspectorDialog dialog, CodeAction action) {
         this.dialog = dialog;
-        this.inspection = inspection;
+        this.action = action;
     }
 
     @Override
     public String getTitle(TokenContext context) {
-        return inspection.getDescription();
+        return action.getDescription();
     }
 
     @Override
@@ -78,10 +76,6 @@ public class ExecutableInspectionToken implements ModuleToken {
 
     @Override
     public void onInteract() {
-        for(InspectionAction action : inspection.getActions()) {
-            if(action instanceof ReplacementInspectionAction) {
-                dialog.submit((ReplacementInspectionAction) action);
-            }
-        }
+        dialog.submit(action);
     }
 }

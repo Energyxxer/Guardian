@@ -1,5 +1,7 @@
 package com.energyxxer.guardian.ui.editor.behavior;
 
+import com.energyxxer.util.StringUtil;
+
 import javax.swing.text.AttributeSet;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -157,6 +159,10 @@ public class IndentationManager {
 
     public Pattern getBraceMatcher() {
         return braceMatcher;
+    }
+
+    public String indent(int level) {
+        return StringUtil.repeat("    ", level);
     }
 
     private static class IndentationChange {

@@ -63,7 +63,7 @@ public interface ModuleToken {
         public static List<ModuleTokenFactory> tokenFactories = new ArrayList<>();
 
         static {
-            tokenFactories.add(FileModuleToken.factory);
+            tokenFactories.add(FileModuleToken.FACTORY);
         }
 
         public static ModuleToken createFromIdentifier(String identifier) {

@@ -4,6 +4,7 @@ import com.energyxxer.guardian.ui.floatingcanvas.DynamicVector;
 import com.energyxxer.guardian.ui.floatingcanvas.FloatingComponent;
 import com.energyxxer.guardian.ui.floatingcanvas.FloatingPanel;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.IntStyleProperty;
+import com.energyxxer.guardian.ui.theme.Theme;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -27,15 +28,6 @@ class ProgressBar extends FloatingPanel {
 
         background.setKeys("AudioPlayer.progressBar.*.background");
         foreground.setKeys("AudioPlayer.progressBar.*.foreground");
-
-        audioPlayer.tlm.addThemeChangeListener(t -> {
-            background.themeUpdated(t);
-            foreground.themeUpdated(t);
-
-            thickness.themeUpdated(t);
-
-            updateHeight();
-        });
     }
 
     @Override
@@ -95,4 +87,10 @@ class ProgressBar extends FloatingPanel {
         this.getSizeVector().setY(thickness.getCurrent(this));
     }
 
+    @Override
+    public void themeUpdated(Theme t) {
+        super.themeUpdated(t);
+        thickness.themeUpdated(t);
+        updateHeight();
+    }
 }
