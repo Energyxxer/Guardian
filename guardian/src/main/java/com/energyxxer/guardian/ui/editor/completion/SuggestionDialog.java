@@ -318,7 +318,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
     @Override
     public void relocate() {
-        if(editor != null && editor.isVisible() && editor.isShowing()) {
+        if(editor != null && this.isVisible() && this.isShowing()) {
             relocate(activeResults != null ? Math.min(activeResults.getSuggestionIndex(), editor.getDocument().getLength()) : editor.getCaretWordPosition());
         }
     }

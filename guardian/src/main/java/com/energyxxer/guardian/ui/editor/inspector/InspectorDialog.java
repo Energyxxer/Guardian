@@ -264,7 +264,7 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
     }
 
     public void relocate() {
-        if(editor != null && editor.isVisible() && editor.isShowing()) {
+        if(editor != null && this.isVisible() && this.isShowing()) {
             relocate(activeIndex);
         }
     }
