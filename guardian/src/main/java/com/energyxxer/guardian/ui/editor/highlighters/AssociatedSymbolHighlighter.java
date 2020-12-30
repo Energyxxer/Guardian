@@ -137,22 +137,25 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                     lastSuccessfulSummary = lastSuccessfulSummary.getParentSummary().getSummaryForLocation(lastSuccessfulSummary.getFileLocation());
                 }
                 if(lastSuccessfulSummary != null) {
-                    SummarySymbol selectedSymbol = lastSuccessfulSummary.getSymbolForName(word, wordStart);
-                    if(selectedSymbol != null) {
-                        for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
-                            if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
+                    PrismarineSummaryModule.SymbolUsage highlightedUsage = lastSuccessfulSummary.getSymbolUsageAtIndex(wordStart);
+                    if(highlightedUsage != null && highlightedUsage.symbolName.equals(word)) {
+                        SummarySymbol selectedSymbol = highlightedUsage.fetchSymbol(lastSuccessfulSummary);
+                        if(selectedSymbol != null) {
+                            for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
+                                if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
 
-                            StringBounds bounds = usage.pattern.getStringBounds();
+                                StringBounds bounds = usage.pattern.getStringBounds();
 
-                            SummarySymbol thisUsageSymbol = lastSuccessfulSummary.getSymbolForName(word, bounds.start.index);
+                                SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
 
-                            if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
+                                if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
 
-                            if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getDeclarationPattern() != null) { //If this usage refers to the identifier that's currently selected...
-                                this.selectedSymbol = selectedSymbol;
-                                selectedDeclaration = bounds.start.index == selectedSymbol.getDeclarationPattern().getStringLocation().index;
-                                hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds()).stream().findFirst().get();
-                                editor.repaint();
+                                if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getDeclarationPattern() != null) { //If this usage refers to the identifier that's currently selected...
+                                    this.selectedSymbol = selectedSymbol;
+                                    selectedDeclaration = bounds.start.index == selectedSymbol.getDeclarationPattern().getStringLocation().index;
+                                    hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds()).stream().findFirst().get();
+                                    editor.repaint();
+                                }
                             }
                         }
                     }
@@ -245,8 +248,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
         for(PrismarineSummaryModule.SymbolUsage usage : fileSummary.getSymbolUsages()) {
             if(!usage.symbolName.equals(selectedSymbol.getName())) continue; //filter out symbols that aren't the selected symbol's name
 
-            StringBounds bounds = usage.pattern.getStringBounds();
-            SummarySymbol thisUsageSymbol = fileSummary.getSymbolForName(selectedSymbol.getName(), bounds.start.index);
+            SummarySymbol thisUsageSymbol = usage.fetchSymbol(fileSummary);
 
             if(thisUsageSymbol == selectedSymbol && usage.pattern != thisUsageSymbol.getDeclarationPattern()) {
                 selectedSymbolUsages.add(usage);
