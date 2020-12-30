@@ -125,7 +125,7 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
         }
     }
 
-    private static final Pattern INDENT_REPLACEMENT_PATTERN = Pattern.compile("\bINDENT([-+]\\d+)\b");
+    private static final Pattern INDENT_REPLACEMENT_PATTERN = Pattern.compile("\bINDENT([-+]\\d+)?\b");
 
     public void submit(CodeReplacementAction inspection) {
         int replacementStartIndex = inspection.getReplacementStartIndex();
