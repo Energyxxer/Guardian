@@ -125,7 +125,7 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
         }
     }
 
-    private static final Pattern INDENT_REPLACEMENT_PATTERN = Pattern.compile("\bINDENT([-+]\\d+)\b");
+    private static final Pattern INDENT_REPLACEMENT_PATTERN = Pattern.compile("\bINDENT([-+]\\d+)?\b");
 
     public void submit(CodeReplacementAction inspection) {
         int replacementStartIndex = inspection.getReplacementStartIndex();
@@ -144,7 +144,7 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
             Matcher indentMatcher = INDENT_REPLACEMENT_PATTERN.matcher(replacementText);
             while(indentMatcher.find()) {
                 int extraIndent = 0;
-                if(indentMatcher.groupCount() >= 1) {
+                if(indentMatcher.groupCount() >= 1 && indentMatcher.group(1) != null) {
                     extraIndent = Integer.parseInt(indentMatcher.group(1));
                 }
                 indentMatcher.appendReplacement(sb, editor.getIndentationManager().indent(indentationLevel + extraIndent));
