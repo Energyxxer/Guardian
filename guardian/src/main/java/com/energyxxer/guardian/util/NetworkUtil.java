@@ -49,7 +49,7 @@ public class NetworkUtil {
         connection.setInstanceFollowRedirects(true);
 
         connection.setConnectTimeout(5000);
-        connection.setReadTimeout(5000);
+        connection.setReadTimeout(15000);
 
         connection.connect();
         int status = connection.getResponseCode();
