@@ -6,6 +6,8 @@ import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
+import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
+import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.CompoundEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.InsertionEdit;
@@ -29,6 +31,8 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SuggestionDialog extends JDialog implements KeyListener, FocusListener, SuggestionInterface {
     private EditorComponent editor;
@@ -149,6 +153,8 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         }
     }
 
+    private static Pattern END_MARKER_PATTERN = Pattern.compile("\\$END\\$");
+
     public void submit(String text, Suggestion suggestion, boolean dismiss, int endIndex) {
         if(dismiss) {
             this.setVisible(false);
@@ -156,20 +162,43 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             this.forceLocked = true;
         }
 
+        CaretProfile snippetEndProfile = null;
+
+        int deletionsInSuggestion = StringUtil.getSequenceCount(text, "\b");
+
+        int deletionsInEditor = editor.getCaretPosition() - activeResults.getSuggestionIndex() + deletionsInSuggestion;
+
         if(suggestion instanceof SnippetSuggestion) {
-            text = text.replace("\n", "\n" + StringUtil.repeat("    ", editor.getDocumentIndentationAt(editor.getCaretPosition())));
-            endIndex = text.indexOf("$END$");
-            text = text.replaceFirst("\\$END\\$", "");
+            text = text.replace("\n", "\n" + editor.getIndentationManager().indent(editor.getDocumentIndentationAt(editor.getCaretPosition())));
+
+            Matcher matcher = END_MARKER_PATTERN.matcher(text);
+            StringBuffer sb = new StringBuffer();
+
+            int drift = 0;
+            while(matcher.find()) {
+                matcher.appendReplacement(sb, "");
+                if(snippetEndProfile == null) snippetEndProfile = new CaretProfile();
+                for(Dot dot : editor.getCaret().getDots()) {
+                    snippetEndProfile.add(dot.getMin() + matcher.start() + drift - deletionsInEditor, dot.getMin() + matcher.start() + drift - deletionsInEditor);
+                }
+
+                drift -= "$END$".length();
+            }
+            matcher.appendTail(sb);
+
+            text = sb.toString();
         }
-        int deletions = StringUtil.getSequenceCount(text, "\b");
-        String finalText = text.substring(deletions);
+
+        String finalText = text.substring(deletionsInSuggestion);
 
         CompoundEdit edit = new CompoundEdit();
-        edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor, editor.getCaretPosition() - activeResults.getSuggestionIndex() + deletions)));
+        edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor, deletionsInEditor)));
         edit.appendEdit(new Lazy<>(() -> new InsertionEdit(finalText, editor)));
         editor.getEditManager().insertEdit(edit);
         if(endIndex > -1) {
             editor.getCaret().moveBy(endIndex - finalText.length());
+        } else if(snippetEndProfile != null) {
+            editor.getCaret().setProfile(snippetEndProfile);
         }
 
         if(!dismiss) {
