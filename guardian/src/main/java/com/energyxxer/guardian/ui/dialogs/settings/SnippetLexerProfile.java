@@ -31,7 +31,7 @@ public class SnippetLexerProfile extends LexerProfile {
                             } else {
                                 return ScannerContextResponse.FAILED;
                             }
-                        } else if(!Character.isUpperCase(c)) {
+                        } else if(!Character.isUpperCase(c) && c != '_') {
                             return ScannerContextResponse.FAILED;
                         }
                     }

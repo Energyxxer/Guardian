@@ -3,11 +3,8 @@ package com.energyxxer.guardian.ui.editor.behavior.caret;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.util.StringLocation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Created by User on 1/10/2017.
@@ -174,5 +171,11 @@ public class CaretProfile implements Iterable<Integer> {
 
     public void set(int index, int pos) {
         list.set(index, pos);
+    }
+
+    public void apply(Function<Integer, Integer> function) {
+        for(int i = 0; i < list.size(); i++) {
+            list.set(i, function.apply(list.get(i)));
+        }
     }
 }

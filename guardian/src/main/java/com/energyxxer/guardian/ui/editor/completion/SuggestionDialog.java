@@ -2,6 +2,7 @@ package com.energyxxer.guardian.ui.editor.completion;
 
 import com.energyxxer.enxlex.suggestions.Suggestion;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
+import com.energyxxer.guardian.global.Status;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
@@ -19,12 +20,15 @@ import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.Lazy;
+import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringUtil;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableDimension;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -80,9 +84,40 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         this.addKeyListener(this);
         explorer.addKeyListener(this);
 
+        try {
+            editor.getHighlighter().addHighlight(0, 0, new SnippetVariableHighlighter());
+        } catch (BadLocationException ignore) {
+            //Literally impossible
+        }
+
         editor.addCharacterDriftListener(h -> {
             if(summary != null) {
                 summary.updateIndices(h);
+            }
+            if(!snippetProfilesLocked) {
+                snippetEnd.apply(h);
+                int i = 0;
+                for(CaretProfile profile : snippetVariables) {
+                    if(i == snippetVariableActive) {
+                        for(int j = 0; j < profile.size(); j++) {
+                            int before = profile.get(j);
+                            int after = h.apply(before);
+
+                            if(j % 2 == 0) {
+                                if(before != after && h.apply(before-1) == before -1) {
+                                    //This is the start of the edit, keep it where it is
+                                } else {
+                                    profile.set(j, after);
+                                }
+                            } else {
+                                profile.set(j, after);
+                            }
+                        }
+                    } else {
+                        profile.apply(h);
+                    }
+                    i++;
+                }
             }
         });
     }
@@ -153,7 +188,13 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         }
     }
 
-    private static Pattern END_MARKER_PATTERN = Pattern.compile("\\$END\\$");
+    private static Pattern SNIPPET_MARKER_PATTERN = Pattern.compile("\\$([A-Z_]+)\\$");
+
+    private ArrayList<CaretProfile> snippetVariables = new ArrayList<>();
+    private ArrayList<String> snippetVariableNames = new ArrayList<>();
+    private CaretProfile snippetEnd = new CaretProfile();
+    private int snippetVariableActive = -1;
+    private boolean snippetProfilesLocked = false;
 
     public void submit(String text, Suggestion suggestion, boolean dismiss, int endIndex) {
         if(dismiss) {
@@ -162,7 +203,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             this.forceLocked = true;
         }
 
-        CaretProfile snippetEndProfile = null;
+        boolean thisSuggestionHasVariables = false;
 
         int deletionsInSuggestion = StringUtil.getSequenceCount(text, "\b");
 
@@ -171,18 +212,46 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         if(suggestion instanceof SnippetSuggestion) {
             text = text.replace("\n", "\n" + editor.getIndentationManager().indent(editor.getDocumentIndentationAt(editor.getCaretPosition())));
 
-            Matcher matcher = END_MARKER_PATTERN.matcher(text);
+            Matcher matcher = SNIPPET_MARKER_PATTERN.matcher(text);
             StringBuffer sb = new StringBuffer();
 
             int drift = 0;
             while(matcher.find()) {
                 matcher.appendReplacement(sb, "");
-                if(snippetEndProfile == null) snippetEndProfile = new CaretProfile();
-                for(Dot dot : editor.getCaret().getDots()) {
-                    snippetEndProfile.add(dot.getMin() + matcher.start() + drift - deletionsInEditor, dot.getMin() + matcher.start() + drift - deletionsInEditor);
+
+                if(!thisSuggestionHasVariables) {
+                    thisSuggestionHasVariables = true;
+                    snippetEnd.clear();
+                    snippetVariables.clear();
+                    snippetVariableNames.clear();
+                    snippetVariableActive = -1;
+                    snippetProfilesLocked = true;
                 }
 
-                drift -= "$END$".length();
+                String varName = matcher.group(1);
+
+                CaretProfile profileToAppend;
+                if("END".equals(varName)) {
+                    profileToAppend = snippetEnd;
+                } else {
+                    if(!snippetVariableNames.contains(varName)) {
+                        snippetVariableNames.add(varName);
+                        snippetVariables.add(new CaretProfile());
+                    }
+
+                    int varIndex = snippetVariableNames.indexOf(varName);
+
+                    profileToAppend = snippetVariables.get(varIndex);
+                    if(snippetVariableActive == -1) {
+                        snippetVariableActive = varIndex;
+                    }
+                }
+
+                for(Dot dot : editor.getCaret().getDots()) {
+                    profileToAppend.add(dot.getMin() + matcher.start() + drift - deletionsInEditor, dot.getMin() + matcher.start() + drift - deletionsInEditor);
+                }
+
+                drift -= varName.length() + 2;
             }
             matcher.appendTail(sb);
 
@@ -197,8 +266,14 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         editor.getEditManager().insertEdit(edit);
         if(endIndex > -1) {
             editor.getCaret().moveBy(endIndex - finalText.length());
-        } else if(snippetEndProfile != null) {
-            editor.getCaret().setProfile(snippetEndProfile);
+        } else if(snippetVariableActive != -1 && thisSuggestionHasVariables) {
+            prepareSnippetVariable();
+        } else if(snippetEnd != null && snippetEnd.size() > 0) {
+            editor.getCaret().setProfile(snippetEnd);
+        }
+
+        if(thisSuggestionHasVariables) {
+            snippetProfilesLocked = false;
         }
 
         if(!dismiss) {
@@ -209,6 +284,29 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         if(dismiss) {
             setSafeToSuggest(false);
         }
+    }
+
+    private Status snippetVariableStatus = new Status();
+
+    private void prepareSnippetVariable() {
+        CaretProfile profile = snippetVariables.get(snippetVariableActive);
+        editor.getCaret().setProfile(profile);
+        snippetVariableStatus.setMessage("Now inserting: " + snippetVariableNames.get(snippetVariableActive));
+        GuardianWindow.setStatus(snippetVariableStatus);
+    }
+
+    private void nextSnippetVariable() {
+        snippetVariableActive++;
+        if(snippetVariableActive >= snippetVariables.size()) {
+            snippetVariableActive = -1;
+            if(snippetEnd != null && snippetEnd.size() > 0) {
+                editor.getCaret().setProfile(snippetEnd);
+            }
+            GuardianWindow.dismissStatus(snippetVariableStatus);
+        } else {
+            prepareSnippetVariable();
+        }
+        editor.repaint();
     }
 
     @Override
@@ -223,6 +321,18 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
     @Override
     public void keyPressed(KeyEvent e) {
         //Debug.log("Pressed");
+        if(snippetVariableActive != -1 && (!this.isVisible() || !anyEnabled)) {
+            if(KeyMap.SUGGESTION_SELECT.wasPerformedExact(e)) {
+                e.consume();
+                nextSnippetVariable();
+                return;
+            } else if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                snippetVariableActive = -1;
+                e.consume();
+                editor.repaint();
+                return;
+            }
+        }
         if(!this.isVisible() || !anyEnabled) return;
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             this.setVisible(false);
@@ -399,5 +509,75 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             explorer.dispose();
         }
         disposed = true;
+    }
+
+    private class SnippetVariableHighlighter implements Highlighter.HighlightPainter {
+
+        private Color highlightColor;
+        private Color highlightBorderColor;
+
+        public SnippetVariableHighlighter() {
+            tlm.addThemeChangeListener(t -> {
+                highlightColor = t.getColor(t.getColor(Color.GREEN, "Editor.find.highlight", "Editor.snippet.variable.highlight"));
+                highlightBorderColor = t.getColor(t.getColor(Color.YELLOW, "Editor.find.highlight.border", "Editor.snippet.variable.highlight.border"));
+            });
+        }
+
+        @Override
+        public void paint(Graphics g, int p0, int p1, Shape ignore, JTextComponent c) {
+            if(snippetVariableActive == -1) return;
+
+            CaretProfile activeProfile = snippetVariables.get(snippetVariableActive);
+
+            for(int i = 0; i < activeProfile.size() - 1; i += 2) {
+                int start = activeProfile.get(i);
+                int end = activeProfile.get(i+1);
+
+                try {
+                    StringBounds bounds = new StringBounds(editor.getLocationForOffset(start),editor.getLocationForOffset(end));
+
+                    for (int l = bounds.start.line; l <= bounds.end.line; l++) {
+                        Rectangle rectangle;
+                        if (l == bounds.start.line) {
+                            rectangle = c.modelToView(bounds.start.index);
+                            if (bounds.start.line == bounds.end.line) {
+                                rectangle.width = c.modelToView(bounds.end.index).x - rectangle.x;
+                            } else {
+                                rectangle.width = c.getWidth() - rectangle.x;
+                            }
+                        } else if (l == bounds.end.line) {
+                            rectangle = c.modelToView(bounds.end.index);
+                            rectangle.width = rectangle.x - c.modelToView(0).x;
+                            rectangle.x = c.modelToView(0).x; //0
+                        } else {
+                            rectangle = c.modelToView(bounds.start.index);
+                            rectangle.x = c.modelToView(0).x; //0
+                            rectangle.y += rectangle.height * (l - bounds.start.line);
+                            rectangle.width = c.getWidth();
+                        }
+
+                        if(rectangle.width < 0) {
+                            rectangle.x += rectangle.width;
+                            rectangle.width *= -1;
+                        }
+                        rectangle.width = Math.abs(rectangle.width);
+
+                        g.setColor(highlightColor);
+
+                        g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+
+                        g.setColor(highlightBorderColor);
+
+                        g.fillRect(rectangle.x, rectangle.y, 1, rectangle.height-1);
+                        g.fillRect(rectangle.x, rectangle.y + rectangle.height - 1, rectangle.width-1, 1);
+                        g.fillRect(rectangle.x + rectangle.width - 1, rectangle.y+1, 1, rectangle.height-1);
+                        g.fillRect(rectangle.x+1, rectangle.y, rectangle.width-1, 1);
+
+                    }
+                } catch (BadLocationException e) {
+                    //Can't render
+                }
+            }
+        }
     }
 }
