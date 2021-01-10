@@ -221,7 +221,6 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
             int drift = 0;
             while(matcher.find()) {
-                matcher.appendReplacement(sb, "");
 
                 if(!thisSuggestionHasVariables) {
                     thisSuggestionHasVariables = true;
@@ -236,8 +235,10 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
                 CaretProfile profileToAppend;
                 if("END".equals(varName)) {
+                    matcher.appendReplacement(sb, "");
                     profileToAppend = snippetEnd;
                 } else {
+                    matcher.appendReplacement(sb, varName);
                     if(!snippetVariableNames.contains(varName)) {
                         snippetVariableNames.add(varName);
                         snippetVariables.add(new CaretProfile());
@@ -251,11 +252,13 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
                     }
                 }
 
+                int driftThisBy = matcher.group(0).length() - ("END".equals(varName) ? 0 : varName.length());
+
                 for(Dot dot : editor.getCaret().getDots()) {
-                    profileToAppend.add(dot.getMin() + matcher.start() + drift - driftFromCaret, dot.getMin() + matcher.start() + drift - driftFromCaret);
+                    profileToAppend.add(dot.getMin() + matcher.start() + drift - driftFromCaret, dot.getMin() + matcher.end() + drift - driftFromCaret - driftThisBy);
                 }
 
-                drift -= matcher.group(0).length();
+                drift -= driftThisBy;
             }
             matcher.appendTail(sb);
 
