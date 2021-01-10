@@ -197,6 +197,11 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
     private boolean snippetProfilesLocked = false;
 
     public void submit(String text, Suggestion suggestion, boolean dismiss, int endIndex) {
+        int deletionsInSuggestion = StringUtil.getSequenceCount(text, "\b");
+        submit(text.substring(deletionsInSuggestion), suggestion, dismiss, endIndex, editor.getCaretPosition() - activeResults.getSuggestionIndex() + deletionsInSuggestion, SNIPPET_MARKER_PATTERN);
+    }
+
+    public void submit(String text, Suggestion suggestion, boolean dismiss, int endIndex, int driftFromCaret, Pattern snippetMarkerPattern) {
         if(dismiss) {
             this.setVisible(false);
         } else {
@@ -207,12 +212,11 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
         int deletionsInSuggestion = StringUtil.getSequenceCount(text, "\b");
 
-        int deletionsInEditor = editor.getCaretPosition() - activeResults.getSuggestionIndex() + deletionsInSuggestion;
 
         if(suggestion instanceof SnippetSuggestion) {
             text = text.replace("\n", "\n" + editor.getIndentationManager().indent(editor.getDocumentIndentationAt(editor.getCaretPosition())));
 
-            Matcher matcher = SNIPPET_MARKER_PATTERN.matcher(text);
+            Matcher matcher = snippetMarkerPattern.matcher(text);
             StringBuffer sb = new StringBuffer();
 
             int drift = 0;
@@ -248,10 +252,10 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
                 }
 
                 for(Dot dot : editor.getCaret().getDots()) {
-                    profileToAppend.add(dot.getMin() + matcher.start() + drift - deletionsInEditor, dot.getMin() + matcher.start() + drift - deletionsInEditor);
+                    profileToAppend.add(dot.getMin() + matcher.start() + drift - driftFromCaret, dot.getMin() + matcher.start() + drift - driftFromCaret);
                 }
 
-                drift -= varName.length() + 2;
+                drift -= matcher.group(0).length();
             }
             matcher.appendTail(sb);
 
@@ -261,7 +265,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         String finalText = text.substring(deletionsInSuggestion);
 
         CompoundEdit edit = new CompoundEdit();
-        edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor, deletionsInEditor)));
+        edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor, driftFromCaret)));
         edit.appendEdit(new Lazy<>(() -> new InsertionEdit(finalText, editor)));
         editor.getEditManager().insertEdit(edit);
         if(endIndex > -1) {

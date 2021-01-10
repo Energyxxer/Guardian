@@ -13,6 +13,9 @@ import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.CompoundEdit
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.InsertionEdit;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.SetCaretProfileEdit;
+import com.energyxxer.guardian.ui.editor.completion.SnippetSuggestion;
+import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
+import com.energyxxer.guardian.ui.editor.completion.SuggestionInterface;
 import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
@@ -126,17 +129,13 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
     }
 
     private static final Pattern INDENT_REPLACEMENT_PATTERN = Pattern.compile("\bINDENT([-+]\\d+)?\b");
+    private static final Pattern SNIPPET_MARKER_PATTERN = Pattern.compile("\b([A-Z_]+)\b");
 
     public void submit(CodeReplacementAction inspection) {
         int replacementStartIndex = inspection.getReplacementStartIndex();
         int replacementEndIndex = inspection.getReplacementEndIndex();
         String replacementText = inspection.getReplacementText();
 
-        CompoundEdit edit = new CompoundEdit();
-        edit.appendEdit(new Lazy<>(() -> new SetCaretProfileEdit(new CaretProfile(replacementStartIndex, replacementEndIndex), editor)));
-        if(replacementStartIndex != replacementEndIndex) {
-            edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor)));
-        }
 
         if(replacementText.contains("\b")) {
             int indentationLevel = editor.getIndentationManager().getSuggestedIndentationLevelAt(replacementStartIndex);
@@ -156,9 +155,20 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
 
         final String finalReplacementText = replacementText;
 
-        edit.appendEdit(new Lazy<>(() -> new InsertionEdit(finalReplacementText, editor)));
-
-        editor.getEditManager().insertEdit(edit);
+        SuggestionInterface suggestionInterface = editor.getSuggestionInterface();
+        if(suggestionInterface != null) {
+            SnippetSuggestion snippetSuggestion = new SnippetSuggestion("", finalReplacementText, "");
+            editor.getCaret().setProfile(new CaretProfile(replacementStartIndex, replacementEndIndex));
+            ((SuggestionDialog) suggestionInterface).submit(finalReplacementText, snippetSuggestion, true, -1, 0, SNIPPET_MARKER_PATTERN);
+        } else {
+            CompoundEdit edit = new CompoundEdit();
+            edit.appendEdit(new Lazy<>(() -> new SetCaretProfileEdit(new CaretProfile(replacementStartIndex, replacementEndIndex), editor)));
+            if(replacementStartIndex != replacementEndIndex) {
+                edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor)));
+            }
+            edit.appendEdit(new Lazy<>(() -> new InsertionEdit(finalReplacementText, editor)));
+            editor.getEditManager().insertEdit(edit);
+        }
     }
 
     @Override
