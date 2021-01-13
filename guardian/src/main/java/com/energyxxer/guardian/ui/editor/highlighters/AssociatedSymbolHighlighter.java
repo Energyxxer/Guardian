@@ -2,6 +2,7 @@ package com.energyxxer.guardian.ui.editor.highlighters;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.find.FileOccurrence;
 import com.energyxxer.guardian.main.window.sections.tools.find.FindResults;
@@ -22,7 +23,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter, MouseMotionListener, MouseListener {
 
@@ -217,6 +221,8 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
         }
     }
 
+    private HashMap<File, String> cachedFileContents = new HashMap<>();
+
     private void navigateToUsages(ArrayList<PrismarineSummaryModule.SymbolUsage> selectedSymbolUsages) {
         if(selectedSymbolUsages.size() == 0) {
             GuardianWindow.showPopupMessage("No usages found");
@@ -234,14 +240,30 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                 File file = usage.pattern.getSource().getExactFile();
                 if(file != null) {
                     StringBounds bounds = usage.pattern.getStringBounds();
-                    FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, usage.pattern.flatten(false), 0);
-                    results.insertResult(fileOccurrence);
+                    try {
+                        String contents;
+                        if(cachedFileContents.containsKey(file)) {
+                            contents = cachedFileContents.get(file);
+                        } else {
+                            contents = new String(Files.readAllBytes(file.toPath()), Guardian.DEFAULT_CHARSET);
+                        }
+
+                        int lineStart = bounds.start.index - bounds.start.column;
+                        int lineEnd = contents.indexOf('\n', bounds.start.index);
+                        if(lineEnd == -1) lineEnd = bounds.end.index;
+                        FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, contents.substring(lineStart, lineEnd), bounds.start.index-lineStart);
+                        results.insertResult(fileOccurrence);
+                    } catch (IOException x) {
+                        FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, usage.pattern.flatten(false), 0);
+                        results.insertResult(fileOccurrence);
+                    }
                 }
             }
 
             GuardianWindow.toolBoard.open(GuardianWindow.findBoard);
             GuardianWindow.findBoard.showResults(results);
         }
+        cachedFileContents.clear();
     }
 
     private void collectSelectedSymbolUsages(ArrayList<PrismarineSummaryModule.SymbolUsage> selectedSymbolUsages, PrismarineSummaryModule fileSummary) {
