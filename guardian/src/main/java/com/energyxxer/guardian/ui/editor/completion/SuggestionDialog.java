@@ -277,6 +277,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             prepareSnippetVariable();
         } else if(snippetEnd != null && snippetEnd.size() > 0) {
             editor.getCaret().setProfile(snippetEnd);
+            snippetEnd = null;
         }
 
         if(thisSuggestionHasVariables) {
@@ -308,6 +309,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             snippetVariableActive = -1;
             if(snippetEnd != null && snippetEnd.size() > 0) {
                 editor.getCaret().setProfile(snippetEnd);
+                snippetEnd = null;
             }
             GuardianWindow.dismissStatus(snippetVariableStatus);
         } else {
