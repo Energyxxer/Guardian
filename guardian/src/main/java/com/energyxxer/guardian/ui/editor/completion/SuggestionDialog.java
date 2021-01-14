@@ -95,7 +95,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
                 summary.updateIndices(h);
             }
             if(!snippetProfilesLocked) {
-                snippetEnd.apply(h);
+                if(snippetEnd != null) snippetEnd.apply(h);
                 int i = 0;
                 for(CaretProfile profile : snippetVariables) {
                     if(i == snippetVariableActive) {
@@ -277,7 +277,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             prepareSnippetVariable();
         } else if(snippetEnd != null && snippetEnd.size() > 0) {
             editor.getCaret().setProfile(snippetEnd);
-            snippetEnd = null;
+            snippetEnd.clear();
         }
 
         if(thisSuggestionHasVariables) {
@@ -309,7 +309,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             snippetVariableActive = -1;
             if(snippetEnd != null && snippetEnd.size() > 0) {
                 editor.getCaret().setProfile(snippetEnd);
-                snippetEnd = null;
+                snippetEnd.clear();
             }
             GuardianWindow.dismissStatus(snippetVariableStatus);
         } else {
