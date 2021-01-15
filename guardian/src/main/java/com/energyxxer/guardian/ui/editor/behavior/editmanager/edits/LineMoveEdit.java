@@ -5,6 +5,7 @@ import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.guardian.ui.editor.behavior.editmanager.Edit;
+import com.energyxxer.util.logger.Debug;
 
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
@@ -58,20 +59,28 @@ public class LineMoveEdit extends Edit {
                 int shiftTo;
                 if(dir == Dot.UP) {
                     shiftTo = new Dot(start, editor).getPositionAbove();
-                } else shiftTo = new Dot(end, editor).getRowEnd()+1 - (end-start);
+                } else {
+                    shiftTo = new Dot(end, editor).getRowEnd()+1 - (end-start);
+                }
 
                 //Remove lines
 
                 String value = text.substring(start,end-1) + "\n";
 
-                if (end < text.length())
+                if (end < text.length()) {
                     doc.remove(start, (end - start));
-                else
+                } else {
                     doc.remove(start - 1, (end - start));
+                }
 
                 //Add value back
 
-                doc.insertString(shiftTo,value,null);
+                if(shiftTo > doc.getLength()) {
+                    value = "\n" + value.substring(0, value.length()-1);
+                    doc.insertString(doc.getLength(),value,null);
+                } else {
+                    doc.insertString(shiftTo,value,null);
+                }
                 actionPerformed = true;
 
                 //Add new dot to profile
@@ -82,6 +91,7 @@ public class LineMoveEdit extends Edit {
             caret.setProfile(nextProfile);
 
         } catch(BadLocationException x) {
+            Debug.log("Offset requested: " + x.offsetRequested());
             x.printStackTrace();
         }
         return actionPerformed;
