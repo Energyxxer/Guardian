@@ -3,11 +3,11 @@ package com.energyxxer.guardian.ui.editor.behavior.caret;
 import com.energyxxer.guardian.testing.LiveTestCase;
 import com.energyxxer.guardian.testing.LiveTestManager;
 import com.energyxxer.guardian.testing.LiveTestResult;
+import com.energyxxer.guardian.ui.common.transactions.CompoundTransaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.CompoundEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DragInsertionEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.SetCaretProfileEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.DeletionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.DragInsertionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.SetCaretProfileEdit;
 import com.energyxxer.guardian.ui.editor.highlighters.BracePairHighlighter;
 import com.energyxxer.guardian.util.Range;
 import com.energyxxer.util.Lazy;
@@ -695,13 +695,13 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
                     boolean isMoveOperation = e.getDropAction() == TransferHandler.MOVE && e.isLocalTransfer() && transferFromDot != null;
 
                     if (!isMoveOperation || transferFromDot.getMin() != dropDot.getMin() || transferFromDot.getMax() != dropDot.getMax()) {
-                        CompoundEdit edit = new CompoundEdit();
+                        CompoundTransaction edit = new CompoundTransaction();
 
                         if(isMoveOperation) { //Move operation
                             Debug.log(transferFromDot);
                             CaretProfile deletionProfile = new CaretProfile(transferFromDot.mark, transferFromDot.index);
-                            edit.appendEdit(new Lazy<>(() -> new SetCaretProfileEdit(deletionProfile, editor)));
-                            edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor)));
+                            edit.append(new Lazy<>(() -> new SetCaretProfileEdit(deletionProfile, editor)));
+                            edit.append(new Lazy<>(() -> new DeletionEdit(editor)));
                             int transferFromLength = transferFromDot.getMax() - transferFromDot.getMin();
                             if(dropDot.mark > transferFromDot.getMin()) dropDot.mark = Math.max(transferFromDot.getMin(), dropDot.mark - transferFromLength);
                             if(dropDot.index > transferFromDot.getMin()) dropDot.index = Math.max(transferFromDot.getMin(), dropDot.index - transferFromLength);
@@ -709,10 +709,10 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
 
                         CaretProfile newProfile = new CaretProfile(dropDot.mark, dropDot.index);
 
-                        edit.appendEdit(new Lazy<>(() -> new SetCaretProfileEdit(newProfile, editor)));
-                        edit.appendEdit(new Lazy<>(() -> new DragInsertionEdit(text, editor)));
+                        edit.append(new Lazy<>(() -> new SetCaretProfileEdit(newProfile, editor)));
+                        edit.append(new Lazy<>(() -> new DragInsertionEdit(text, editor)));
 
-                        editor.getEditManager().insertEdit(edit);
+                        editor.getTransactionManager().insertTransaction(edit);
                     }
                 }
             } catch (UnsupportedFlavorException | IOException ex) {

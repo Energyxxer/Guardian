@@ -11,7 +11,7 @@ import com.energyxxer.guardian.main.window.sections.editor_search.FindAndReplace
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.DeletionEdit;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPaneLayout;
@@ -176,11 +176,11 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
                 break;
             }
             case "undo": {
-                editorComponent.getEditManager().undo();
+                editorComponent.getTransactionManager().undo();
                 break;
             }
             case "redo": {
-                editorComponent.getEditManager().redo();
+                editorComponent.getTransactionManager().redo();
                 break;
             }
             case "copy": {
@@ -200,7 +200,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
                 break;
             }
             case "delete": {
-                editorComponent.getEditManager().insertEdit(new DeletionEdit(editorComponent));
+                editorComponent.getTransactionManager().insertTransaction(new DeletionEdit(editorComponent));
                 break;
             }
         }

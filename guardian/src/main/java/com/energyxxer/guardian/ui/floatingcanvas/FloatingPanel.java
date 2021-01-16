@@ -3,7 +3,9 @@ package com.energyxxer.guardian.ui.floatingcanvas;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.ColorStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.FloatStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.IntStyleProperty;
+import com.energyxxer.guardian.ui.floatingcanvas.styles.StyleProperty;
 import com.energyxxer.guardian.ui.theme.Theme;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
@@ -12,9 +14,12 @@ import static com.energyxxer.guardian.ui.floatingcanvas.DynamicVector.Unit.RELAT
 public class FloatingPanel extends FloatingComponent {
 
     private DynamicVector size;
-    public final IntStyleProperty borderThickness = new IntStyleProperty(0);
-    public final ColorStyleProperty borderColor = new ColorStyleProperty(null);
-    public final FloatStyleProperty cornerRadius = new FloatStyleProperty(0f);
+    @NotNull
+    public StyleProperty<Integer> borderThickness = new IntStyleProperty(0);
+    @NotNull
+    public StyleProperty<Color> borderColor = new ColorStyleProperty(null);
+    @NotNull
+    public StyleProperty<Float> cornerRadius = new FloatStyleProperty(0f);
 
     public FloatingPanel(DynamicVector size) {
         this.size = size;

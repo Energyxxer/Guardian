@@ -6,12 +6,12 @@ import com.energyxxer.guardian.global.Status;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
+import com.energyxxer.guardian.ui.common.transactions.CompoundTransaction;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.CompoundEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.InsertionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.DeletionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.InsertionEdit;
 import com.energyxxer.guardian.ui.editor.completion.snippets.Snippet;
 import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetManager;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
@@ -267,10 +267,10 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
         String finalText = text.substring(deletionsInSuggestion);
 
-        CompoundEdit edit = new CompoundEdit();
-        edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor, driftFromCaret)));
-        edit.appendEdit(new Lazy<>(() -> new InsertionEdit(finalText, editor)));
-        editor.getEditManager().insertEdit(edit);
+        CompoundTransaction edit = new CompoundTransaction();
+        edit.append(new Lazy<>(() -> new DeletionEdit(editor, driftFromCaret)));
+        edit.append(new Lazy<>(() -> new InsertionEdit(finalText, editor)));
+        editor.getTransactionManager().insertTransaction(edit);
         if(endIndex > -1) {
             editor.getCaret().moveBy(endIndex - finalText.length());
         } else if(snippetVariableActive != -1 && thisSuggestionHasVariables) {

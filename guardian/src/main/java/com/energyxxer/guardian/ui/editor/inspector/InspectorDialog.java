@@ -7,12 +7,12 @@ import com.energyxxer.enxlex.lexical_analysis.inspections.Inspection;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
+import com.energyxxer.guardian.ui.common.transactions.CompoundTransaction;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.CompoundEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.DeletionEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.InsertionEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.SetCaretProfileEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.DeletionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.InsertionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.SetCaretProfileEdit;
 import com.energyxxer.guardian.ui.editor.completion.SnippetSuggestion;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionInterface;
@@ -161,13 +161,13 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
             editor.getCaret().setProfile(new CaretProfile(replacementStartIndex, replacementEndIndex));
             ((SuggestionDialog) suggestionInterface).submit(finalReplacementText, snippetSuggestion, true, -1, 0, SNIPPET_MARKER_PATTERN);
         } else {
-            CompoundEdit edit = new CompoundEdit();
-            edit.appendEdit(new Lazy<>(() -> new SetCaretProfileEdit(new CaretProfile(replacementStartIndex, replacementEndIndex), editor)));
+            CompoundTransaction edit = new CompoundTransaction();
+            edit.append(new Lazy<>(() -> new SetCaretProfileEdit(new CaretProfile(replacementStartIndex, replacementEndIndex), editor)));
             if(replacementStartIndex != replacementEndIndex) {
-                edit.appendEdit(new Lazy<>(() -> new DeletionEdit(editor)));
+                edit.append(new Lazy<>(() -> new DeletionEdit(editor)));
             }
-            edit.appendEdit(new Lazy<>(() -> new InsertionEdit(finalReplacementText, editor)));
-            editor.getEditManager().insertEdit(edit);
+            edit.append(new Lazy<>(() -> new InsertionEdit(finalReplacementText, editor)));
+            editor.getTransactionManager().insertTransaction(edit);
         }
     }
 

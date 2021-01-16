@@ -9,8 +9,8 @@ import com.energyxxer.guardian.ui.ToolbarSeparator;
 import com.energyxxer.guardian.ui.editor.EditorModule;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.InsertionEdit;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.PasteEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.InsertionEdit;
+import com.energyxxer.guardian.ui.editor.behavior.edits.PasteEdit;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.*;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
@@ -396,7 +396,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
                         str = replaceField.getText();
                     }
                     editor.editorComponent.getCaret().setProfile(new CaretProfile(regions.get(selectedIndex+1), regions.get(selectedIndex)).disableDotMerge());
-                    editor.editorComponent.getEditManager().insertEdit(new PasteEdit(str, editor.editorComponent));
+                    editor.editorComponent.getTransactionManager().insertTransaction(new PasteEdit(str, editor.editorComponent));
                 } else {
                     HintStylizer.style(hint);
                     hint.setText("No match selected");
@@ -449,7 +449,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
             if(!toReplace.isEmpty()) {
                 CaretProfile profile = new CaretProfile(toReplace).disableDotMerge();
                 editor.editorComponent.getCaret().setProfile(profile);
-                editor.editorComponent.getEditManager().insertEdit(new PasteEdit(replacementValues.toArray(new String[0]), editor.editorComponent));
+                editor.editorComponent.getTransactionManager().insertTransaction(new PasteEdit(replacementValues.toArray(new String[0]), editor.editorComponent));
             } else {
                 HintStylizer.style(hint);
                 hint.setText("Nothing to replace");
@@ -501,7 +501,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
 
     public void setFindText(String text) {
         findField.getCaret().setProfile(new CaretProfile(findField.getText().length(), 0));
-        findField.getEditManager().insertEdit(new InsertionEdit(text, findField));
+        findField.getTransactionManager().insertTransaction(new InsertionEdit(text, findField));
     }
 
     public AdvancedEditor getFindField() {

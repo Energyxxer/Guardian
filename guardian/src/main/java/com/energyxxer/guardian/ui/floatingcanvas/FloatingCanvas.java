@@ -66,7 +66,8 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
     }
 
     private FloatingComponent getObjectAtMousePos(Point p) {
-        for(FloatingComponent o : objects) {
+        for(int i = objects.size()-1; i >= 0; i--) {
+            FloatingComponent o = objects.get(i);
             if(o.contains(p)) {
                 return o.getObjectAtMousePos(p);
             }

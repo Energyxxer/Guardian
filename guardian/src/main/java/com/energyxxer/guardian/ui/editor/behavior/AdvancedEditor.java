@@ -5,11 +5,11 @@ import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.global.keystrokes.UserKeyBind;
 import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
+import com.energyxxer.guardian.ui.common.transactions.TransactionManager;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.EditManager;
-import com.energyxxer.guardian.ui.editor.behavior.editmanager.edits.*;
+import com.energyxxer.guardian.ui.editor.behavior.edits.*;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionInterface;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.util.linepainter.LinePainter;
@@ -58,7 +58,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
     private EditorCaret caret;
 
-    private EditManager editManager = new EditManager(this);
+    private TransactionManager<AdvancedEditor> transactionManager = new EditorTransactionManager(this);
     private LinePainter linePainter;
 
     private final StringLocationCache viewLineCache = new StringLocationCache();
@@ -166,7 +166,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         if(e.isConsumed()) return;
         e.consume();
         if(!isPlatformControlDown(e) && !Commons.isSpecialCharacter(e.getKeyChar())) {
-            editManager.insertEdit(new InsertionEdit("" + e.getKeyChar(), this));
+            transactionManager.insertTransaction(new InsertionEdit("" + e.getKeyChar(), this));
             if(suggestionInterface != null) {
                 suggestionInterface.setSafeToSuggest(true);
                 suggestionInterface.lock();
@@ -180,38 +180,38 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         if(e.isConsumed()) return;
         int keyCode = e.getKeyCode();
         if(KeyMap.UNDO.wasPerformedExact(e)) {
-            editManager.undo();
+            transactionManager.undo();
             e.consume();
         } else if(KeyMap.REDO.wasPerformedExact(e)) {
-            editManager.redo();
+            transactionManager.redo();
             e.consume();
         } else if(KeyMap.COMMENT.wasPerformedExact(e)) {
             e.consume();
-            editManager.insertEdit(new CommentEdit(this));
+            transactionManager.insertTransaction(new CommentEdit(this));
         } else if(KeyMap.TEXT_DELETE_LINE.wasPerformedExact(e)) {
             e.consume();
-            editManager.insertEdit(new LineDeletionEdit(this));
+            transactionManager.insertTransaction(new LineDeletionEdit(this));
         } else if(KeyMap.TEXT_DUPLICATE_LINE.wasPerformedExact(e)) {
             e.consume();
-            editManager.insertEdit(new LineDuplicationEdit(this));
+            transactionManager.insertTransaction(new LineDuplicationEdit(this));
         } else if(keyCode == KeyEvent.VK_TAB) {
             e.consume();
 
             CaretProfile profile = caret.getProfile();
             if(profile.getSelectedCharCount() == 0 && !e.isShiftDown()) {
-                editManager.insertEdit(new TabInsertionEdit(this));
+                transactionManager.insertTransaction(new TabInsertionEdit(this));
             } else {
-                editManager.insertEdit(new IndentEdit(this, e.isShiftDown()));
+                transactionManager.insertTransaction(new IndentEdit(this, e.isShiftDown()));
             }
         } else if(keyCode == KeyEvent.VK_BACK_SPACE || keyCode == KeyEvent.VK_DELETE) {
             e.consume();
-            editManager.insertEdit(new DeletionEdit(this, isPlatformControlDown(e), keyCode == KeyEvent.VK_DELETE));
+            transactionManager.insertTransaction(new DeletionEdit(this, isPlatformControlDown(e), keyCode == KeyEvent.VK_DELETE));
             if(suggestionInterface != null) {
                 suggestionInterface.lock();
             }
         } else if(keyCode == KeyEvent.VK_ENTER) {
             e.consume();
-            editManager.insertEdit(new NewlineEdit(this, !isPlatformControlDown(e)));
+            transactionManager.insertTransaction(new NewlineEdit(this, !isPlatformControlDown(e)));
         } else if(KeyMap.COPY.wasPerformedExact(e) || KeyMap.CUT.wasPerformedExact(e)) {
             e.consume();
             this.copyOrCut(KeyMap.CUT.wasPerformedExact(e));
@@ -223,10 +223,10 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             caret.setProfile(new CaretProfile(0, getDocument().getLength()));
         } else if(KeyMap.TEXT_MOVE_LINE_UP.wasPerformedExact(e)) {
             e.consume();
-            editManager.insertEdit(new LineMoveEdit(this, Dot.UP));
+            transactionManager.insertTransaction(new LineMoveEdit(this, Dot.UP));
         } else if(KeyMap.TEXT_MOVE_LINE_DOWN.wasPerformedExact(e)) {
             e.consume();
-            editManager.insertEdit(new LineMoveEdit(this, Dot.DOWN));
+            transactionManager.insertTransaction(new LineMoveEdit(this, Dot.DOWN));
         } else if(keyCode == KeyEvent.VK_ESCAPE) {
             caret.deselect();
         }
@@ -236,8 +236,8 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         }
     }
 
-    public EditManager getEditManager() {
-        return editManager;
+    public TransactionManager getTransactionManager() {
+        return transactionManager;
     }
 
     public StringLocation getLocationForOffset(int index) {
@@ -367,7 +367,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             }
 
             if(cut) {
-                editManager.insertEdit(new InsertionEdit("", this));
+                transactionManager.insertTransaction(new InsertionEdit("", this));
             }
         } catch(BadLocationException x) {
             Debug.log(x.getMessage(), Debug.MessageType.ERROR);
@@ -383,13 +383,13 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
                 if(rawContents == null) return;
                 String[] contents = ((String[]) rawContents);
-                editManager.insertEdit(new PasteEdit(contents, this));
+                transactionManager.insertTransaction(new PasteEdit(contents, this));
             } else if(clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
                 Object rawContents = clipboard.getData(DataFlavor.stringFlavor);
 
                 if(rawContents == null) return;
                 String contents = ((String) rawContents).replace("\t", "    ").replace("\r","");
-                editManager.insertEdit(new PasteEdit(contents, this));
+                transactionManager.insertTransaction(new PasteEdit(contents, this));
             }
         } catch(Exception x) {
             x.printStackTrace();

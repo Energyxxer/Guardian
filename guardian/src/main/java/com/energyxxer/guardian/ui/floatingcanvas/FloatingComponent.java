@@ -20,8 +20,10 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
     @NotNull
     private Alignment alignment = new Alignment();
 
-    public final StyleProperty<Color> background = new ColorStyleProperty(Color.WHITE);
-    public final StyleProperty<Color> foreground = new ColorStyleProperty(Color.BLACK);
+    @NotNull
+    public StyleProperty<Color> background = new ColorStyleProperty(Color.WHITE);
+    @NotNull
+    public StyleProperty<Color> foreground = new ColorStyleProperty(Color.BLACK);
 
     public FloatingComponent(FloatingCanvas rootCanvas) {
         this.rootCanvas = rootCanvas;
@@ -53,9 +55,19 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
 
     public void add(FloatingComponent obj) {
         if(this.children == null) this.children = new ArrayList<>();
+        if(obj.parent != null) obj.parent.remove(obj);
         obj.parent = this;
         if(this.rootCanvas != null) obj.setRootCanvas(this.rootCanvas);
         this.children.add(obj);
+    }
+
+    public void remove(FloatingComponent obj) {
+        if(obj.parent == this) {
+            obj.parent = null;
+            if(this.children != null) {
+                this.children.remove(obj);
+            }
+        }
     }
 
     void setRootCanvas(FloatingCanvas rootCanvas) {
@@ -120,11 +132,16 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        if (this.parent != null) {
+            this.parent.mouseDragged(e);
+        }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
+        if (this.parent != null) {
+            this.parent.mouseMoved(e);
+        }
     }
 
     @Override

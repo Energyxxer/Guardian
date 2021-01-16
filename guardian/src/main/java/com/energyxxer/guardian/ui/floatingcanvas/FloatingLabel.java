@@ -13,6 +13,7 @@ public abstract class FloatingLabel extends FloatingComponent {
 
     private Rectangle prevBounds = new Rectangle();
 
+    private boolean interactive = false;
     private boolean copyOnDoubleClick = false;
 
     public FloatingLabel() {
@@ -21,11 +22,12 @@ public abstract class FloatingLabel extends FloatingComponent {
 
     public FloatingLabel(boolean copyOnDoubleClick) {
         this.copyOnDoubleClick = copyOnDoubleClick;
+        this.interactive = copyOnDoubleClick;
     }
 
     @Override
     public boolean contains(Point p) {
-        return prevBounds.contains(p);
+        return interactive && prevBounds.contains(p);
     }
 
     @Override
@@ -70,6 +72,14 @@ public abstract class FloatingLabel extends FloatingComponent {
             AdvancedEditor.copyToClipboard(text);
             GuardianWindow.setStatus("Copied to clipboard: " + text);
         }
+    }
+
+    public boolean isInteractive() {
+        return interactive;
+    }
+
+    public void setInteractive(boolean interactive) {
+        this.interactive = interactive;
     }
 
     public static class Fixed extends FloatingLabel {
