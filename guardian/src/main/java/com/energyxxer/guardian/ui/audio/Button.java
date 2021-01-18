@@ -26,12 +26,17 @@ public class Button extends FloatingPanel {
     private String iconName;
 
     public Button(String... keys) {
-        super(new DynamicVector(0.2f, DynamicVector.Unit.RELATIVE_MIN, 0.2f, DynamicVector.Unit.RELATIVE_MIN));
+        this(0.2f, keys);
+    }
+
+    public Button(float size, String... keys) {
+        super(new DynamicVector(size, DynamicVector.Unit.RELATIVE_MIN, size, DynamicVector.Unit.RELATIVE_MIN));
+        this.size.setFallback(size);
 
         setKeysNoUpdate(keys);
     }
 
-    public void setKeys(String... keys) {
+    public void batchSetKeys(String... keys) {
         setKeysNoUpdate(keys);
         themeUpdated(GuardianWindow.getTheme());
     }

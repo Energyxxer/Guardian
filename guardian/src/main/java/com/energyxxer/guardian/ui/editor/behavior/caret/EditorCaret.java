@@ -201,6 +201,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
 
     @Override
     public void paint(Graphics g) {
+        if(!editor.isFocusOwner()) return;
         caretPaintListeners.forEach(Runnable::run);
         try {
             g.setColor(getComponent().getCaretColor());
@@ -695,7 +696,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
                     boolean isMoveOperation = e.getDropAction() == TransferHandler.MOVE && e.isLocalTransfer() && transferFromDot != null;
 
                     if (!isMoveOperation || transferFromDot.getMin() != dropDot.getMin() || transferFromDot.getMax() != dropDot.getMax()) {
-                        CompoundTransaction edit = new CompoundTransaction();
+                        CompoundTransaction<AdvancedEditor> edit = new CompoundTransaction<>();
 
                         if(isMoveOperation) { //Move operation
                             Debug.log(transferFromDot);

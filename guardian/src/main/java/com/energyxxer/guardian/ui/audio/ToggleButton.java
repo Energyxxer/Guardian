@@ -33,6 +33,6 @@ public class ToggleButton extends Button {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-        super.setKeys(enabled ? enabledKeys : disabledKeys);
+        super.batchSetKeys(enabled ? enabledKeys : disabledKeys);
     }
 }

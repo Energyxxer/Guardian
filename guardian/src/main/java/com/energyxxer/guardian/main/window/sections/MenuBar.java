@@ -10,6 +10,7 @@ import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.xswing.ScalableDimension;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicMenuItemUI;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
@@ -115,7 +116,7 @@ public class MenuBar extends JMenuBar {
 
         {
             StyledMenu menu = new StyledMenu(" Navigate ");
-            menu.setMnemonic(KeyEvent.VK_W);
+            menu.setMnemonic(KeyEvent.VK_N);
 
             menu.add(createItemForAction("CLOSE_TAB"));
             menu.add(createItemForAction("CLOSE_ALL_TABS"));
@@ -150,7 +151,18 @@ public class MenuBar extends JMenuBar {
 
     public static StyledMenuItem createItemForAction(String actionKey) {
         ProgramAction action = ActionManager.getAction(actionKey);
-        StyledMenuItem item = new StyledMenuItem(action.getTitle(), action.getIconKey());
+        StyledMenuItem item = new StyledMenuItem(action.getTitle(), action.getIconKey()) {
+            @Override
+            public KeyStroke getAccelerator() {
+                //Blacklist BasicMenuItemUI from knowing the accelerator. The accelerator should only be visible in the
+                // menu bar, but the keystroke itself should not be captured by Swing because it sucks and
+                // it's ridiculously laggy when you hold down the keystroke
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                String callingClassName = stackTrace[2].getClassName();
+                if(callingClassName.equals(BasicMenuItemUI.class.getName())) return null;
+                return super.getAccelerator();
+            }
+        };
         if(action.getShortcut() != null && action.getShortcut().getFirstMapping() instanceof SimpleMapping) item.setAccelerator(((SimpleMapping) action.getShortcut().getFirstMapping()).getKeyStroke());
         item.addActionListener(e -> action.perform());
         return item;

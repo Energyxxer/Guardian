@@ -26,7 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Commons {
@@ -215,12 +217,18 @@ public class Commons {
     }*/
 
     public static Image getScaledIcon(String icon, int width, int height) {
+        ScaledIconInstance cacheKey = new ScaledIconInstance(icon, width, height);
+        Image cached = SCALED_IMAGE_CACHE.get(cacheKey);
+        if(cached != null) return cached;
+
         width = (int) (width * ScalableGraphics2D.SCALE_FACTOR);
         height = (int) (height * ScalableGraphics2D.SCALE_FACTOR);
         Image image = getIcon(icon);
         int scaling = Image.SCALE_FAST;
         if(width < image.getWidth(null)) scaling = Image.SCALE_SMOOTH;
-        return image.getScaledInstance(width, height, scaling);
+        Image scaledInstance = image.getScaledInstance(width, height, scaling);
+        SCALED_IMAGE_CACHE.put(cacheKey, scaledInstance);
+        return scaledInstance;
     }
 
     public static boolean isProjectFile(File file) {
@@ -228,5 +236,34 @@ public class Commons {
         if(associatedProject == null) return false;
         if(associatedProject.getProjectType().isProjectIdentity(file)) return true;
         return associatedProject.getProjectType().isProjectRoot(file.getParentFile()) && file.isDirectory() && file.getName().equals(".tdnui");
+    }
+
+    private static HashMap<ScaledIconInstance, Image> SCALED_IMAGE_CACHE = new HashMap<>();
+
+    private static class ScaledIconInstance {
+        private String iconName;
+        private int width;
+        private int height;
+
+        public ScaledIconInstance(String iconName, int width, int height) {
+            this.iconName = iconName;
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ScaledIconInstance that = (ScaledIconInstance) o;
+            return width == that.width &&
+                    height == that.height &&
+                    iconName.equals(that.iconName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(iconName, width, height);
+        }
     }
 }

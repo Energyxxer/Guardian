@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class TransactionManager<T> {
     private ArrayList<Transaction<T>> transactions = new ArrayList<>();
     private int currentTransaction = 0;
+    private ArrayList<TransactionListener<T>> listeners = new ArrayList<>();
 
     /**
      * Time interval in milliseconds within which transactions will be redone and undone together.
@@ -47,7 +48,7 @@ public class TransactionManager<T> {
     }
 
     public void insertTransaction(Transaction<T> transaction) {
-        if(transaction.redo(target)) {
+        if(transaction.redoOnInsert(target)) {
             while(transactions.size() > currentTransaction) {
                 transactions.remove(currentTransaction);
             }
@@ -55,6 +56,14 @@ public class TransactionManager<T> {
             currentTransaction++;
             inserted(transaction);
         }
+    }
+
+    public void addTransactionListener(TransactionListener<T> listener) {
+        this.listeners.add(listener);
+    }
+
+    public void removeTransactionListener(TransactionListener<T> listener) {
+        this.listeners.remove(listener);
     }
 
     public int getChainDelay() {
@@ -72,13 +81,27 @@ public class TransactionManager<T> {
         return true;
     }
     protected void undone(Transaction<T> transaction) {
-
+        invokeListeners(transaction);
     }
     protected void redone(Transaction<T> transaction) {
-
+        invokeListeners(transaction);
     }
     protected void inserted(Transaction<T> transaction) {
+        invokeListeners(transaction);
     }
 
+    private void invokeListeners(Transaction<T> transaction) {
+        for(TransactionListener<T> listener : listeners) {
+            listener.accept(transaction);
+        }
+    }
 
+    public void clear() {
+        transactions.clear();
+        currentTransaction = 0;
+    }
+
+    public interface TransactionListener<T> {
+        void accept(Transaction<T> transaction);
+    }
 }

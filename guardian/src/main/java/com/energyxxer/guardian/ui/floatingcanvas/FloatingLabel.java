@@ -32,21 +32,35 @@ public abstract class FloatingLabel extends FloatingComponent {
 
     @Override
     public void paint(Graphics2D g) {
-        g.setColor(this.foreground.getCurrent(this));
         g.setFont(font);
 
         String text = getText();
+        Image icon = getIcon();
 
         FontMetrics fm = g.getFontMetrics(font);
         int width = fm.stringWidth(text);
         int height = fm.getAscent() + fm.getDescent();
 
+        int iconPadding = fm.getDescent();
+        int textXOffset = 0;
+
         Rectangle parentBounds = getParentBounds();
 
-        int x = parentBounds.x + getAlignment().getX(parentBounds.width, width);
-        int y = parentBounds.y + getAlignment().getY(parentBounds.height, height);
+        if(icon != null) {
+            height = Math.max(height, icon.getHeight(null));
+            textXOffset = icon.getWidth(null) + iconPadding;
+            width += textXOffset;
+        }
 
-        g.drawString(text, x, y + fm.getAscent());
+        int x = parentBounds.x + getAlignment().getX(parentBounds.width, width, parentBounds.height, height);
+        int y = parentBounds.y + getAlignment().getY(parentBounds.height, height, parentBounds.width, width);
+
+        if(icon != null) {
+            g.drawImage(icon, x, y + height/2 - icon.getHeight(null)/2, null);
+        }
+
+        g.setColor(this.foreground.getCurrent(this));
+        g.drawString(text, x + textXOffset, y + fm.getAscent());
 
         prevBounds.x = x;
         prevBounds.y = y;
@@ -56,7 +70,11 @@ public abstract class FloatingLabel extends FloatingComponent {
 
     @Override
     public Rectangle getBounds() {
-        return prevBounds;
+        return new Rectangle(prevBounds);
+    }
+
+    public Font getFont() {
+        return font;
     }
 
     public void setFont(Font font) {
@@ -64,6 +82,10 @@ public abstract class FloatingLabel extends FloatingComponent {
     }
 
     public abstract String getText();
+
+    public Image getIcon() {
+        return null;
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {

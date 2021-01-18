@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.floatingcanvas;
 
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.ColorStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.FloatStyleProperty;
 import com.energyxxer.guardian.ui.floatingcanvas.styles.IntStyleProperty;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
+import static com.energyxxer.guardian.ui.floatingcanvas.DynamicVector.Unit.RELATIVE;
 import static com.energyxxer.guardian.ui.floatingcanvas.DynamicVector.Unit.RELATIVE_MIN;
 
 public class FloatingPanel extends FloatingComponent {
@@ -57,8 +59,8 @@ public class FloatingPanel extends FloatingComponent {
         int width = size.getAbsoluteX(parentBounds.width, parentBounds.height);
         int height = size.getAbsoluteY(parentBounds.width, parentBounds.height);
 
-        int x = parentBounds.x + getAlignment().getX(parentBounds.width, width);
-        int y = parentBounds.y + getAlignment().getY(parentBounds.height, height);
+        int x = parentBounds.x + getAlignment().getX(parentBounds.width, width, parentBounds.height, height);
+        int y = parentBounds.y + getAlignment().getY(parentBounds.height, height, parentBounds.width, width);
 
         return new Rectangle(x, y, width, height);
     }
@@ -73,5 +75,71 @@ public class FloatingPanel extends FloatingComponent {
         borderColor.themeUpdated(t);
         borderThickness.themeUpdated(t);
         cornerRadius.themeUpdated(t);
+    }
+
+
+    public void batchSetKeys(String... keys) {
+        batchSetKeysNoUpdate(keys);
+        themeUpdated(GuardianWindow.getTheme());
+    }
+
+    private void batchSetKeysNoUpdate(String... keys) {
+        String[] backgroundKeys = new String[keys.length];
+        String[] foregroundKeys = new String[keys.length];
+        String[] borderThicknessKeys = new String[keys.length];
+        String[] borderColorKeys = new String[keys.length];
+        String[] cornerRadiusKeys = new String[keys.length];
+
+        for(int i = 0; i < keys.length; i++) {
+            String prefix = keys[i];
+            backgroundKeys[i] = prefix + ".*.background";
+            foregroundKeys[i] = prefix + ".*.foreground";
+            borderThicknessKeys[i] = prefix + ".*.border.thickness";
+            borderColorKeys[i] = prefix + ".*.border.color";
+            cornerRadiusKeys[i] = prefix + ".*.cornerRadius";
+        }
+
+        background.setKeys(backgroundKeys);
+        foreground.setKeys(foregroundKeys);
+        borderThickness.setKeys(borderThicknessKeys);
+        borderColor.setKeys(borderColorKeys);
+        cornerRadius.setKeys(cornerRadiusKeys);
+    }
+
+    public static class ContentSized extends FloatingPanel {
+
+        public ContentSized() {
+            super(new DynamicVector(1f, RELATIVE, 1f, RELATIVE));
+        }
+
+        public ContentSized(DynamicVector size) {
+            super(size);
+        }
+
+        @Override
+        public Rectangle getBounds() {
+            Rectangle parentBounds = getParentBounds();
+
+            DynamicVector size = getSizeVector();
+
+            Rectangle childUnion = null;
+            if(this.children != null) {
+                for(FloatingComponent child : this.children) {
+                    if(childUnion == null) childUnion = child.getBounds();
+                    else childUnion = childUnion.union(child.getBounds());
+                }
+            }
+            if(childUnion == null) {
+                childUnion = new Rectangle(0, 0, 0, 0);
+            }
+
+            int width = size.getAbsoluteX(childUnion.width, childUnion.height);
+            int height = size.getAbsoluteY(childUnion.width, childUnion.height);
+
+            int x = parentBounds.x + getAlignment().getX(parentBounds.width, width, parentBounds.height, height);
+            int y = parentBounds.y + getAlignment().getY(parentBounds.height, height, parentBounds.width, width);
+
+            return new Rectangle(x, y, width, height);
+        }
     }
 }

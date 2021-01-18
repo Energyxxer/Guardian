@@ -10,4 +10,8 @@ public abstract class Transaction<T> {
 
     public abstract boolean redo(T target);
     public abstract boolean undo(T target);
+
+    public boolean redoOnInsert(T target) {
+        return redo(target);
+    }
 }

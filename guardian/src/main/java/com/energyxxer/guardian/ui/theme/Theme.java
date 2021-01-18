@@ -3,8 +3,7 @@ package com.energyxxer.guardian.ui.theme;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.util.HashMap;
 
 import static com.energyxxer.guardian.ui.theme.Theme.ThemeType.GUI_THEME;
@@ -107,6 +106,7 @@ public class Theme {
 		for(String key : keys) {
 			Object value = values.get(key);
 			if(value instanceof Float) return (Float) value;
+			else if(value instanceof Integer) return ((Integer) value).floatValue();
 		}
 		return defaultValue;
 	}

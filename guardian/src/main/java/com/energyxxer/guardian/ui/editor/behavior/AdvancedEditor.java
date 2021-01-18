@@ -81,6 +81,10 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     private Color braceHighlightColor;
 
     public AdvancedEditor() {
+        this(null);
+    }
+
+    public AdvancedEditor(String namespace) {
         this.getStyledDocument().addStyle(STRING_STYLE, null);
         this.getStyledDocument().addStyle(STRING_ESCAPE_STYLE, null);
 
@@ -134,17 +138,31 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             }
         });
 
-        tlm.addThemeChangeListener(t -> {
-            this.setBackground(t.getColor(Color.WHITE, "Editor.background"));
-            this.setBackground(this.getBackground());
-            this.setForeground(t.getColor(Color.BLACK, "Editor.foreground","General.foreground"));
-            this.setCaretColor(this.getForeground());
-            this.setSelectionColor(t.getColor(new Color(50, 100, 175), "Editor.selection.background"));
-            this.setSelectionUnfocusedColor(t.getColor(new Color(50, 100, 175), "Editor.selection.unfocused.background"));
-            this.setCurrentLineColor(t.getColor(new Color(235, 235, 235), "Editor.currentLine.background"));
-            this.setFont(new Font(t.getString("Editor.font","default:monospaced"), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
-            this.setBraceHighlightColor(t.getColor(Color.YELLOW, "Editor.braceHighlight.background"));
-        });
+        if(namespace != null) {
+            tlm.addThemeChangeListener(t -> {
+                this.setBackground(t.getColor(Color.WHITE, namespace + ".background", "Editor.background"));
+                this.setBackground(this.getBackground());
+                this.setForeground(t.getColor(Color.BLACK, namespace + ".foreground", "Editor.foreground", "General.foreground"));
+                this.setCaretColor(this.getForeground());
+                this.setSelectionColor(t.getColor(new Color(50, 100, 175), namespace + ".selection.background", "Editor.selection.background"));
+                this.setSelectionUnfocusedColor(t.getColor(new Color(50, 100, 175), namespace + ".selection.unfocused.background", "Editor.selection.unfocused.background"));
+                this.setCurrentLineColor(t.getColor(new Color(235, 235, 235), namespace + ".currentLine.background", "Editor.currentLine.background"));
+                this.setFont(new Font(t.getString(namespace + ".font", "Editor.font", "default:monospaced"), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
+                this.setBraceHighlightColor(t.getColor(Color.YELLOW, namespace + ".braceHighlight.background", "Editor.braceHighlight.background"));
+            });
+        } else {
+            tlm.addThemeChangeListener(t -> {
+                this.setBackground(t.getColor(Color.WHITE, "Editor.background"));
+                this.setBackground(this.getBackground());
+                this.setForeground(t.getColor(Color.BLACK, "Editor.foreground","General.foreground"));
+                this.setCaretColor(this.getForeground());
+                this.setSelectionColor(t.getColor(new Color(50, 100, 175), "Editor.selection.background"));
+                this.setSelectionUnfocusedColor(t.getColor(new Color(50, 100, 175), "Editor.selection.unfocused.background"));
+                this.setCurrentLineColor(t.getColor(new Color(235, 235, 235), "Editor.currentLine.background"));
+                this.setFont(new Font(t.getString("Editor.font", "default:monospaced"), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
+                this.setBraceHighlightColor(t.getColor(Color.YELLOW, "Editor.braceHighlight.background"));
+            });
+        }
     }
 
     public void setSelectedLineEnabled(boolean enabled) {
@@ -172,6 +190,13 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 suggestionInterface.lock();
             }
         }
+    }
+
+    @Override
+    public void setText(String t) {
+        super.setText(t);
+
+        this.setCaretPosition(t.length());
     }
 
     @Override
@@ -236,7 +261,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         }
     }
 
-    public TransactionManager getTransactionManager() {
+    public TransactionManager<AdvancedEditor> getTransactionManager() {
         return transactionManager;
     }
 

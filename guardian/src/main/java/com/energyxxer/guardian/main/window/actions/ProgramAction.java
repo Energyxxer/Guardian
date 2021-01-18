@@ -28,7 +28,6 @@ public class ProgramAction implements ModuleToken {
     private UserKeyBind shortcut;
     private Runnable action;
     private String iconKey = null;
-    private boolean globalUsage = true;
     private Predicate<ProgramAction> usableFunction = USABLE_EVERYWHERE;
 
     public ProgramAction(String displayName, String description, UserKeyBind shortcut, String moduleActionKey) {

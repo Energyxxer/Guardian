@@ -6,9 +6,14 @@ public class Alignment {
     public static final float BOTTOM = 1, RIGHT = 1;
 
     private float parentAlignmentX;
+    private DynamicVector.Unit parentUnitX = DynamicVector.Unit.RELATIVE;
     private float childAlignmentX;
+    private DynamicVector.Unit childUnitX = DynamicVector.Unit.RELATIVE;
+
     private float parentAlignmentY;
+    private DynamicVector.Unit parentUnitY = DynamicVector.Unit.RELATIVE;
     private float childAlignmentY;
+    private DynamicVector.Unit childUnitY = DynamicVector.Unit.RELATIVE;
 
     public Alignment() {
         this(MIDDLE, MIDDLE);
@@ -43,11 +48,29 @@ public class Alignment {
         this.childAlignmentY = childAlignmentY;
     }
 
-    public int getX(int parentWidth, int childWidth) {
-        return (int) (parentWidth*parentAlignmentX - childWidth*childAlignmentX);
+    public void setUnitX(DynamicVector.Unit unitX) {
+        setUnitX(unitX, unitX);
     }
 
-    public int getY(int parentHeight, int childHeight) {
-        return (int) (parentHeight*parentAlignmentY - childHeight*childAlignmentY);
+    public void setUnitX(DynamicVector.Unit parentUnitX, DynamicVector.Unit childUnitX) {
+        this.parentUnitX = parentUnitX;
+        this.childUnitX = childUnitX;
+    }
+
+    public void setUnitY(DynamicVector.Unit unitY) {
+        setUnitY(unitY, unitY);
+    }
+
+    public void setUnitY(DynamicVector.Unit parentUnitY, DynamicVector.Unit childUnitY) {
+        this.parentUnitY = parentUnitY;
+        this.childUnitY = childUnitY;
+    }
+
+    public int getX(int parentWidth, int childWidth, int parentHeight, int childHeight) {
+        return (int) (parentUnitX.convert(parentAlignmentX, parentWidth, parentHeight) - childUnitX.convert(childAlignmentX, childWidth, childHeight));
+    }
+
+    public int getY(int parentHeight, int childHeight, int parentWidth, int childWidth) {
+        return (int) (parentUnitY.convert(parentAlignmentY, parentHeight, parentWidth) - childUnitY.convert(childAlignmentY, childHeight, childWidth));
     }
 }

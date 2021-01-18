@@ -32,15 +32,18 @@ public class EditorTransactionManager extends TransactionManager<AdvancedEditor>
     @Override
     protected void undone(Transaction<AdvancedEditor> transaction) {
         lastProfile = target.getCaret().getProfile();
+        super.undone(transaction);
     }
 
     @Override
     protected void redone(Transaction<AdvancedEditor> transaction) {
         lastProfile = target.getCaret().getProfile();
+        super.redone(transaction);
     }
 
     @Override
     protected void inserted(Transaction<AdvancedEditor> transaction) {
         lastProfile = target.getCaret().getProfile();
+        super.inserted(transaction);
     }
 }

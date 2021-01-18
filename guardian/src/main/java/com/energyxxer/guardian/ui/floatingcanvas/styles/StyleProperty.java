@@ -50,4 +50,8 @@ public abstract class StyleProperty<T> {
     }
 
     public abstract void themeUpdated(Theme t);
+
+    public void setFallback(T fallback) {
+        this.fallback = fallback;
+    }
 }

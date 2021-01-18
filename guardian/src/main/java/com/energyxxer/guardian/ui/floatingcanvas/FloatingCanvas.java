@@ -8,7 +8,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FloatingCanvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class FloatingCanvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
     private Dimension size = new Dimension(0,0);
     public List<FloatingComponent> objects = new ArrayList<>();
 
@@ -25,6 +25,7 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addMouseWheelListener(this);
+        this.addKeyListener(this);
 
         tlm.addThemeChangeListener(t -> {
             for(FloatingComponent child : objects) {
@@ -60,6 +61,9 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
         if(!newSize.equals(size)) {
             size = newSize;
             this.setPreferredSize(newSize);
+            for(FloatingComponent obj : objects) {
+                obj.canvasResized();
+            }
         }
 
         g.dispose();
@@ -149,6 +153,27 @@ public class FloatingCanvas extends JPanel implements MouseListener, MouseMotion
         if(rollover != null) {
             rollover.mouseWheelMoved(e);
             repaint();
+        }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        for(FloatingComponent component : objects) {
+            component.keyPressed(e);
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        for(FloatingComponent component : objects) {
+            component.keyReleased(e);
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        for(FloatingComponent component : objects) {
+            component.keyTyped(e);
         }
     }
 

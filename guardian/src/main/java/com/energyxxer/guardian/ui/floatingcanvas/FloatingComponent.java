@@ -11,7 +11,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class FloatingComponent implements MouseListener, MouseMotionListener, MouseWheelListener {
+public abstract class FloatingComponent implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     FloatingCanvas rootCanvas;
     FloatingComponent parent;
@@ -44,7 +44,8 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
 
     public FloatingComponent getObjectAtMousePos(Point p) {
         if(children != null) {
-            for(FloatingComponent obj : children) {
+            for(int i = children.size()-1; i >= 0; i--) {
+                FloatingComponent obj = children.get(i);
                 if(obj.contains(p)) {
                     return obj.getObjectAtMousePos(p);
                 }
@@ -103,6 +104,7 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
         return Cursor.getDefaultCursor();
     }
 
+    @NotNull
     public Alignment getAlignment() {
         return alignment;
     }
@@ -147,6 +149,41 @@ public abstract class FloatingComponent implements MouseListener, MouseMotionLis
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         if(parent != null) parent.mouseWheelMoved(e);
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if(this.children != null) {
+            for(FloatingComponent component : children) {
+                component.keyPressed(e);
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if(this.children != null) {
+            for(FloatingComponent component : children) {
+                component.keyReleased(e);
+            }
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        if(this.children != null) {
+            for(FloatingComponent component : children) {
+                component.keyTyped(e);
+            }
+        }
+    }
+
+    public void canvasResized() {
+        if(this.children != null) {
+            for(FloatingComponent component : children) {
+                component.canvasResized();
+            }
+        }
     }
 
     public void themeUpdated(Theme t) {

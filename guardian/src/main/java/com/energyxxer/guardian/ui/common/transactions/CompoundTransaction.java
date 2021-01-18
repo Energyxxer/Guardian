@@ -39,4 +39,13 @@ public class CompoundTransaction<T> extends Transaction<T> {
         }
         return actionPerformed;
     }
+
+    @Override
+    public boolean redoOnInsert(T target) {
+        boolean actionPerformed = false;
+        for(Lazy<Transaction<T>> e : edits) {
+            if(e.getValue().redoOnInsert(target)) actionPerformed = true;
+        }
+        return actionPerformed;
+    }
 }
