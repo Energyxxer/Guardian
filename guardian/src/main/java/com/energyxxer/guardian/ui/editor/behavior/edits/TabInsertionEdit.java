@@ -42,7 +42,7 @@ public class TabInsertionEdit extends Transaction<AdvancedEditor> {
                 int selectionStart = previousProfile.get(i) + characterDrift;
                 //Trust that marks will be equal to their dots.
 
-                for(int j = selectionStart-1; j >= 0; j--) {
+                for(int j = selectionStart-characterDrift-1; j >= 0; j--) {
                     if(text.charAt(j) != '\n') columns++;
                     else break;
                 }
