@@ -40,7 +40,9 @@ public class FloatingPanel extends FloatingComponent {
 
         g.setColor(borderColor.getCurrent(this));
         int borderThickness = this.borderThickness.getCurrent(this);
-        g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, cornerRadius, cornerRadius);
+        if(borderThickness > 0) {
+            g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, cornerRadius, cornerRadius);
+        }
 
         g.setColor(this.background.getCurrent(this));
         g.fillRoundRect(rect.x+borderThickness, rect.y+borderThickness, rect.width-borderThickness*2, rect.height-borderThickness*2, cornerRadius, cornerRadius);

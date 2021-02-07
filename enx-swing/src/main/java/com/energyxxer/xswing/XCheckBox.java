@@ -16,6 +16,8 @@ public class XCheckBox extends JCheckBox {
 
     protected Image checkMarkIcon = null;
 
+    protected boolean labelOnLeft = false;
+
     {
         setFocusPainted(false);
         setOpaque(false);
@@ -37,12 +39,20 @@ public class XCheckBox extends JCheckBox {
 
     @Override
     protected void paintComponent(Graphics g) {
-        g.setColor(this.getBorderColor());
         Rectangle checkBoxRect = new Rectangle();
         checkBoxRect.x = 0;
         checkBoxRect.y = (this.getHeight() - checkBoxSize) / 2;
         checkBoxRect.width = checkBoxSize;
         checkBoxRect.height = checkBoxSize;
+        int stringX = checkBoxRect.x + checkBoxRect.width + realIconTextGap;
+        FontMetrics metrics = g.getFontMetrics(this.getFont());
+
+        if(labelOnLeft) {
+            stringX = 0;
+            checkBoxRect.x = metrics.stringWidth(this.getText()) + realIconTextGap;
+        }
+
+        g.setColor(this.getBorderColor());
         g.fillRect(checkBoxRect.x, checkBoxRect.y, checkBoxRect.width, checkBoxRect.height);
         if(this.getModel().isPressed()) {
             g.setColor(this.getPressedColor());
@@ -55,12 +65,14 @@ public class XCheckBox extends JCheckBox {
         g.setColor(this.getForeground());
         g.setFont(this.getFont());
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        FontMetrics metrics = g.getFontMetrics(this.getFont());
-        g.drawString(this.getText(), checkBoxRect.x + checkBoxRect.width + realIconTextGap, this.getHeight()/2 - metrics.getHeight()/2 + metrics.getAscent());
 
         if(this.isSelected() && this.getCheckMarkIcon() != null) {
             g.drawImage(this.getCheckMarkIcon(), checkBoxRect.x, checkBoxRect.y, checkBoxRect.width, checkBoxRect.height, null);
         }
+
+
+        g.drawString(this.getText(), stringX, this.getHeight()/2 - metrics.getHeight()/2 + metrics.getAscent());
+
         //super.paintComponent(g);
     }
 
@@ -113,5 +125,13 @@ public class XCheckBox extends JCheckBox {
     public void setIconTextGap(int iconTextGap) {
         realIconTextGap = iconTextGap;
         super.setIconTextGap(realIconTextGap + checkBoxSize - 12);
+    }
+
+    public boolean isLabelOnLeft() {
+        return labelOnLeft;
+    }
+
+    public void setLabelOnLeft(boolean labelOnLeft) {
+        this.labelOnLeft = labelOnLeft;
     }
 }

@@ -48,4 +48,8 @@ public class CompoundTransaction<T> extends Transaction<T> {
         }
         return actionPerformed;
     }
+
+    public int size() {
+        return edits.size();
+    }
 }

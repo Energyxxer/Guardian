@@ -27,6 +27,8 @@ public interface Project {
 
 	Iterable<String> getPreActions();
 	Iterable<String> getPostActions();
+	Iterable<String> getPostSuccessActions();
+	Iterable<String> getPostFailureActions();
 
 	PrismarineCompiler createProjectCompiler();
 	ProjectSummarizer createProjectSummarizer();

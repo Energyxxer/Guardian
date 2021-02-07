@@ -261,7 +261,7 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
             loc.y += rect.height;
             loc.translate(editor.getLocationOnScreen().x, editor.getLocationOnScreen().y);
             if(loc.y + this.getHeight() >= GuardianWindow.jframe.getLocationOnScreen().y + GuardianWindow.jframe.getHeight()) {
-                loc.y -= editor.getLineHeight();
+                loc.y -= rect.height;
                 loc.y -= this.getHeight();
             }
             this.setLocation(loc);

@@ -13,6 +13,7 @@ import com.energyxxer.xswing.ScalableGraphics2D;
 import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.prefs.BackingStoreException;
@@ -89,7 +90,11 @@ public class Preferences {
     }
 
     public static int getModifiedEditorFontSize() {
-        return (int)Math.floor(editorFontSize * globalScaleFactor);
+        return getModifiedEditorFontSize(1);
+    }
+
+    public static int getModifiedEditorFontSize(float instanceFactor) {
+        return (int)Math.floor(editorFontSize * globalScaleFactor * instanceFactor);
     }
 
     public static void setBaseFontSize(int fontSize) {
@@ -184,6 +189,9 @@ public class Preferences {
 
                             Debug.log("Value set for preference '" + key + "': " + CommandUtils.quote(value));
                             Preferences.put(key, value);
+
+                            SettingPref<?> relatedSetting = SettingPref.LOADED_SETTINGS.get(key);
+                            if(relatedSetting != null) relatedSetting.load();
                             return;
                         }
                         case "remove": {
@@ -194,6 +202,9 @@ public class Preferences {
                             String key = args[2];
                             Preferences.remove(key);
                             Debug.log("Value removed for preference '" + key + "'");
+
+                            SettingPref<?> relatedSetting = SettingPref.LOADED_SETTINGS.get(key);
+                            if(relatedSetting != null) relatedSetting.load();
                             return;
                         }
                         case "clear_i_know_what_i_am_doing": {
@@ -263,6 +274,8 @@ public class Preferences {
     }
 
     public static class SettingPref<T> {
+        static final HashMap<String, SettingPref<?>> LOADED_SETTINGS = new HashMap<>();
+
         private T defaultValue;
         private T value;
         private String key;
@@ -279,6 +292,8 @@ public class Preferences {
             this.value = defaultValue;
             this.prefToVal = prefToVal;
             this.valToPref = valToPref;
+
+            LOADED_SETTINGS.put(key, this);
 
             load();
         }

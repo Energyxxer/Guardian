@@ -15,6 +15,7 @@ import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.prismarine.summaries.SummarySymbol;
 import com.energyxxer.util.StringBounds;
 
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
@@ -75,22 +76,25 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                 SummarySymbol selectedSymbol = highlightedUsage.fetchSymbol(lastSuccessfulSummary);
                 if(selectedSymbol == null) return;
 
-                for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
-                    if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
+                SwingUtilities.invokeLater(() -> {
+                    for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
+                        if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
 
-                    StringBounds bounds = usage.pattern.getStringBounds();
+                        StringBounds bounds = usage.pattern.getStringBounds();
 
-                    SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
+                        SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
 
-                    if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
+                        if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
 
-                    if(bounds.start.index == wordStart && bounds.end.index == wordEnd) { //If this usage refers to the identifier that's currently selected...
-                        shouldRender = true;
+                        if(bounds.start.index == wordStart && bounds.end.index == wordEnd) { //If this usage refers to the identifier that's currently selected...
+                            shouldRender = true;
+                        }
+                        try {
+                            rectangles.addAll(EditorSelectionPainter.getRectanglesForBounds(editor, bounds));
+                        } catch (BadLocationException ignore) {}
                     }
-                    try {
-                        rectangles.addAll(EditorSelectionPainter.getRectanglesForBounds(editor, bounds));
-                    } catch (BadLocationException ignore) {}
-                }
+                    editor.repaint();
+                });
             }
 
         } catch (BadLocationException e) {
@@ -191,7 +195,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                     //Looking at declaration
                     ArrayList<PrismarineSummaryModule.SymbolUsage> selectedSymbolUsages = new ArrayList<>();
 
-                    PrismarineSummaryModule lastSuccessfulSummary = (PrismarineSummaryModule) ((SuggestionDialog) editor.getSuggestionInterface()).getLastSuccessfulSummary();
+                    PrismarineSummaryModule lastSuccessfulSummary = ((SuggestionDialog) editor.getSuggestionInterface()).getLastSuccessfulSummary();
                     if(lastSuccessfulSummary != null && lastSuccessfulSummary.getParentSummary() != null) {
                         lastSuccessfulSummary = lastSuccessfulSummary.getParentSummary().getSummaryForLocation(lastSuccessfulSummary.getFileLocation());
                     }

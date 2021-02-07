@@ -98,7 +98,7 @@ public class LinePainter
         if(!enabled) return;
         try
         {
-            Rectangle r = c.modelToView(c.getCaretPosition());
+            Rectangle r = ((AdvancedEditor) c).modelToView(c.getCaretPosition());
             g.setColor( color );
             g.fillRect(0, r.y, c.getWidth(), r.height);
 
@@ -129,7 +129,7 @@ public class LinePainter
 
                     //  Remove the highlighting from the previously highlighted line
 
-                    if (lastView == null || lastView.y != currentView.y) {
+                    if (currentView != null && (lastView == null || lastView.y != currentView.y)) {
                         if(lastView != null) component.repaint(0, lastView.y, component.getWidth(), lastView.height);
                         lastView = currentView;
                     }

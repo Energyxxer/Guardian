@@ -6,8 +6,10 @@ import com.energyxxer.guardian.global.Status;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
+import com.energyxxer.guardian.ui.common.KeyFixDialog;
 import com.energyxxer.guardian.ui.common.transactions.CompoundTransaction;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
+import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.edits.DeletionEdit;
@@ -38,7 +40,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SuggestionDialog extends JDialog implements KeyListener, FocusListener, SuggestionInterface {
+public class SuggestionDialog extends KeyFixDialog implements KeyListener, FocusListener, SuggestionInterface {
     private EditorComponent editor;
 
     private OverlayScrollPane scrollPane;
@@ -82,6 +84,8 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         editor.addKeyListener(this);
         editor.addFocusListener(this);
         this.addKeyListener(this);
+        contentPane.addKeyListener(this);
+        scrollPane.addKeyListener(this);
         explorer.addKeyListener(this);
 
         try {
@@ -126,66 +130,60 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         if(this.isVisible()) return;
         if(!safe) return;
         activeResults = results;
-        explorer.clear();
-        activeTokens.clear();
+        SwingUtilities.invokeLater(() -> {
+            explorer.clear();
+            activeTokens.clear();
 
-        boolean any = false;
-        boolean anyExpandable = false;
+            boolean any = false;
+            boolean anyExpandable = false;
 
-        if(results != null) {
-            for(Snippet snippet : SnippetManager.getAll()) {
-                snippet.expanderApplied = false;
-            }
-            StringBuilder headerSB = new StringBuilder();
-            boolean createdEverywhereSnippets = false;
-            for (int i = 0; i < results.getSuggestions().size(); i++) {
-                Suggestion suggestion = results.getSuggestions().get(i);
-                for (SuggestionToken token : SuggestionExpander.expand(suggestion, this, results)) {
-                    if(token instanceof ExpandableSuggestionToken) {
-                        SuggestionExplorerItem item = new SuggestionExplorerItem(((ExpandableSuggestionToken) token), explorer);
-                        item.setDetailed(true);
-                        explorer.addElement(item);
-                        activeTokens.add(((ExpandableSuggestionToken) token));
-                        if (!anyExpandable) {
-                            item.setSelected(true);
-                            explorer.setSelected(item, null);
+            if(results != null) {
+                for(Snippet snippet : SnippetManager.getAll()) {
+                    snippet.expanderApplied = false;
+                }
+                StringBuilder headerSB = new StringBuilder();
+                boolean createdEverywhereSnippets = false;
+                for (int i = 0; i < results.getSuggestions().size(); i++) {
+                    Suggestion suggestion = results.getSuggestions().get(i);
+                    for (SuggestionToken token : SuggestionExpander.expand(suggestion, this, results)) {
+                        if(token instanceof ExpandableSuggestionToken) {
+                            SuggestionExplorerItem item = new SuggestionExplorerItem(((ExpandableSuggestionToken) token), explorer);
+                            item.setDetailed(true);
+                            explorer.addElement(item);
+                            activeTokens.add(((ExpandableSuggestionToken) token));
+                            if (!anyExpandable) {
+                                item.setSelected(true);
+                                explorer.setSelected(item, null);
+                            }
+                            anyExpandable = true;
+                        } else if(token instanceof ParameterNameSuggestionToken) {
+                            headerSB.append(((ParameterNameSuggestionToken) token).getParameterName());
+                            headerSB.append(", ");
                         }
-                        anyExpandable = true;
-                    } else if(token instanceof ParameterNameSuggestionToken) {
-                        headerSB.append(((ParameterNameSuggestionToken) token).getParameterName());
-                        headerSB.append(", ");
+                        any = true;
                     }
-                    any = true;
+                    if(!createdEverywhereSnippets && i == results.getSuggestions().size()-1) {
+                        results.getSuggestions().addAll(SnippetManager.createSuggestionsForTag(null));
+                        createdEverywhereSnippets = true;
+                    }
                 }
-                if(!createdEverywhereSnippets && i == results.getSuggestions().size()-1) {
-                    results.getSuggestions().addAll(SnippetManager.createSuggestionsForTag(null));
-                    createdEverywhereSnippets = true;
+                if(headerSB.length() > 0) {
+                    headerSB.setLength(headerSB.length()-2);
+                    parameterLabel.setText(" <" + headerSB.toString() + ">");
+                } else {
+                    parameterLabel.setText("");
                 }
             }
-            if(headerSB.length() > 0) {
-                headerSB.setLength(headerSB.length()-2);
-                parameterLabel.setText(" <" + headerSB.toString() + ">");
-            } else {
-                parameterLabel.setText("");
-            }
-        }
 
-        if(any) {
-//            Debug.log("Received " + explorer.getTotalCount() + " suggestions");
-            //Debug.log(explorer.getChildren().stream().map(ExplorerElement::getToken).collect(Collectors.toList()));
-            this.setVisible(true);
-            filter();
-            int shownTokens = 0;
-            for(ExpandableSuggestionToken token : activeTokens) {
-                if(token.isEnabled()) shownTokens += 1;
+            if(any) {
+                this.setVisible(true);
+                filter();
+                relocate(Math.min(results.getSuggestionIndex(), editor.getDocument().getLength()));
+                editor.requestFocus();
+            } else {
+                this.setVisible(false);
             }
-//            Debug.log("After filtering: " + shownTokens);
-            relocate(Math.min(results.getSuggestionIndex(), editor.getDocument().getLength()));
-            editor.requestFocus();
-        } else {
-//            Debug.log("No suggestions received");
-            this.setVisible(false);
-        }
+        });
     }
 
     private static Pattern SNIPPET_MARKER_PATTERN = Pattern.compile("\\$([A-Z_]+)\\$");
@@ -267,7 +265,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
         String finalText = text.substring(deletionsInSuggestion);
 
-        CompoundTransaction edit = new CompoundTransaction();
+        CompoundTransaction<AdvancedEditor> edit = new CompoundTransaction<>();
         edit.append(new Lazy<>(() -> new DeletionEdit(editor, driftFromCaret)));
         edit.append(new Lazy<>(() -> new InsertionEdit(finalText, editor)));
         editor.getTransactionManager().insertTransaction(edit);
@@ -323,13 +321,14 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
         boolean editorNotFocused = GuardianWindow.jframe.getFocusOwner() == null;
         if(editorNotFocused) {
             editor.requestFocus();
-            if(!e.isConsumed()) editor.keyTyped(e);
+            if(!e.isConsumed()) {
+                editor.keyTyped(e);
+            }
         }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        //Debug.log("Pressed");
         if(snippetVariableActive != -1 && (!this.isVisible() || !anyEnabled)) {
             if(KeyMap.SUGGESTION_SELECT.wasPerformedExact(e)) {
                 e.consume();
@@ -342,7 +341,16 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
                 return;
             }
         }
-        if(!this.isVisible() || !anyEnabled) return;
+        boolean editorNotFocused = GuardianWindow.jframe.getFocusOwner() == null;
+        if(!this.isVisible() || !anyEnabled) {
+            if(editorNotFocused) {
+                editor.requestFocus();
+                if(!e.isConsumed()) {
+                    editor.keyPressed(e);
+                }
+            }
+            return;
+        }
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             this.setVisible(false);
             e.consume();
@@ -371,10 +379,11 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             }
             e.consume();
         }
-        boolean editorNotFocused = GuardianWindow.jframe.getFocusOwner() == null;
         if(editorNotFocused) {
             editor.requestFocus();
-            if(!e.isConsumed()) editor.keyPressed(e);
+            if(!e.isConsumed()) {
+                editor.keyPressed(e);
+            }
         }
 
         Rectangle rect = explorer.getVisibleRect(selectedIndex);
@@ -400,11 +409,6 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
 
     public EditorComponent getEditor() {
         return editor;
-    }
-
-    @Override
-    public void setVisible(boolean b) {
-        super.setVisible(b);
     }
 
     private boolean anyEnabled = true;
@@ -452,7 +456,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
             loc.y += rect.height;
             loc.translate(editor.getLocationOnScreen().x, editor.getLocationOnScreen().y);
             if(loc.y + this.getHeight() >= GuardianWindow.jframe.getLocationOnScreen().y + GuardianWindow.jframe.getHeight()) {
-                loc.y -= editor.getLineHeight();
+                loc.y -= rect.height;
                 loc.y -= this.getHeight();
             }
             this.setLocation(loc);
@@ -543,7 +547,7 @@ public class SuggestionDialog extends JDialog implements KeyListener, FocusListe
                 int end = activeProfile.get(i+1);
 
                 try {
-                    StringBounds bounds = new StringBounds(editor.getLocationForOffset(start),editor.getLocationForOffset(end));
+                    StringBounds bounds = new StringBounds(editor.getLocationForOffset(start), editor.getLocationForOffset(end));
 
                     for (int l = bounds.start.line; l <= bounds.end.line; l++) {
                         Rectangle rectangle;

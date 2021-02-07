@@ -108,7 +108,9 @@ public class TextLineNumber extends JPanel
 				return;
 			}
 			((Graphics2D) g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			int lineHeight = component.modelToView(0).height;
+			Rectangle mtvZero = component.modelToView(0);
+			if(mtvZero == null) return;
+			int lineHeight = mtvZero.height;
 			int availableWidth = getSize().width - (2 * padding);
 
 			Rectangle viewport = scrollPane.getViewport().getViewRect();

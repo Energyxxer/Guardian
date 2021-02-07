@@ -259,7 +259,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
         } else {
             this.replaceField = field;
         }
-        field.setDefaultSize(new ScalableDimension(400, 23));
+        field.setDefaultSize(new ScalableDimension(400, 6));
         field.setSelectedLineEnabled(false);
         if(!replace) {
             field.addKeyListener(new KeyListener() {

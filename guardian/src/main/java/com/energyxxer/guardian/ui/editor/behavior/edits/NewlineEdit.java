@@ -72,7 +72,7 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
                     }
                 }
                 String placeAfterCaret = "";
-                int tabs = target.getIndentationLevelAt(start - characterDrift);
+                int tabs = target.getIndentationLevelAt(start);
 
                 if(Dot.SMART_KEYS_INDENT.get() && !afterCaret.isEmpty()) {
                     if(target.getIndentationManager().match(beforeCaretChar, afterCaretChar)) {
@@ -101,12 +101,11 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
                     int dot = start + str.length() - placeAfterCaret.length();
                     nextProfile.add(dot, dot);
                 } else nextProfile.pushFrom(start+1, str.length());
-                characterDrift += (end - start) + (tabs * 4) + 1;
+                characterDrift += (end - start) + (tabs * 4) + 1 + placeAfterCaret.length();
 
                 int ftabs = tabs;
 
                 target.registerCharacterDrift(o -> (o >= start) ? ((o <= end) ? start + (ftabs * 4) + 1 : o + (ftabs * 4) + 1 - (end - start)) : o);
-
             }
         } catch(BadLocationException x) {
             x.printStackTrace();

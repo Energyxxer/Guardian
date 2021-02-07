@@ -19,7 +19,6 @@ import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -29,12 +28,16 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
+import java.util.Timer;
 import java.util.*;
 import java.util.function.Function;
 
-public class EditorComponent extends AdvancedEditor implements KeyListener, CaretListener, ActionListener, FocusListener {
+public class EditorComponent extends AdvancedEditor implements KeyListener, CaretListener, FocusListener {
 
     private static final int MAX_HIGHLIGHTED_TOKENS_PER_LINE = 150;
     private EditorModule parent;
@@ -46,7 +49,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     private long lastEdit;
 
-    private final Timer timer;
+    private final Timer timer = new Timer();
     private Thread highlightingThread = null;
 
     public static final Preferences.SettingPref<Integer> AUTOREPARSE_DELAY = new Preferences.SettingPref<>("settings.editor.auto_reparse_delay", 500, Integer::parseInt);
@@ -65,8 +68,12 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
         this.addCaretListener(this);
 
-        timer = new Timer(20, this);
-        timer.start();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                timerTicked();
+            }
+        }, 20, 20);
 
         //this.setTransferHandler(GuardianWindow.editArea.dragToOpenFileHandler);
         this.setTransferHandler(new TransferHandler("string") {
@@ -182,6 +189,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
         }
     }
 
+    private final ArrayList<String> previousTokenStyles = new ArrayList<>();
+
     private void performTokenStyling(Lang.LangAnalysisResponse analysis, Project project, Lang lang) {
         try {
             Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
@@ -192,7 +201,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             }
 
             Token prevToken = null;
-            ArrayList<String> previousTokenStyles = new ArrayList<>();
+            previousTokenStyles.clear();
 
             if(this.inspector != null) {
                 this.inspector.clear();
@@ -272,10 +281,13 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                                         continue tgs;
                                 }
                                 Style attrStyle = EditorComponent.this.getStyle(entry.getKey());
-                                if (attrStyle == null) continue;
                                 if (prevToken != null && previousTokenStyles.contains(entry.getKey())) {
                                     styleStart = prevToken.loc.index + prevToken.value.length();
                                 }
+                                if(entry.getKey().equals("$class_function.dynamic_function.dynamic_function.code_block.statement_list")) {
+                                    sd.setParagraphAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), parent.collapsedParagraphStyle, false);
+                                }
+                                if (attrStyle == null) continue;
                                 previousTokenStyles.add(entry.getKey());
                                 sd.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
                             } while (true);
@@ -306,6 +318,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             if(analysis.response == null || analysis.response.matched) GuardianWindow.dismissStatus(errorStatus);
 
+            sd.setParagraphAttributes(0, sd.getLength(), defaultStyle, false);
+
         } catch(Exception x) {
             x.printStackTrace();
             GuardianWindow.showException(x);
@@ -321,12 +335,11 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     void highlight() {
         parent.highlightTime = System.currentTimeMillis();
-        lastEdit = new Date().getTime();
+        lastEdit = System.currentTimeMillis();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        if (lastEdit > -1 && (new Date().getTime()) - lastEdit > AUTOREPARSE_DELAY.get() && (parent.associatedTab == null || parent.associatedTab.isActive())) {
+    public void timerTicked() {
+        if (lastEdit > -1 && System.currentTimeMillis() - lastEdit > AUTOREPARSE_DELAY.get() && (parent.associatedTab == null || parent.associatedTab.isActive())) {
             lastEdit = -1;
             if(highlightingThread != null) {
                 highlightingThread.stop();
@@ -389,7 +402,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
     @Override
     public void dispose() {
         super.dispose();
-        timer.stop();
+        timer.cancel();
+        timer.purge();
         suggestionBox.dispose();
     }
 

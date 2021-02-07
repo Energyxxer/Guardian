@@ -42,19 +42,19 @@ public class SearchHighlighter implements Highlighter.HighlightPainter {
                 for (int l = bounds.start.line; l <= bounds.end.line; l++) {
                     Rectangle rectangle;
                     if (l == bounds.start.line) {
-                        rectangle = c.modelToView(bounds.start.index);
+                        rectangle = ((AdvancedEditor) c).modelToView(bounds.start.index);
                         if (bounds.start.line == bounds.end.line) {
-                            rectangle.width = c.modelToView(bounds.end.index).x - rectangle.x;
+                            rectangle.width = ((AdvancedEditor) c).modelToView(bounds.end.index).x - rectangle.x;
                         } else {
                             rectangle.width = c.getWidth() - rectangle.x;
                         }
                     } else if (l == bounds.end.line) {
-                        rectangle = c.modelToView(bounds.end.index);
-                        rectangle.width = rectangle.x - c.modelToView(0).x;
-                        rectangle.x = c.modelToView(0).x; //0
+                        rectangle = ((AdvancedEditor) c).modelToView(bounds.end.index);
+                        rectangle.width = rectangle.x - ((AdvancedEditor) c).modelToView(0).x;
+                        rectangle.x = ((AdvancedEditor) c).modelToView(0).x; //0
                     } else {
-                        rectangle = c.modelToView(bounds.start.index);
-                        rectangle.x = c.modelToView(0).x; //0
+                        rectangle = ((AdvancedEditor) c).modelToView(bounds.start.index);
+                        rectangle.x = ((AdvancedEditor) c).modelToView(0).x; //0
                         rectangle.y += rectangle.height * (l - bounds.start.line);
                         rectangle.width = c.getWidth();
                     }

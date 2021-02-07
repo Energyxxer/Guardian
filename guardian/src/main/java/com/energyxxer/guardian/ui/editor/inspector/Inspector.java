@@ -7,6 +7,7 @@ import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.HintStylizer;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
+import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.xswing.hints.TextHint;
 
@@ -82,11 +83,11 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
                             }
                         } else if (l == bounds.end.line) {
                             rectangle = editor.modelToView(bounds.end.index);
-                            rectangle.width = rectangle.x - c.modelToView(0).x;
-                            rectangle.x = c.modelToView(0).x; //0
+                            rectangle.width = rectangle.x - ((AdvancedEditor) c).modelToView(0).x;
+                            rectangle.x = ((AdvancedEditor) c).modelToView(0).x; //0
                         } else {
                             rectangle = editor.modelToView(bounds.start.index);
-                            rectangle.x = c.modelToView(0).x; //0
+                            rectangle.x = ((AdvancedEditor) c).modelToView(0).x; //0
                             rectangle.y += rectangle.height * (l - bounds.start.line);
                             rectangle.width = c.getWidth();
                         }

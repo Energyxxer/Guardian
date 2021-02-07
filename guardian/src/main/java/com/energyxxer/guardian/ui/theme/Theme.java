@@ -5,6 +5,7 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static com.energyxxer.guardian.ui.theme.Theme.ThemeType.GUI_THEME;
 
@@ -117,6 +118,31 @@ public class Theme {
 
 	//Fonts
 
+	private static final HashSet<String> KNOWN_FONTS = new HashSet<>();
+	private static final HashSet<String> UNKNOWN_FONTS = new HashSet<>();
+	private static final String[] ALL_FONTS = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+
+	private static boolean fontExists(String name) {
+		if(KNOWN_FONTS.contains(name)) return true;
+		if(UNKNOWN_FONTS.contains(name)) return false;
+
+		for(String existing : ALL_FONTS) {
+			if(existing.equals(name)) {
+				KNOWN_FONTS.add(name);
+				return true;
+			}
+		}
+		UNKNOWN_FONTS.add(name);
+		return false;
+	}
+
+	private static String getFirstKnownFontFromList(String[] list) {
+		for(String str : list) {
+			if(fontExists(str.trim())) return str;
+		}
+		return null;
+	}
+
 	public Font getFont(Font defaultValue, String... keys) {
 		String[] names = new String[keys.length];
 		String[] sizes = new String[keys.length];
@@ -132,6 +158,7 @@ public class Theme {
 
 		String name = this.getString(names);
 		if(name == null) name = defaultValue.getName();
+		if(name.contains(",")) name = getFirstKnownFontFromList(name.split("\\s*,\\s*"));
 		int size = Math.round(Preferences.getModifiedFontSize() * this.getFloat(1, sizes));
 		if(size < 0) size = Preferences.getModifiedFontSize();
 		boolean bold = this.getBoolean(defaultValue.isBold(), bolds);

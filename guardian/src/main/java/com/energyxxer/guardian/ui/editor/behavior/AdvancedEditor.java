@@ -26,6 +26,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.basic.BasicTextPaneUI;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -33,8 +34,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -49,6 +50,8 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     private static final float BIAS_POINT = 0.4f;
 
     private static final String WORD_DELIMITERS = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
+
+    public static final Font DEFAULT_FONT = new Font("monospaced", Font.PLAIN, 11);
 
     private final TransferHandler editorTransferHandler;
 
@@ -66,10 +69,13 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
     private SuggestionInterface suggestionInterface;
 
-    private int lineHeight = 17;
-
     private static UserKeyBind FOLD;
     private static UserKeyBind UNFOLD;
+
+    public static final Preferences.SettingPref<Float> LINE_SPACING = new Preferences.SettingPref<>("settings.editor.line_spacing", 1f, Float::parseFloat);
+    public static final Preferences.SettingPref<String> FONT = new Preferences.SettingPref<>("settings.editor.font", "monospaced", String::trim);
+
+    public static final Preferences.SettingPref<Boolean> EDITOR_DO_BARREL_ROLL = new Preferences.SettingPref<>("settings.editor.barrel_roll", false, Boolean::parseBoolean);
 
     static {
         if(Preferences.get("debug","false").equals("true")) {
@@ -80,11 +86,18 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     private Color selectionUnfocusedColor;
     private Color braceHighlightColor;
 
+    private int lineHeight;
+    private int lineOffset;
+
+    private Style defaultParagraphStyle;
+
     public AdvancedEditor() {
         this(null);
     }
 
     public AdvancedEditor(String namespace) {
+        this.setUI(new AdvancedEditorTextUI());
+
         this.getStyledDocument().addStyle(STRING_STYLE, null);
         this.getStyledDocument().addStyle(STRING_ESCAPE_STYLE, null);
 
@@ -105,14 +118,8 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 ex.printStackTrace();
             }
 
-            updateDefaultSize();
+            SwingUtilities.invokeLater(this::updateDefaultSize);
         });
-
-        /*this.getDocument().addUndoableEditListener(e -> {
-            if (e.getEdit().getPresentationName().equals("style change")) return;
-            viewLineCache.setText(this.getText());
-            updateDefaultSize();
-        });*/
 
         this.setTransferHandler(this.editorTransferHandler = new TransferHandler() {
             @Override
@@ -138,31 +145,29 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             }
         });
 
-        if(namespace != null) {
-            tlm.addThemeChangeListener(t -> {
-                this.setBackground(t.getColor(Color.WHITE, namespace + ".background", "Editor.background"));
-                this.setBackground(this.getBackground());
-                this.setForeground(t.getColor(Color.BLACK, namespace + ".foreground", "Editor.foreground", "General.foreground"));
-                this.setCaretColor(this.getForeground());
-                this.setSelectionColor(t.getColor(new Color(50, 100, 175), namespace + ".selection.background", "Editor.selection.background"));
-                this.setSelectionUnfocusedColor(t.getColor(new Color(50, 100, 175), namespace + ".selection.unfocused.background", "Editor.selection.unfocused.background"));
-                this.setCurrentLineColor(t.getColor(new Color(235, 235, 235), namespace + ".currentLine.background", "Editor.currentLine.background"));
-                this.setFont(new Font(t.getString(namespace + ".font", "Editor.font", "default:monospaced"), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
-                this.setBraceHighlightColor(t.getColor(Color.YELLOW, namespace + ".braceHighlight.background", "Editor.braceHighlight.background"));
-            });
-        } else {
-            tlm.addThemeChangeListener(t -> {
-                this.setBackground(t.getColor(Color.WHITE, "Editor.background"));
-                this.setBackground(this.getBackground());
-                this.setForeground(t.getColor(Color.BLACK, "Editor.foreground","General.foreground"));
-                this.setCaretColor(this.getForeground());
-                this.setSelectionColor(t.getColor(new Color(50, 100, 175), "Editor.selection.background"));
-                this.setSelectionUnfocusedColor(t.getColor(new Color(50, 100, 175), "Editor.selection.unfocused.background"));
-                this.setCurrentLineColor(t.getColor(new Color(235, 235, 235), "Editor.currentLine.background"));
-                this.setFont(new Font(t.getString("Editor.font", "default:monospaced"), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
-                this.setBraceHighlightColor(t.getColor(Color.YELLOW, "Editor.braceHighlight.background"));
-            });
-        }
+        defaultParagraphStyle = this.addStyle("_DEFAULT_PARAGRAPH_STYLE", null);
+
+        tlm.addThemeChangeListener(t -> {
+            this.setBackground(t.getColor(Color.WHITE, "Editor.background"));
+            this.setBackground(this.getBackground());
+            this.setForeground(t.getColor(Color.BLACK, "Editor.foreground","General.foreground"));
+            this.setCaretColor(this.getForeground());
+            this.setSelectionColor(t.getColor(new Color(50, 100, 175), "Editor.selection.background"));
+            this.setSelectionUnfocusedColor(t.getColor(new Color(50, 100, 175), "Editor.selection.unfocused.background"));
+            this.setCurrentLineColor(t.getColor(new Color(235, 235, 235), "Editor.currentLine.background"));
+            this.setFont(new Font(FONT.get(), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
+            this.setBraceHighlightColor(t.getColor(Color.YELLOW, "Editor.braceHighlight.background"));
+
+            FontMetrics fm = this.getFontMetrics(getFont());
+            lineHeight = fm.getHeight();
+
+            float lineSpacing = LINE_SPACING.get();
+            lineOffset = (int) Math.floor((lineSpacing-1) * lineHeight)-1;
+
+            StyleConstants.setLineSpacing(defaultParagraphStyle, lineSpacing-1);
+
+            this.getStyledDocument().setParagraphAttributes(0, this.getStyledDocument().getLength(), defaultParagraphStyle, false);
+        });
     }
 
     public void setSelectedLineEnabled(boolean enabled) {
@@ -183,8 +188,9 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         if(!enabled) return;
         if(e.isConsumed()) return;
         e.consume();
-        if(!isPlatformControlDown(e) && !Commons.isSpecialCharacter(e.getKeyChar())) {
-            transactionManager.insertTransaction(new InsertionEdit("" + e.getKeyChar(), this));
+        char c = e.getKeyChar();
+        if(!isPlatformControlDown(e) && !Commons.isSpecialCharacter(c) && this.isCharacterAllowed(c)) {
+            transactionManager.insertTransaction(new InsertionEdit("" + c, this));
             if(suggestionInterface != null) {
                 suggestionInterface.setSafeToSuggest(true);
                 suggestionInterface.lock();
@@ -192,11 +198,17 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         }
     }
 
+    protected boolean isCharacterAllowed(char c) {
+        return true;
+    }
+
     @Override
     public void setText(String t) {
         super.setText(t);
 
-        this.setCaretPosition(t.length());
+        this.setCaretPosition(0);
+
+        getTransactionManager().clear();
     }
 
     @Override
@@ -222,11 +234,13 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         } else if(keyCode == KeyEvent.VK_TAB) {
             e.consume();
 
-            CaretProfile profile = caret.getProfile();
-            if(profile.getSelectedCharCount() == 0 && !e.isShiftDown()) {
-                transactionManager.insertTransaction(new TabInsertionEdit(this));
-            } else {
-                transactionManager.insertTransaction(new IndentEdit(this, e.isShiftDown()));
+            if(isCharacterAllowed(' ')) {
+                CaretProfile profile = caret.getProfile();
+                if(profile.getSelectedCharCount() == 0 && !e.isShiftDown()) {
+                    transactionManager.insertTransaction(new TabInsertionEdit(this));
+                } else {
+                    transactionManager.insertTransaction(new IndentEdit(this, e.isShiftDown()));
+                }
             }
         } else if(keyCode == KeyEvent.VK_BACK_SPACE || keyCode == KeyEvent.VK_DELETE) {
             e.consume();
@@ -236,7 +250,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             }
         } else if(keyCode == KeyEvent.VK_ENTER) {
             e.consume();
-            transactionManager.insertTransaction(new NewlineEdit(this, !isPlatformControlDown(e)));
+            if(isCharacterAllowed('\n')) transactionManager.insertTransaction(new NewlineEdit(this, !isPlatformControlDown(e)));
         } else if(KeyMap.COPY.wasPerformedExact(e) || KeyMap.CUT.wasPerformedExact(e)) {
             e.consume();
             this.copyOrCut(KeyMap.CUT.wasPerformedExact(e));
@@ -286,7 +300,6 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             if(ch == '\n') return superResult;
             Rectangle backward = this.modelToView(superResult);
             Rectangle forward = this.modelToView(superResult+1);
-            setLineHeight(backward.height);
             if(backward.x > forward.x) return superResult;
 
             float offset = (float) (pt.x - backward.x) / (forward.x - backward.x);
@@ -298,11 +311,6 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             Debug.log(x.getMessage(), Debug.MessageType.ERROR);
             return superResult;
         }
-    }
-
-    @Override
-    public Rectangle modelToView(int pos) throws BadLocationException {
-        return super.modelToView(pos);
     }
 
     protected String getCaretInfo() {
@@ -408,17 +416,27 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
                 if(rawContents == null) return;
                 String[] contents = ((String[]) rawContents);
+                for(int i = 0; i < contents.length; i++) {
+                    contents[i] = validateBeforePaste(contents[i]);
+                    if(contents[i] == null) return;
+                }
                 transactionManager.insertTransaction(new PasteEdit(contents, this));
             } else if(clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
                 Object rawContents = clipboard.getData(DataFlavor.stringFlavor);
 
                 if(rawContents == null) return;
                 String contents = ((String) rawContents).replace("\t", "    ").replace("\r","");
+                contents = validateBeforePaste(contents);
+                if(contents == null) return;
                 transactionManager.insertTransaction(new PasteEdit(contents, this));
             }
         } catch(Exception x) {
             x.printStackTrace();
         }
+    }
+
+    protected String validateBeforePaste(String s) {
+        return s;
     }
 
     public void jumpToMatchingBrace() {
@@ -482,6 +500,10 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         if(suggestionInterface != null) {
             suggestionInterface.dismiss(false);
         }
+    }
+
+    public int getLineOffset() {
+        return lineOffset;
     }
 
     private enum CharType {
@@ -674,11 +696,17 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
     private void updateDefaultSize() {
         if(defaultSize != null) {
-            int lineCount = getText().split("\n", -1).length;
-            Dimension size = new ScalableDimension(defaultSize.width, (getLineHeight() * lineCount) + defaultSize.height - getLineHeight());
-            this.setPreferredSize(size);
-            for(Consumer<Dimension> consumer : defaultSizeListeners) {
-                consumer.accept(size);
+            try {
+                Rectangle mtv = this.modelToView(getDocument().getLength());
+                if (mtv == null) return;
+                Dimension size = new ScalableDimension(defaultSize.width, mtv.y + mtv.height + defaultSize.height);
+                this.setPreferredSize(size);
+                for (Consumer<Dimension> consumer : defaultSizeListeners) {
+                    consumer.accept(size);
+                }
+                this.revalidate();
+            } catch (BadLocationException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -718,14 +746,6 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             e.printStackTrace();
             return 0;
         }
-    }
-
-    public int getLineHeight() {
-        return lineHeight;
-    }
-
-    void setLineHeight(int lineHeight) {
-        this.lineHeight = lineHeight;
     }
 
     //Delegates and deprecated managers
@@ -942,60 +962,6 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         });
     }
 
-    private static class MyTransferable implements Transferable {
-        private static ArrayList<DataFlavor> MyFlavors = new ArrayList<DataFlavor>();
-        private String plain = null;
-        private String html = null;
-
-        static {
-            try {
-                for (String m : new String[]{"text/plain", "text/html"}) {
-                    MyFlavors.add(new DataFlavor(m + ";class=java.lang.String"));
-                    MyFlavors.add(new DataFlavor(m + ";class=java.io.Reader"));
-                    MyFlavors.add(new DataFlavor(m + ";class=java.io.InputStream;charset=utf-8"));
-                }
-            }
-            catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public MyTransferable(String plain, String html) {
-            this.plain = plain;
-            this.html = html;
-        }
-
-        public DataFlavor[] getTransferDataFlavors() {
-            return MyFlavors.toArray(new DataFlavor[MyFlavors.size()]);
-        }
-
-        public boolean isDataFlavorSupported(DataFlavor flavor) {
-            return MyFlavors.contains(flavor);
-        }
-
-        public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
-            String s = null;
-            if (flavor.getMimeType().contains("text/plain")) {
-                s = plain;
-            }
-            else if (flavor.getMimeType().contains("text/html")) {
-                s = html;
-            }
-            if (s != null) {
-                if (String.class.equals(flavor.getRepresentationClass())) {
-                    return s;
-                }
-                else if (Reader.class.equals(flavor.getRepresentationClass())) {
-                    return new StringReader(s);
-                }
-                else if (InputStream.class.equals(flavor.getRepresentationClass())) {
-                    return new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
-                }
-            }
-            throw new UnsupportedFlavorException(flavor);
-        }
-    }
-
     public static void copyToClipboard(String str) {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(new Transferable() {
@@ -1016,5 +982,79 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 throw new UnsupportedFlavorException(flavor);
             }
         }, null);
+    }
+
+    private class AdvancedEditorTextUI extends BasicTextPaneUI {
+        private boolean superPainted = false;
+
+        private BufferedImage previewBuffer = null;
+        private Graphics2D previewGraphics = null;
+
+        @Override
+        protected void paintSafely(Graphics g) {
+            if(!superPainted) {
+                super.paintSafely(g);
+                superPainted = true;
+            } else {
+                Highlighter highlighter = AdvancedEditor.this.getHighlighter();
+                Caret caret = AdvancedEditor.this.getCaret();
+
+                // paint the background
+                if (AdvancedEditor.this.isOpaque() && !isPaintingForPrint()) {
+                    paintBackground(g);
+                }
+
+                // paint the highlights
+                if (highlighter != null) {
+                    highlighter.paint(g);
+                }
+
+                // paint the view hierarchy
+                Rectangle alloc = getVisibleEditorRect();
+                if (alloc != null) {
+                    Graphics offsetGraphics = g.create();
+                    offsetGraphics.translate(0, lineOffset);
+                    if(EDITOR_DO_BARREL_ROLL.get()) {
+                        ((Graphics2D) offsetGraphics).rotate(((double) System.currentTimeMillis()) / 1000 * Math.PI, getWidth() / 2, getHeight() / 2);
+                        repaint();
+                    }
+                    getRootView(AdvancedEditor.this).paint(offsetGraphics, alloc);
+                }
+
+                // paint the caret
+                if (caret != null) {
+                    caret.paint(g);
+                }
+
+//                if(!isPaintingForPrint()) {
+//                    int previewWindow = 500;
+//                    int previewWidth = 150;
+//
+//                    if(previewBuffer == null || previewBuffer.getWidth() != previewWindow || previewBuffer.getHeight() != getHeight()) {
+//                        if(previewGraphics != null) previewGraphics.dispose();
+//                        previewBuffer = new BufferedImage(previewWindow, getHeight(), BufferedImage.TYPE_INT_ARGB);
+//                        previewGraphics = (Graphics2D) previewBuffer.getGraphics();
+//                    }
+//
+//                    g.setColor(new Color(0, 0, 0, 0));
+//                    Composite oldComposite = previewGraphics.getComposite();
+//                    previewGraphics.setComposite(AlphaComposite.Clear);
+//                    previewGraphics.fillRect(0, 0, previewBuffer.getWidth(), previewBuffer.getHeight());
+//                    previewGraphics.setComposite(oldComposite);
+//                    printAll(previewGraphics);
+//
+//                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+//                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+//                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+//
+//                    g.drawImage(previewBuffer, getWidth() - previewWidth, 0, previewWidth, (int) (((float)previewWidth / previewWindow) * getHeight()), null);
+////                    g.drawImage(previewBuffer, getWidth() - previewWidth, 0, null);
+//                }
+
+//                if (dropCaret != null) {
+//                    dropCaret.paint(g);
+//                }
+            }
+        }
     }
 }

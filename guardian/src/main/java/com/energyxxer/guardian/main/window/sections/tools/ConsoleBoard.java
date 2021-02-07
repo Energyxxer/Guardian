@@ -3,11 +3,12 @@ package com.energyxxer.guardian.main.window.sections.tools;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.ProcessManager;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.styledcomponents.StyledTextField;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.util.out.ConsoleOutputStream;
 import com.energyxxer.util.processes.AbstractProcess;
@@ -60,7 +61,7 @@ public class ConsoleBoard extends ToolBoard {
             console.setBackground(t.getColor(Color.WHITE, "Console.background"));
             console.setSelectionColor(t.getColor(new Color(50, 100, 175), "Console.selection.background","General.textfield.selection.background"));
             console.setSelectedTextColor(t.getColor(Color.BLACK, "Console.selection.foreground","General.textfield.selection.foreground","Console.foreground","General.foreground"));
-            console.setFont(new Font(t.getString("Console.font","Editor.font","default:monospaced"), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
+            console.setFont(t.getFont(AdvancedEditor.DEFAULT_FONT, "Console", "Editor").deriveFont((float)Preferences.getModifiedEditorFontSize()));
             console.setForeground(t.getColor(Color.BLACK, "Console.foreground"));
 
             if(console.getStyle("warning") != null) console.removeStyle("warning");
@@ -133,7 +134,7 @@ public class ConsoleBoard extends ToolBoard {
 
         tlm.addThemeChangeListener(t -> {
             inputField.setPreferredSize(new ScalableDimension(1, 24));
-            inputField.setFont(new Font(t.getString("Console.font","Editor.font","default:monospaced"), Font.PLAIN, Preferences.getModifiedEditorFontSize()));
+            inputField.setFont(t.getFont(AdvancedEditor.DEFAULT_FONT, "Console", "Editor").deriveFont((float)Preferences.getModifiedEditorFontSize()));
             fieldPane.setBackground(inputField.getBackground());
             consoleScrollPane.setBackground(console.getBackground());
             consoleScrollPane.setBorder(BorderFactory.createMatteBorder(Math.max(t.getInteger("Console.header.border.thickness"),0), 0, 0, 0, t.getColor(new Color(200, 200, 200), "Console.header.border.color")));
@@ -215,10 +216,37 @@ public class ConsoleBoard extends ToolBoard {
                 Debug.log("EXEC: Runs a program");
             }
 
+            private ArrayList<String> splitCommandIntoArgs(String command) {
+                ArrayList<String> args = new ArrayList<>();
+                StringBuilder sb = new StringBuilder();
+                boolean escaped = false;
+                boolean inString = false;
+                for(char c : command.toCharArray()) {
+                    if(Character.isWhitespace(c) && !inString) {
+                        args.add(sb.toString());
+                        sb.setLength(0);
+                        escaped = false;
+                    } else if(c == '\"' && !escaped) {
+                        inString = !inString;
+                        sb.append(c);
+                    } else if(c == '\\') {
+                        escaped = !escaped;
+                        sb.append(c);
+                    } else {
+                        escaped = false;
+                        sb.append(c);
+                    }
+                }
+                if(sb.length() > 0) {
+                    args.add(sb.toString());
+                }
+                return args;
+            }
+
             @Override
             public void handle(String[] args) {
                 String command = String.join(" ", args).substring("exec".length()).trim();
-                ProcessBuilder pb = new ProcessBuilder(command).redirectErrorStream(true);
+                ProcessBuilder pb = new ProcessBuilder(splitCommandIntoArgs(command)).redirectErrorStream(true);
 
                 GuardianWindow.consoleBoard.lock();
 

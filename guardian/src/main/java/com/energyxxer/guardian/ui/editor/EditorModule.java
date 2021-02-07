@@ -57,6 +57,8 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     private TextLineNumber tln;
     protected Theme syntax;
 
+    Style defaultParagraphStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+    Style collapsedParagraphStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
     private ArrayList<String> styles = new ArrayList<>();
     HashMap<String, String[]> parserStyles = new HashMap<>();
 
@@ -75,9 +77,9 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
 
         editorComponent = new EditorComponent(this);
 
-        JPanel container = new JPanel(new BorderLayout());
-        container.add(editorComponent);
-        scrollPane.setViewportView(container);
+//        JPanel container = new JPanel(new BorderLayout());
+//        container.add(editorComponent);
+        scrollPane.setViewportView(editorComponent);
 
         this.add(scrollPane, BorderLayout.CENTER);
 
@@ -231,6 +233,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
         for(String key : this.parserStyles.keySet()) {
             editorComponent.removeStyle(key);
         }
+        editorComponent.removeStyle("_DEFAULT_STYLE");
         this.styles.clear();
         this.parserStyles.clear();
     }
@@ -388,6 +391,12 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     }
 
     public void updateSyntax(Theme t) {
+        collapsedParagraphStyle = editorComponent.addStyle("_COLLAPSED_STYLE", null);
+        StyleConstants.setLineSpacing(collapsedParagraphStyle, -1f);
+        StyleConstants.setFontSize(collapsedParagraphStyle, 0);
+
+        editorComponent.getStyledDocument().setParagraphAttributes(0, editorComponent.getStyledDocument().getLength(), defaultParagraphStyle, false);
+
         Lang lang = getLanguage();
         if(lang != null) {
             setSyntax(ThemeManager.getSyntaxForGUITheme(lang, t));
@@ -494,6 +503,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
             file = ((FileModuleToken) newToken).getFile();
             updateSyntax();
             editorComponent.getStyledDocument().setCharacterAttributes(0, editorComponent.getStyledDocument().getLength(), StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true);
+            editorComponent.getStyledDocument().setParagraphAttributes(0, editorComponent.getStyledDocument().getLength(), defaultParagraphStyle, false);
             editorComponent.highlight();
         }
         return true;

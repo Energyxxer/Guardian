@@ -195,6 +195,11 @@ public class Commons {
         });
         process.addCompletionListener((p, success) -> {
             GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostActions());
+            if(success) {
+                GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostSuccessActions());
+            } else {
+                GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostFailureActions());
+            }
         });
 
         ProcessManager.queueProcess(process);
@@ -239,6 +244,12 @@ public class Commons {
     }
 
     private static HashMap<ScaledIconInstance, Image> SCALED_IMAGE_CACHE = new HashMap<>();
+
+    static {
+        ThemeChangeListener.addThemeChangeListener(t -> {
+            SCALED_IMAGE_CACHE.clear();
+        });
+    }
 
     private static class ScaledIconInstance {
         private String iconName;

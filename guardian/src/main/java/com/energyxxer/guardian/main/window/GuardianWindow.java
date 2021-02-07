@@ -16,6 +16,7 @@ import com.energyxxer.guardian.main.window.sections.tools.find.FindBoard;
 import com.energyxxer.guardian.main.window.sections.tools.process.ProcessBoard;
 import com.energyxxer.guardian.main.window.sections.tools.todo.TodoBoard;
 import com.energyxxer.guardian.ui.HintStylizer;
+import com.energyxxer.guardian.ui.common.KeyFixDialog;
 import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetManager;
 import com.energyxxer.guardian.ui.explorer.NoticeExplorerMaster;
 import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
@@ -83,6 +84,8 @@ public class GuardianWindow {
 
 	public ThemeListenerManager tlm = new ThemeListenerManager();
 
+	private static KeyFixDialog recentlyShownDialog = null;
+
     public GuardianWindow() {
 		jframe = new JFrame();
 		setTitle("");
@@ -121,6 +124,24 @@ public class GuardianWindow {
 			} else if(e.getID() == KeyEvent.KEY_RELEASED) {
 				if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
 					markRelease(e);
+				}
+			}
+			if(jframe.getFocusOwner() == null) {
+				// Missed key event
+				if(recentlyShownDialog != null) {
+					if(recentlyShownDialog.isVisible()) {
+						// Attributing to dialog
+						recentlyShownDialog.requestFocusInWindow();
+						if(e.getID() == KeyEvent.KEY_TYPED) {
+							recentlyShownDialog.keyTyped(e);
+						} else if(e.getID() == KeyEvent.KEY_PRESSED) {
+							recentlyShownDialog.keyPressed(e);
+						} else if(e.getID() == KeyEvent.KEY_RELEASED) {
+							recentlyShownDialog.keyReleased(e);
+						}
+						return true;
+					}
+					// Dropped
 				}
 			}
             return false;
@@ -247,6 +268,10 @@ public class GuardianWindow {
 		exceptionHint.setArrowVisible(false);
 		((ExceptionHint) exceptionHint).setText(message);
 		exceptionHint.show(new Point(jframe.getX() + jframe.getWidth() - 15, jframe.getY() + jframe.getHeight() - 53 - 15), new TemporaryConfirmation(5 + message.length() / 10));
+	}
+
+	public static void dialogShown(KeyFixDialog dialog) {
+		recentlyShownDialog = dialog;
 	}
 
     public static void close() {

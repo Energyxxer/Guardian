@@ -2,15 +2,15 @@ package com.energyxxer.guardian.main.window.sections;
 
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.guardian.main.window.actions.ActionManager;
 import com.energyxxer.guardian.ui.ToolbarButton;
 import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPaneLayout;
 import com.energyxxer.guardian.ui.styledcomponents.Padding;
-import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.energyxxer.guardian.main.window.actions.ActionManager;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
+import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.xswing.ComponentResizer;
 import com.energyxxer.xswing.OverlayBorderPanel;
 import com.energyxxer.xswing.ScalableDimension;
@@ -36,6 +36,7 @@ public class Sidebar extends OverlayBorderPanel {
     }
 
     {
+
         expanded.setPreferredSize(new ScalableDimension(350, 5));
 
         tlm.addThemeChangeListener(t -> {
@@ -182,7 +183,9 @@ public class Sidebar extends OverlayBorderPanel {
     public void expand() {
         this.removeAll();
         this.add(expanded, BorderLayout.CENTER);
+        this.getOverlayInsets().right = ComponentResizer.DIST;
         update();
+
 
         Preferences.put("explorer.expanded", "true");
     }
@@ -190,7 +193,9 @@ public class Sidebar extends OverlayBorderPanel {
     public void collapse() {
         this.removeAll();
         this.add(collapsed, BorderLayout.CENTER);
+        this.getOverlayInsets().right = 0;
         update();
+
 
         Preferences.put("explorer.expanded", "false");
     }

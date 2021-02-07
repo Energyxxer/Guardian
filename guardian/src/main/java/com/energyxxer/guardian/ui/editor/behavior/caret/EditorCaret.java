@@ -218,11 +218,13 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
                 boolean shouldPaint = !(dragSelectMode == RECTANGLE && dot == bufferedDot) && !(dragSelectMode == CHAR && dotIndex >= rectangleDotsStartIndex);
 
                 if(visible && shouldPaint) {
-                    r.x -= paintWidth >> 1;
+                    r.x -= paintWidth / 2;
                     g.fillRect(r.x, r.y, paintWidth, r.height);
                 }
                 else {
-                    getComponent().repaint(r);
+//                    Rectangle dirtyRect = new Rectangle(r);
+//                    dirtyRect.y += editor.getLineOffset();
+//                    getComponent().repaint(r);
                 }
                 dotIndex++;
             }

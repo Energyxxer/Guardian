@@ -19,4 +19,12 @@ public class OverlayBorderPanel extends JPanel implements OverlayBorderComponent
     public Insets getOverlayDimensions() {
         return insets;
     }
+
+    public Insets getOverlayInsets() {
+        return insets;
+    }
+
+    public void setOverlayInsets(Insets insets) {
+        this.insets = insets;
+    }
 }

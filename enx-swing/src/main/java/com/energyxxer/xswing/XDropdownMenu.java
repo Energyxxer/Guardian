@@ -5,8 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 @SuppressWarnings("unused")
@@ -32,12 +30,7 @@ public class XDropdownMenu<T> extends XButton {
     }
 
     {
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                XDropdownMenu.this.mouseClicked(e);
-            }
-        });
+        this.addActionListener(a -> pressed());
         setHorizontalAlignment(SwingConstants.LEFT);
     }
 
@@ -122,8 +115,7 @@ public class XDropdownMenu<T> extends XButton {
         icons.clear();
     }
 
-    public void mouseClicked(MouseEvent e) {
-
+    public void pressed() {
         JPopupMenu pm = popupFactory.createInstance();
 
         int height = 2;
