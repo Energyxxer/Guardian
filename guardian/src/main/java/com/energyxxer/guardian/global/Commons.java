@@ -20,6 +20,7 @@ import com.energyxxer.util.out.Console;
 import com.energyxxer.util.processes.AbstractProcess;
 import com.energyxxer.xswing.ScalableGraphics2D;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -194,12 +195,14 @@ public class Commons {
             report.getErrors().forEach(Console.err::println);
         });
         process.addCompletionListener((p, success) -> {
-            GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostActions());
-            if(success) {
-                GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostSuccessActions());
-            } else {
-                GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostFailureActions());
-            }
+            SwingUtilities.invokeLater(() -> {
+                GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostActions());
+                if(success) {
+                    GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostSuccessActions());
+                } else {
+                    GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostFailureActions());
+                }
+            });
         });
 
         ProcessManager.queueProcess(process);
