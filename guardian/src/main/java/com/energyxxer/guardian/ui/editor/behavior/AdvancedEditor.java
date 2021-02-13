@@ -56,6 +56,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     private final TransferHandler editorTransferHandler;
 
     private boolean enabled = true;
+    private boolean painted = false;
 
     public ThemeListenerManager tlm = new ThemeListenerManager();
 
@@ -698,7 +699,9 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         if(defaultSize != null) {
             try {
                 Rectangle mtv = this.modelToView(getDocument().getLength());
-                if (mtv == null) return;
+                if (mtv == null) {
+                    return;
+                }
                 Dimension size = new ScalableDimension(defaultSize.width, mtv.y + mtv.height + defaultSize.height);
                 this.setPreferredSize(size);
                 for (Consumer<Dimension> consumer : defaultSizeListeners) {
@@ -745,6 +748,15 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         } catch (BadLocationException e) {
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if(!painted) {
+            painted = true;
+            SwingUtilities.invokeLater(this::updateDefaultSize);
         }
     }
 
