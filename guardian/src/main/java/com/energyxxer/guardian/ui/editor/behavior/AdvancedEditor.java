@@ -507,27 +507,27 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         return lineOffset;
     }
 
-    private enum CharType {
+    private enum SelectionCharType {
         ALPHA(true, 1), WHITESPACE(true, 0), SYMBOL(false), NULL(false);
 
         public final boolean pull;
         public final int pullPrecedence;
 
-        CharType(boolean pull) {
+        SelectionCharType(boolean pull) {
             this(pull, -1);
         }
 
-        CharType(boolean pull, int pullPrecedence) {
+        SelectionCharType(boolean pull, int pullPrecedence) {
             this.pull = pull;
             this.pullPrecedence = pullPrecedence;
         }
     }
 
-    private static CharType getCharType(char c) {
-        if(c == '\n') return CharType.NULL;
-        if(Character.isWhitespace(c)) return CharType.WHITESPACE;
-        if(c == '_' || Character.isLetterOrDigit(c)) return CharType.ALPHA;
-        return CharType.SYMBOL;
+    private static SelectionCharType getSelectionCharType(char c) {
+        if(c == '\n') return SelectionCharType.NULL;
+        if(Character.isWhitespace(c)) return SelectionCharType.WHITESPACE;
+        if(c == '_' || Character.isLetterOrDigit(c)) return SelectionCharType.ALPHA;
+        return SelectionCharType.SYMBOL;
     }
 
     public int getWordStart(int offs) throws BadLocationException {
@@ -538,18 +538,18 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         if(text.charAt(offs-1) == '\n') return offs;
 
         int index = offs-1;
-        CharType outsideCharType = CharType.NULL;
-        if(offs < text.length()) outsideCharType = getCharType(text.charAt(offs));
+        SelectionCharType outsideCharType = SelectionCharType.NULL;
+        if(offs < text.length()) outsideCharType = getSelectionCharType(text.charAt(offs));
 
-        CharType startCharType = getCharType(text.charAt(offs-1));
+        SelectionCharType startCharType = getSelectionCharType(text.charAt(offs-1));
 
-        CharType expecting = outsideCharType.pull && outsideCharType.pullPrecedence > startCharType.pullPrecedence
+        SelectionCharType expecting = outsideCharType.pull && outsideCharType.pullPrecedence > startCharType.pullPrecedence
                                 ? outsideCharType
                                 : startCharType;
 
         while(index >= 0) {
             char ch = text.charAt(index);
-            CharType curCharType = getCharType(ch);
+            SelectionCharType curCharType = getSelectionCharType(ch);
 
             if(curCharType != expecting) {
                 return index+1;
@@ -570,18 +570,18 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         if(text.charAt(offs) == '\n') return offs;
 
         int index = offs;
-        CharType outsideCharType = CharType.NULL;
-        if(offs > 0) outsideCharType = getCharType(text.charAt(offs-1));
+        SelectionCharType outsideCharType = SelectionCharType.NULL;
+        if(offs > 0) outsideCharType = getSelectionCharType(text.charAt(offs-1));
 
-        CharType startCharType = getCharType(text.charAt(offs));
+        SelectionCharType startCharType = getSelectionCharType(text.charAt(offs));
 
-        CharType expecting = outsideCharType.pull && outsideCharType.pullPrecedence > startCharType.pullPrecedence
+        SelectionCharType expecting = outsideCharType.pull && outsideCharType.pullPrecedence > startCharType.pullPrecedence
                 ? outsideCharType
                 : startCharType;
 
         while(index < docLength) {
             char ch = text.charAt(index);
-            CharType curCharType = getCharType(ch);
+            SelectionCharType curCharType = getSelectionCharType(ch);
 
             if(curCharType != expecting) {
                 return index;
@@ -593,42 +593,74 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         return docLength;
     }
 
+    private enum JumpCharType {
+        ALPHA(true), WHITESPACE(true), OPEN_BRACE(true), CLOSE_BRACE(true), SEPARATOR(false), SYMBOL(true), NULL(false);
+
+        public final boolean merge;
+
+        JumpCharType(boolean merge) {
+            this.merge = merge;
+        }
+    }
+
+    private JumpCharType getJumpCharType(char c) {
+        if(c == '\n') return JumpCharType.NULL;
+        if(Character.isWhitespace(c)) return JumpCharType.WHITESPACE;
+        if(c == '_' || Character.isLetterOrDigit(c)) return JumpCharType.ALPHA;
+        if(c == ',' || c == ':' || c == '=' || c == ';') return JumpCharType.SEPARATOR;
+        if(getIndentationManager().isOpeningBrace(c)) return JumpCharType.OPEN_BRACE;
+        if(getIndentationManager().isClosingBrace(c)) return JumpCharType.CLOSE_BRACE;
+        return JumpCharType.SYMBOL;
+    }
+
     public int getPreviousWord(int offs) throws BadLocationException {
         Document doc = this.getDocument();
         String text = doc.getText(0, doc.getLength());
 
         int index = offs-1;
-        char lastChar = '\000';
-        boolean initialWhitespace = true;
+        JumpCharType prevType = JumpCharType.NULL;
+        boolean firstIsWhitespace = false;
+        boolean first = true;
         while(index >= 0) {
             char ch = text.charAt(index);
-            if(((initialWhitespace || Character.isJavaIdentifierPart(lastChar) == Character.isJavaIdentifierPart(ch)) && ch != '\n') || index == offs-1) {
-                if((index != offs-1 && initialWhitespace && !Character.isWhitespace(ch)) || ch == '\n') initialWhitespace = false;
-                index--;
-                lastChar = ch;
-            } else break;
+            JumpCharType type = getJumpCharType(ch);
+            if(first && type == JumpCharType.WHITESPACE) firstIsWhitespace = true;
+            if(!first && ((type != prevType) || !prevType.merge)) {
+                if(!firstIsWhitespace || prevType != JumpCharType.WHITESPACE) {
+                    break;
+                }
+            }
+            first = false;
+
+            index--;
+            prevType = type;
         }
         return index+1;
     }
 
     public int getNextWord(int offs) throws BadLocationException {
         Document doc = this.getDocument();
-        String text = doc.getText(offs, doc.getLength()-offs);
+        String text = doc.getText(0, doc.getLength());
 
-        int index = 0;
-        char lastChar = '\000';
+        int index = offs;
+        JumpCharType prevType = JumpCharType.NULL;
+        boolean firstIsWhitespace = false;
+        boolean first = true;
         while(index < text.length()) {
             char ch = text.charAt(index);
-            if((Character.isJavaIdentifierPart(lastChar) == Character.isJavaIdentifierPart(ch) && ch != '\n') || index == 0) {
-                index++;
-                lastChar = ch;
-            } else break;
-        }
-        char ch;
-        while(index < text.length()-offs && ((ch = text.charAt(index)) != '\n' && Character.isWhitespace(ch))) {
+            JumpCharType type = getJumpCharType(ch);
+            if(first && type == JumpCharType.WHITESPACE) firstIsWhitespace = true;
+            if(!first && ((type != prevType) || !prevType.merge)) {
+                if(firstIsWhitespace || type != JumpCharType.WHITESPACE) {
+                    break;
+                }
+            }
+            first = false;
+
             index++;
+            prevType = type;
         }
-        return index+offs;
+        return index;
     }
 
     public int getNextNonWhitespace(int offs) throws BadLocationException {
