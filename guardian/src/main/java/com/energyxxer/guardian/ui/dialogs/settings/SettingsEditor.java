@@ -1,13 +1,16 @@
 package com.energyxxer.guardian.ui.dialogs.settings;
 
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
 import com.energyxxer.guardian.ui.editor.EditorModule;
+import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.ui.styledcomponents.StyledCheckBox;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.styledcomponents.StyledTextField;
+import com.energyxxer.guardian.ui.theme.change.ThemeChangeListener;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.xswing.Padding;
 import com.energyxxer.xswing.ScalableDimension;
 
@@ -60,6 +63,52 @@ public class SettingsEditor extends JPanel {
             content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
             content.setOpaque(false);
             this.add(new OverlayScrollPane(tlm, content), BorderLayout.CENTER);
+
+
+            {
+                content.add(new Padding(20));
+            }
+
+
+            {
+                StyledLabel label = new StyledLabel("Font Family:","Settings.content", tlm);
+                label.setStyle(Font.BOLD);
+                content.add(label);
+            }
+            {
+                StyledTextField fontField = new StyledTextField("","Settings.content", tlm);
+                fontField.setMaximumSize(new ScalableDimension(300,25));
+                fontField.setAlignmentX(Component.LEFT_ALIGNMENT);
+                Settings.addOpenEvent(() -> fontField.setText(AdvancedEditor.FONT.get()));
+                Settings.addApplyEvent(() -> {
+                    EditorComponent.FONT.set(fontField.getText());
+                    ThemeChangeListener.dispatchThemeChange(GuardianWindow.getTheme());
+                });
+                content.add(fontField);
+            }
+
+
+            {
+                StyledLabel label = new StyledLabel("Line Spacing:","Settings.content", tlm);
+                label.setStyle(Font.BOLD);
+                content.add(label);
+            }
+            {
+                StyledTextField lineSpacingField = new StyledTextField("","Settings.content", tlm);
+                lineSpacingField.setMaximumSize(new ScalableDimension(300,25));
+                lineSpacingField.setAlignmentX(Component.LEFT_ALIGNMENT);
+                Settings.addOpenEvent(() -> lineSpacingField.setText("" + AdvancedEditor.LINE_SPACING.get()));
+                Settings.addApplyEvent(() -> {
+                    try {
+                        float spacing = Float.parseFloat(lineSpacingField.getText());
+                        if(spacing >= 0.1) {
+                            EditorComponent.LINE_SPACING.set(spacing);
+                            ThemeChangeListener.dispatchThemeChange(GuardianWindow.getTheme());
+                        }
+                    } catch(NumberFormatException ignore) {}
+                });
+                content.add(lineSpacingField);
+            }
 
 
             {

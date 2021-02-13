@@ -72,8 +72,8 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     private static UserKeyBind FOLD;
     private static UserKeyBind UNFOLD;
 
-    public static final Preferences.SettingPref<Float> LINE_SPACING = new Preferences.SettingPref<>("settings.editor.line_spacing", 1f, Float::parseFloat);
     public static final Preferences.SettingPref<String> FONT = new Preferences.SettingPref<>("settings.editor.font", "monospaced", String::trim);
+    public static final Preferences.SettingPref<Float> LINE_SPACING = new Preferences.SettingPref<>("settings.editor.line_spacing", 1f, Float::parseFloat);
 
     public static final Preferences.SettingPref<Boolean> EDITOR_DO_BARREL_ROLL = new Preferences.SettingPref<>("settings.editor.barrel_roll", false, Boolean::parseBoolean);
 

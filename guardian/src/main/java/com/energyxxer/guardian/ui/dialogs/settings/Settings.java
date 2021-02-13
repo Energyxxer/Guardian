@@ -5,6 +5,7 @@ import com.energyxxer.guardian.ui.styledcomponents.StyledButton;
 import com.energyxxer.guardian.ui.styledcomponents.StyledList;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.ImageManager;
+import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.*;
 
 import javax.swing.*;
@@ -152,6 +153,7 @@ public class Settings {
 	}
 
 	public static void show() {
+		Debug.log("Showing Settings");
 		openEvents.forEach(Runnable::run);
 
 		dialog.setVisible(true);
