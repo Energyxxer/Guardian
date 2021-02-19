@@ -999,7 +999,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 richTextCopy = !richTextCopy;
                 Debug.log("Rich text copying is now: " + richTextCopy);
             }

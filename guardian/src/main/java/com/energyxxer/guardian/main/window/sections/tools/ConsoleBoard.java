@@ -170,7 +170,7 @@ public class ConsoleBoard extends ToolBoard {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 console.setText("");
             }
         });
@@ -187,7 +187,7 @@ public class ConsoleBoard extends ToolBoard {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 if(args.length <= 1) {
                     Debug.log();
                     Debug.log("Available Commands:");
@@ -244,7 +244,7 @@ public class ConsoleBoard extends ToolBoard {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 String command = String.join(" ", args).substring("exec".length()).trim();
                 ProcessBuilder pb = new ProcessBuilder(splitCommandIntoArgs(command)).redirectErrorStream(true);
 
@@ -262,8 +262,8 @@ public class ConsoleBoard extends ToolBoard {
                                 Debug.log("Starting process \"" + command + "\"\n");
                                 Process process = pb.start();
 
-                                GuardianWindow.consoleBoard.unlock();
                                 GuardianWindow.consoleBoard.attachProcess(process);
+                                GuardianWindow.consoleBoard.unlock();
 
                                 BufferedReader stdInput = new BufferedReader(new
                                         InputStreamReader(process.getInputStream()));
@@ -404,7 +404,7 @@ public class ConsoleBoard extends ToolBoard {
     private void runCommand(String command) {
         String[] args = command.split(" ", -1);
         if(commandHandlers.containsKey(args[0])) {
-            commandHandlers.get(args[0]).handle(args);
+            commandHandlers.get(args[0]).handle(args, command);
         } else {
             Debug.log("Unknown command '" + args[0] + "'");
         }
@@ -429,6 +429,6 @@ public class ConsoleBoard extends ToolBoard {
     public interface CommandHandler {
         String getDescription();
         void printHelp();
-        void handle(String[] args);
+        void handle(String[] args, String rawArgs);
     }
 }

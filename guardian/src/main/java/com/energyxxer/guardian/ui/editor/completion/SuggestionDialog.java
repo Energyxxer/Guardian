@@ -20,6 +20,7 @@ import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.Lazy;
 import com.energyxxer.util.StringBounds;
@@ -130,7 +131,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
         if(this.isVisible()) return;
         if(!safe) return;
         activeResults = results;
-        SwingUtilities.invokeLater(() -> {
+        ConcurrencyUtil.runAsync(() -> {
             explorer.clear();
             activeTokens.clear();
 
@@ -176,12 +177,16 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
             }
 
             if(any) {
-                this.setVisible(true);
-                filter();
-                relocate(Math.min(results.getSuggestionIndex(), editor.getDocument().getLength()));
-                editor.requestFocus();
+                SwingUtilities.invokeLater(() -> {
+                    this.setVisible(true);
+                    filter();
+                    relocate(Math.min(results.getSuggestionIndex(), editor.getDocument().getLength()));
+                    editor.requestFocus();
+                });
             } else {
-                this.setVisible(false);
+                SwingUtilities.invokeLater(() -> {
+                    this.setVisible(false);
+                });
             }
         });
     }

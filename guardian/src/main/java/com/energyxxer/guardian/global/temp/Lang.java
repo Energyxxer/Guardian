@@ -317,7 +317,7 @@ public class Lang {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 Debug.log("Languages:");
                 for(Lang lang : registeredLanguages) {
                     Debug.log("  - " + lang.getFriendlyName() + " (" + lang.getCode() + ")");

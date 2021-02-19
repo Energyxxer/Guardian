@@ -74,7 +74,7 @@ public class ThemeListenerManager implements Disposable {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 if (args.length >= 2) {
                     switch (args[1]) {
                         case "count": {

@@ -11,11 +11,11 @@ import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorSelectionPainter;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
+import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.prismarine.summaries.SummarySymbol;
 import com.energyxxer.util.StringBounds;
 
-import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
@@ -76,7 +76,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                 SummarySymbol selectedSymbol = highlightedUsage.fetchSymbol(lastSuccessfulSummary);
                 if(selectedSymbol == null) return;
 
-                SwingUtilities.invokeLater(() -> {
+                ConcurrencyUtil.runAsync(() -> {
                     for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
                         if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
 

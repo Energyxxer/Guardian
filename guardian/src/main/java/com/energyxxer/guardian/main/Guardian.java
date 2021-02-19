@@ -232,7 +232,7 @@ public class Guardian {
 			}
 
 			@Override
-			public void handle(String[] args) {
+			public void handle(String[] args, String rawArgs) {
 				Debug.log("\n"+core.getLicense());
 			}
 		});
@@ -249,7 +249,7 @@ public class Guardian {
 			}
 
 			@Override
-			public void handle(String[] args) {
+			public void handle(String[] args, String rawArgs) {
 				throw new RuntimeException("Exception triggered via the console");
 			}
 		});

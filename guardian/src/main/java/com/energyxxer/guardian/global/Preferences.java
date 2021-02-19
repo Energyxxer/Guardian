@@ -150,7 +150,7 @@ public class Preferences {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 if(args.length <= 1) {
                     printHelp();
                 } else {
@@ -243,7 +243,7 @@ public class Preferences {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 if(args.length <= 1) {
                     printHelp();
                 } else {

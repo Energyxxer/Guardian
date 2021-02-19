@@ -182,7 +182,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             Lang.LangAnalysisResponse analysis = file != null ? lang.analyze(file, text, suggestionModule, summaryModule) : null;
             if (analysis == null) return;
 
-            SwingUtilities.invokeLater(() -> performTokenStyling(analysis, project, lang));
+            performTokenStyling(analysis, lang);
         } catch(Exception x) {
             x.printStackTrace();
             GuardianWindow.showException(x);
@@ -191,7 +191,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     private final ArrayList<String> previousTokenStyles = new ArrayList<>();
 
-    private void performTokenStyling(Lang.LangAnalysisResponse analysis, Project project, Lang lang) {
+    private void performTokenStyling(Lang.LangAnalysisResponse analysis, Lang lang) {
         try {
             Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 

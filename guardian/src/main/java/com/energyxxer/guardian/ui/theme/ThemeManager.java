@@ -191,7 +191,7 @@ public class ThemeManager {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 Debug.log("GUI Themes:");
                 for(Theme theme : guiThemes.values()) {
                     if(guiThemesInJar.contains(theme.getName())) {

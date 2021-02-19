@@ -1,11 +1,11 @@
 package com.energyxxer.guardian.main.window.sections;
 
 import com.energyxxer.guardian.global.Status;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
+import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.energyxxer.guardian.main.window.GuardianWindow;
-import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableDimension;
 
@@ -79,7 +79,7 @@ public class StatusBar extends JPanel implements MouseListener {
             }
 
             @Override
-            public void handle(String[] args) {
+            public void handle(String[] args, String rawArgs) {
                 Timer timer = new Timer(200, a -> {
                     setStatus("Focused component: " + GuardianWindow.jframe.getFocusOwner());
                 });

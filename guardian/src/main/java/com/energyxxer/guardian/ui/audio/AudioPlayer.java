@@ -1,12 +1,14 @@
 package com.energyxxer.guardian.ui.audio;
 
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.floatingcanvas.*;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.util.Disposable;
+import com.energyxxer.util.logger.Debug;
 import de.ralleytn.simple.audio.Audio;
 import de.ralleytn.simple.audio.AudioEvent;
 import de.ralleytn.simple.audio.AudioException;
@@ -248,5 +250,46 @@ public class AudioPlayer extends FloatingCanvas implements DisplayModule, Dispos
 
     public Audio getAudio() {
         return audio;
+    }
+
+    static {
+        ConsoleBoard.registerCommandHandler("audio", new ConsoleBoard.CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Plays an audio file";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("AUDIO: Plays an audio file given by a file path");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                if(args.length <= 1) {
+                    printHelp();
+                } else {
+                    File file = new File(rawArgs.split(" ", 2)[1]);
+
+                    Runnable playSound = () -> {
+                        try {
+                            Audio audio = new BufferedAudio(file.toURI());
+                            audio.addAudioListener(l -> {
+                                if (l.getType() == AudioEvent.Type.REACHED_END) {
+                                    audio.close();
+                                }
+                            });
+                            audio.open();
+                            audio.play();
+                        } catch (AudioException e) {
+                            e.printStackTrace();
+                        }
+                    };
+
+                    ConcurrencyUtil.runAsync(playSound);
+                }
+            }
+        });
     }
 }
