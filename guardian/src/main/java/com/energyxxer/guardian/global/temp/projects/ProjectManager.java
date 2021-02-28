@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.global.temp.projects;
 
 import com.energyxxer.guardian.langinterface.ProjectType;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -35,6 +36,8 @@ public class ProjectManager {
 				}
 			}
 		}
+
+		GuardianWindow.projectExplorer.refresh();
 	}
 	
 	public static Project getAssociatedProject(File file) {

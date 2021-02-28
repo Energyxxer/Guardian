@@ -207,6 +207,7 @@ public class Guardian {
 			WorkspaceDialog.prompt();
 		}
 
+		ProjectManager.setWorkspaceDir(Preferences.getWorkspace().toString());
 		ProjectManager.loadWorkspace();
 
 		GuardianWindow.welcomePane.tipScreen.start(1000);

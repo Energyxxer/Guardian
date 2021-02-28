@@ -9,6 +9,7 @@ import com.energyxxer.guardian.global.keystrokes.SpecialMapping;
 import com.energyxxer.guardian.global.keystrokes.UserKeyBind;
 import com.energyxxer.guardian.global.keystrokes.UserMapping;
 import com.energyxxer.guardian.global.temp.projects.Project;
+import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.WorkspaceDialog;
@@ -183,6 +184,7 @@ public class ActionManager {
                         "Reload Workspace", "Refresh the list of projects",
                         KeyMap.requestMapping("reload_workspace", KeyMap.identifierToStrokes("" + KeyEvent.VK_F5)).setGroupName("Projects"),
                         () -> {
+                            ProjectManager.loadWorkspace();
                             GuardianWindow.projectExplorer.refresh();
                             Plugins.loadAll();
                         }

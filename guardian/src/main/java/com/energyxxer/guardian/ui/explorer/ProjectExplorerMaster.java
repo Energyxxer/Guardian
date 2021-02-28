@@ -2,7 +2,6 @@ package com.energyxxer.guardian.ui.explorer;
 
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
-import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
@@ -128,9 +127,6 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
     @Override
     public void refresh() {
         Debug.log("Refreshing workspace");
-        ProjectManager.setWorkspaceDir(Preferences.getWorkspace().toString());
-        ProjectManager.loadWorkspace();
-
         clearSelected();
         refresh(this.getExpandedElements().stream().map(ModuleToken::getIdentifier).distinct().collect(Collectors.toCollection(ArrayList::new)));
     }
