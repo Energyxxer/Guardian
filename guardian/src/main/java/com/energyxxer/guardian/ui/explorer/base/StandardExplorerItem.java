@@ -168,7 +168,7 @@ public class StandardExplorerItem extends ExplorerElement {
 
         if(token.getTitle() != null) {
             x += 25;
-            g.drawString(token.getTitle(), x, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight())/2));
+            g.drawString(token.getTitle(), x, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
             x += metrics.stringWidth(token.getTitle());
         }
 
@@ -178,14 +178,14 @@ public class StandardExplorerItem extends ExplorerElement {
                 String projectName = project.getName();
                 int projectNameX = w - metrics.stringWidth(projectName) - 24;
                 g.drawImage(project.getProjectType().getIconForRoot(token.getAssociatedProjectRoot()), projectNameX - 16 - 8, y + margin + 8 - 8, 16, 16, null);
-                g.drawString(projectName, projectNameX, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight())/2));
+                g.drawString(projectName, projectNameX, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
             }
 
             String subTitle = token.getSubTitle();
             if(subTitle != null) {
                 g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), (int)(g.getColor().getAlpha() * 0.75)));
                 x += 16;
-                g.drawString(subTitle, x, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight())/2));
+                g.drawString(subTitle, x, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
                 x += metrics.stringWidth(subTitle);
             }
         }

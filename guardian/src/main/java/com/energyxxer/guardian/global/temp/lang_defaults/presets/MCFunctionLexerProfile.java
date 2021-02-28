@@ -50,7 +50,7 @@ public class MCFunctionLexerProfile extends LexerProfile {
 
     @Override
     public void putHeaderInfo(Token header) {
-        header.attributes.put("TYPE","mcfunction");
-        header.attributes.put("DESC","Minecraft Function File");
+        header.putAttribute("TYPE","mcfunction");
+        header.putAttribute("DESC","Minecraft Function File");
     }
 }

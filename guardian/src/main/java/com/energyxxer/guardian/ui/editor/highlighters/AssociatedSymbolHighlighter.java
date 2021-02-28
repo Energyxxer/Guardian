@@ -16,6 +16,7 @@ import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.prismarine.summaries.SummarySymbol;
 import com.energyxxer.util.StringBounds;
 
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
@@ -77,6 +78,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                 if(selectedSymbol == null) return;
 
                 ConcurrencyUtil.runAsync(() -> {
+                    ArrayList<StringBounds> boundsToRectangles = new ArrayList<>();
                     for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
                         if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
 
@@ -89,11 +91,16 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                         if(bounds.start.index == wordStart && bounds.end.index == wordEnd) { //If this usage refers to the identifier that's currently selected...
                             shouldRender = true;
                         }
-                        try {
-                            rectangles.addAll(EditorSelectionPainter.getRectanglesForBounds(editor, bounds));
-                        } catch (BadLocationException ignore) {}
+                        boundsToRectangles.add(bounds);
                     }
-                    editor.repaint();
+                    SwingUtilities.invokeLater(() -> {
+                        for(StringBounds bounds : boundsToRectangles) {
+                            try {
+                                rectangles.addAll(EditorSelectionPainter.getRectanglesForBounds(editor, bounds));
+                            } catch (BadLocationException ignore) {}
+                        }
+                        editor.repaint();
+                    });
                 });
             }
 

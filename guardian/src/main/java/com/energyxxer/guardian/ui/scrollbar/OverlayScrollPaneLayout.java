@@ -1,7 +1,5 @@
 package com.energyxxer.guardian.ui.scrollbar;
 
-import com.energyxxer.guardian.main.window.actions.ActionManager;
-import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 
 import javax.swing.*;
@@ -34,13 +32,13 @@ public class OverlayScrollPaneLayout extends ScrollPaneLayout {
     @Override
     public void layoutContainer(Container parent) {
 
-        try {
+//        try {
             super.layoutContainer(parent);
-        } catch (NullPointerException x) {
-            if(new ConfirmDialog("Crash", "An unexpected error has occurred. Save all open tabs?").result) {
-                ActionManager.getAction("SAVE_ALL").perform();
-            }
-        }
+//        } catch (NullPointerException x) {
+//            if(new ConfirmDialog("Crash", "An unexpected error has occurred. Save all open tabs?").result) {
+//                ActionManager.getAction("SAVE_ALL").perform();
+//            }
+//        }
 
         Rectangle availR = parent.getBounds();
         if(this.rowHead != null) this.rowHead.setSize(this.rowHead.getWidth(),availR.height);

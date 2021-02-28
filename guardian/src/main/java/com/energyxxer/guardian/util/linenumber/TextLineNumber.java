@@ -97,6 +97,7 @@ public class TextLineNumber extends JPanel
 		g.fillRect(0,0,this.getWidth(),this.getHeight());
 
 		try {
+			g.setFont(component.getFont());
 			FontMetrics fontMetrics = g.getFontMetrics();
 			int currentZeroWidth = fontMetrics.charWidth('0');
 			if(zeroWidth != currentZeroWidth) {

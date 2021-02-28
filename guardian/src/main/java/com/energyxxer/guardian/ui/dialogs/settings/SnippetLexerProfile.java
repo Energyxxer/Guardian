@@ -55,7 +55,7 @@ public class SnippetLexerProfile extends LexerProfile {
 
     @Override
     public void putHeaderInfo(Token header) {
-        header.attributes.put("TYPE","snippet");
-        header.attributes.put("DESC","Snippet Preview");
+        header.putAttribute("TYPE","snippet");
+        header.putAttribute("DESC","Snippet Preview");
     }
 }

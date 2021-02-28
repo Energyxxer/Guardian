@@ -1,8 +1,8 @@
 package com.energyxxer.guardian.global.temp.lang_defaults.presets;
 
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerContext;
-import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
+import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
@@ -103,7 +103,7 @@ public class PropertiesLexerProfile extends LexerProfile {
 
     @Override
     public void putHeaderInfo(Token header) {
-        header.attributes.put("TYPE","properties");
-        header.attributes.put("DESC","Java Properties File");
+        header.putAttribute("TYPE","properties");
+        header.putAttribute("DESC","Java Properties File");
     }
 }

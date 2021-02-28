@@ -134,6 +134,9 @@ public class Commons {
             for(ExplorerElement element : GuardianWindow.projectExplorer.getFlatList()) {
                 if(element instanceof StandardExplorerItem && element.getToken() instanceof FileModuleToken && ((FileModuleToken) element.getToken()).getFile().equals(file)) {
                     GuardianWindow.projectExplorer.setSelected(element, null);
+                    if(GuardianWindow.projectExplorer.getParent() instanceof JViewport) {
+                        ((JViewport) GuardianWindow.projectExplorer.getParent()).scrollRectToVisible(new Rectangle(0, element.getLastRecordedOffset(), 1, element.getHeight()));
+                    }
                     break;
                 }
             }
@@ -191,8 +194,8 @@ public class Commons {
         process.addCompletionListener((p, success) -> {
             GuardianWindow.noticeExplorer.setNotices(report.group());
             if (report.getTotal() > 0) GuardianWindow.noticeBoard.open();
-            report.getWarnings().forEach(Console.warn::println);
-            report.getErrors().forEach(Console.err::println);
+            if(report.hasWarnings()) report.getWarnings().forEach(Console.warn::println);
+            if(report.hasErrors()) report.getErrors().forEach(Console.err::println);
         });
         process.addCompletionListener((p, success) -> {
             SwingUtilities.invokeLater(() -> {

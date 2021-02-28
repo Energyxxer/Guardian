@@ -69,7 +69,7 @@ public class JSONLexerProfile extends LexerProfile {
             return true;
         }
         if(token.type == COLON && tokenBuffer != null) {
-            tokenBuffer.attributes.put("IS_PROPERTY",true);
+            tokenBuffer.putAttribute("IS_PROPERTY", true);
             this.stream.write(tokenBuffer, true);
             tokenBuffer = null;
             return false;
@@ -83,7 +83,7 @@ public class JSONLexerProfile extends LexerProfile {
 
     @Override
     public void putHeaderInfo(Token header) {
-        header.attributes.put("TYPE","json");
-        header.attributes.put("DESC","JavaScript Object Notation File");
+        header.putAttribute("TYPE","json");
+        header.putAttribute("DESC","JavaScript Object Notation File");
     }
 }

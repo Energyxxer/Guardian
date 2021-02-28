@@ -291,11 +291,11 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
     public String getCaretInfo() {
         if(dots.size() > 1) {
             return dots.size() + " carets";
-        } else {
+        } else if(dots.size() == 1) {
             StringLocation loc = editor.getLocationForOffset(dots.get(0).index);
             if(loc == null) return "-:-";
             return loc.line + ":" + loc.column;
-        }
+        } else return "No carets (wait what?)";
     }
 
     public void moveBy(int offset) {

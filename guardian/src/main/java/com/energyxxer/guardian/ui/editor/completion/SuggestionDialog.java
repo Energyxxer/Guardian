@@ -80,6 +80,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
             contentPane.setBackground(t.getColor(new Color(200, 200, 200), "EditorSuggestions.header.background"));
             contentPane.setBorder(BorderFactory.createMatteBorder(thickness, thickness, thickness, thickness, t.getColor(new Color(200, 200, 200), "EditorSuggestions.border.color")));
             parameterLabel.setBorder(BorderFactory.createMatteBorder(0, 0, thickness, 0, t.getColor(new Color(200, 200, 200), "EditorSuggestions.border.color")));
+            explorer.setFont(editor.getFont());
         });
 
         editor.addKeyListener(this);

@@ -35,6 +35,8 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.Timer;
 import java.util.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class EditorComponent extends AdvancedEditor implements KeyListener, CaretListener, FocusListener {
@@ -51,6 +53,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     private final Timer timer = new Timer();
     private Thread highlightingThread = null;
+    private SwingWorker highlightingWorker = null;
 
     public static final Preferences.SettingPref<Integer> AUTOREPARSE_DELAY = new Preferences.SettingPref<>("settings.editor.auto_reparse_delay", 500, Integer::parseInt);
     public static final Preferences.SettingPref<Boolean> SHOW_SUGGESTIONS = new Preferences.SettingPref<>("settings.editor.show_suggestions", true, Boolean::parseBoolean);
@@ -161,14 +164,14 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     private Status errorStatus = new Status();
 
-    private void startSyntaxHighlighting() {
-        if(parent.syntax == null) return;
+    private Lang.LangAnalysisResponse startSyntaxHighlighting() {
+        if(parent.syntax == null) return null;
 
         try {
             String text = getText();
 
             Lang lang = parent.getLanguage();
-            if (lang == null) return;
+            if (lang == null) return null;
             Project project = parent.file != null ? ProjectManager.getAssociatedProject(parent.file) : null;
 
             SuggestionModule suggestionModule = (SHOW_SUGGESTIONS.get() && project != null && lang.usesSuggestionModule()) ? new SuggestionModule(this.getCaretWordPosition(), this.getCaretPosition()) : null;
@@ -179,14 +182,17 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             }
 
             File file = parent.getFileForAnalyzer();
+            if(Thread.interrupted()) return null;
             Lang.LangAnalysisResponse analysis = file != null ? lang.analyze(file, text, suggestionModule, summaryModule) : null;
-            if (analysis == null) return;
+            if (analysis == null) return null;
 
-            performTokenStyling(analysis, lang);
+            if(Thread.interrupted()) return null;
+            return analysis;
         } catch(Exception x) {
             x.printStackTrace();
             GuardianWindow.showException(x);
         }
+        return null;
     }
 
     private final ArrayList<String> previousTokenStyles = new ArrayList<>();
@@ -200,6 +206,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 suggestionBox.showSuggestions(analysis.lexer.getSuggestionModule());
             }
 
+            if(Thread.interrupted()) return;
+
             Token prevToken = null;
             previousTokenStyles.clear();
 
@@ -209,6 +217,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 this.inspector.insertNotices(analysis.notices);
             }
 
+            if(Thread.interrupted()) return;
+
             if(analysis.response != null && !analysis.response.matched) {
                 errorStatus.setMessage(analysis.response.getErrorMessage() + (analysis.response.faultyToken != null ? ". (line " + analysis.response.faultyToken.loc.line + " column " + analysis.response.faultyToken.loc.column + ")" : ""));
                 GuardianWindow.setStatus(errorStatus);
@@ -216,9 +226,12 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 if(analysis.lexer instanceof LazyLexer) return;
             }
 
+            if(Thread.interrupted()) return;
+
             int tokensInLine = 0;
 
             for(Token token : analysis.lexer.getStream().tokens) {
+                if(Thread.interrupted()) return;
                 boolean shouldPaintStyles = true;
                 if(prevToken != null && prevToken.loc.line != token.loc.line) tokensInLine = 0;
                 tokensInLine++;
@@ -237,24 +250,28 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                     else
                         sd.setCharacterAttributes(token.loc.index, token.value.length(), defaultStyle, true);
 
-                    for(Map.Entry<String, Object> entry : token.attributes.entrySet()) {
-                        if(!entry.getValue().equals(true)) continue;
-                        Style attrStyle = EditorComponent.this.getStyle("~" + entry.getKey().toLowerCase(Locale.ENGLISH));
-                        if(attrStyle == null) continue;
+                    if(token.getAttributes() != null) {
+                        for(Map.Entry<String, Object> entry : token.getAttributes().entrySet()) {
+                            if(!entry.getValue().equals(true)) continue;
+                            Style attrStyle = EditorComponent.this.getStyle("~" + entry.getKey().toLowerCase(Locale.ENGLISH));
+                            if(attrStyle == null) continue;
 
-                        if(prevToken != null && previousTokenStyles.contains(entry.getKey().toLowerCase(Locale.ENGLISH))) {
-                            styleStart = prevToken.loc.index + prevToken.value.length();
+                            if(prevToken != null && previousTokenStyles.contains(entry.getKey().toLowerCase(Locale.ENGLISH))) {
+                                styleStart = prevToken.loc.index + prevToken.value.length();
+                            }
+                            previousTokenStyles.add(entry.getKey().toLowerCase(Locale.ENGLISH));
+
+                            sd.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
                         }
-                        previousTokenStyles.add(entry.getKey().toLowerCase(Locale.ENGLISH));
-
-                        sd.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
                     }
-                    for(Map.Entry<TokenSection, String> entry : token.subSections.entrySet()) {
-                        TokenSection section = entry.getKey();
-                        Style attrStyle = EditorComponent.this.getStyle("~" + entry.getValue().toLowerCase(Locale.ENGLISH));
-                        if(attrStyle == null) continue;
+                    if(token.getSubSections() != null) {
+                        for(Map.Entry<TokenSection, String> entry : token.getSubSections().entrySet()) {
+                            TokenSection section = entry.getKey();
+                            Style attrStyle = EditorComponent.this.getStyle("~" + entry.getValue().toLowerCase(Locale.ENGLISH));
+                            if(attrStyle == null) continue;
 
-                        sd.setCharacterAttributes(token.loc.index + section.start, section.length, attrStyle, false);
+                            sd.setCharacterAttributes(token.loc.index + section.start, section.length, attrStyle, false);
+                        }
                     }
                     for(String tag : token.tags) {
                         Style attrStyle = EditorComponent.this.getStyle("$" + tag.toLowerCase(Locale.ENGLISH));
@@ -306,8 +323,10 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 if(lang.isStringToken(token)) {
                     sd.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(AdvancedEditor.STRING_STYLE), false);
 
-                    for(TokenSection section : token.subSections.keySet()) {
-                        sd.setCharacterAttributes(token.loc.index + section.start, section.length, getStyle(AdvancedEditor.STRING_ESCAPE_STYLE), false);
+                    if(token.getSubSections() != null) {
+                        for(TokenSection section : token.getSubSections().keySet()) {
+                            sd.setCharacterAttributes(token.loc.index + section.start, section.length, getStyle(AdvancedEditor.STRING_ESCAPE_STYLE), false);
+                        }
                     }
                 }
 
@@ -318,6 +337,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             if(analysis.response == null || analysis.response.matched) GuardianWindow.dismissStatus(errorStatus);
 
+            if(Thread.interrupted()) return;
             sd.setParagraphAttributes(0, sd.getLength(), defaultStyle, false);
 
         } catch(Exception x) {
@@ -342,13 +362,26 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
         if (lastEdit > -1 && System.currentTimeMillis() - lastEdit > AUTOREPARSE_DELAY.get() && (parent.associatedTab == null || parent.associatedTab.isActive())) {
             lastEdit = -1;
             if(highlightingThread != null) {
-                highlightingThread.stop();
+                highlightingWorker.cancel(true);
             }
-            highlightingThread = new Thread(new SwingWorker<Object, Object>() {
+            highlightingThread = new Thread(highlightingWorker = new SwingWorker<Lang.LangAnalysisResponse, Object>() {
                 @Override
-                protected Object doInBackground() {
-                    startSyntaxHighlighting();
-                    return null;
+                protected Lang.LangAnalysisResponse doInBackground() {
+                    return startSyntaxHighlighting();
+                }
+
+                @Override
+                protected void done() {
+                    if(getState() != StateValue.DONE) return;
+                    try {
+                        Lang.LangAnalysisResponse response = get();
+                        if(response != null) {
+                            performTokenStyling(response, parent.getLanguage());
+                        }
+                    } catch (InterruptedException | CancellationException ignore) {
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
                 }
             },"Text Highlighter");
             highlightingThread.setUncaughtExceptionHandler((t, e) -> {
@@ -360,8 +393,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                     GuardianWindow.showException(e.getMessage());
                 }
             });
-            //highlightingThread = new Thread(this::startSyntaxHighlighting,"Text Highlighter");
-            highlightingThread.start();
+            highlightingWorker.execute();
 
             Project project = ProjectManager.getAssociatedProject(parent.file);
             if(project != null && project.getSummary() == null) {
