@@ -22,10 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.FocusEvent;
@@ -35,8 +32,6 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.Timer;
 import java.util.*;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class EditorComponent extends AdvancedEditor implements KeyListener, CaretListener, FocusListener {
@@ -53,7 +48,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     private final Timer timer = new Timer();
     private Thread highlightingThread = null;
-    private SwingWorker highlightingWorker = null;
+    private HighlightingWorker highlightingWorker = null;
 
     public static final Preferences.SettingPref<Integer> AUTOREPARSE_DELAY = new Preferences.SettingPref<>("settings.editor.auto_reparse_delay", 500, Integer::parseInt);
     public static final Preferences.SettingPref<Boolean> SHOW_SUGGESTIONS = new Preferences.SettingPref<>("settings.editor.show_suggestions", true, Boolean::parseBoolean);
@@ -197,7 +192,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     private final ArrayList<String> previousTokenStyles = new ArrayList<>();
 
-    private void performTokenStyling(Lang.LangAnalysisResponse analysis, Lang lang) {
+    private void performTokenStyling(Lang.LangAnalysisResponse analysis, Lang lang, HighlightingWorker worker) {
         try {
             Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 
@@ -246,9 +241,9 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
                 if(shouldPaintStyles) {
                     if(style != null)
-                        sd.setCharacterAttributes(token.loc.index, token.value.length(), style, true);
+                        worker.setCharacterAttributes(token.loc.index, token.value.length(), style, true);
                     else
-                        sd.setCharacterAttributes(token.loc.index, token.value.length(), defaultStyle, true);
+                        worker.setCharacterAttributes(token.loc.index, token.value.length(), defaultStyle, true);
 
                     if(token.getAttributes() != null) {
                         for(Map.Entry<String, Object> entry : token.getAttributes().entrySet()) {
@@ -261,7 +256,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                             }
                             previousTokenStyles.add(entry.getKey().toLowerCase(Locale.ENGLISH));
 
-                            sd.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
+                            worker.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
                         }
                     }
                     if(token.getSubSections() != null) {
@@ -270,7 +265,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                             Style attrStyle = EditorComponent.this.getStyle("~" + entry.getValue().toLowerCase(Locale.ENGLISH));
                             if(attrStyle == null) continue;
 
-                            sd.setCharacterAttributes(token.loc.index + section.start, section.length, attrStyle, false);
+                            worker.setCharacterAttributes(token.loc.index + section.start, section.length, attrStyle, false);
                         }
                     }
                     for(String tag : token.tags) {
@@ -282,7 +277,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                         }
                         previousTokenStyles.add(tag.toLowerCase(Locale.ENGLISH));
 
-                        sd.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
+                        worker.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
                     }
 
                     if(analysis.response != null) {
@@ -302,11 +297,11 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                                     styleStart = prevToken.loc.index + prevToken.value.length();
                                 }
                                 if(entry.getKey().equals("$class_function.dynamic_function.dynamic_function.code_block.statement_list")) {
-                                    sd.setParagraphAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), parent.collapsedParagraphStyle, false);
+                                    worker.setParagraphAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), parent.collapsedParagraphStyle, false);
                                 }
                                 if (attrStyle == null) continue;
                                 previousTokenStyles.add(entry.getKey());
-                                sd.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
+                                worker.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
                             } while (true);
                         }
                     }
@@ -317,15 +312,15 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 }
 
                 if(getIndentationManager().getBraceMatcher().matcher(token.value).find() && !lang.isBraceToken(token)) {
-                    sd.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(IndentationManager.NULLIFY_BRACE_STYLE), false);
+                    worker.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(IndentationManager.NULLIFY_BRACE_STYLE), false);
                 }
 
                 if(lang.isStringToken(token)) {
-                    sd.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(AdvancedEditor.STRING_STYLE), false);
+                    worker.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(AdvancedEditor.STRING_STYLE), false);
 
                     if(token.getSubSections() != null) {
                         for(TokenSection section : token.getSubSections().keySet()) {
-                            sd.setCharacterAttributes(token.loc.index + section.start, section.length, getStyle(AdvancedEditor.STRING_ESCAPE_STYLE), false);
+                            worker.setCharacterAttributes(token.loc.index + section.start, section.length, getStyle(AdvancedEditor.STRING_ESCAPE_STYLE), false);
                         }
                     }
                 }
@@ -338,7 +333,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(analysis.response == null || analysis.response.matched) GuardianWindow.dismissStatus(errorStatus);
 
             if(Thread.interrupted()) return;
-            sd.setParagraphAttributes(0, sd.getLength(), defaultStyle, false);
+            worker.setParagraphAttributes(0, sd.getLength(), defaultStyle, false);
 
         } catch(Exception x) {
             x.printStackTrace();
@@ -364,23 +359,20 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(highlightingThread != null) {
                 highlightingWorker.cancel(true);
             }
-            highlightingThread = new Thread(highlightingWorker = new SwingWorker<Lang.LangAnalysisResponse, Object>() {
+            highlightingThread = new Thread(highlightingWorker = new HighlightingWorker() {
                 @Override
                 protected Lang.LangAnalysisResponse doInBackground() {
-                    return startSyntaxHighlighting();
+                    Lang.LangAnalysisResponse analysis = startSyntaxHighlighting();
+                    if(analysis != null) {
+                        performTokenStyling(analysis, parent.getLanguage(), this);
+                    }
+                    return null;
                 }
 
                 @Override
-                protected void done() {
-                    if(getState() != StateValue.DONE) return;
-                    try {
-                        Lang.LangAnalysisResponse response = get();
-                        if(response != null) {
-                            performTokenStyling(response, parent.getLanguage());
-                        }
-                    } catch (InterruptedException | CancellationException ignore) {
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
+                protected void process(List<StyleChangeInstruction> chunks) {
+                    for(StyleChangeInstruction instruction : chunks) {
+                        instruction.perform(sd);
                     }
                 }
             },"Text Highlighter");
@@ -473,6 +465,55 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
         super.caretChanged();
         if(inspector != null) {
             inspector.getDialog().dismiss(false);
+        }
+    }
+
+    private static abstract class StyleChangeInstruction {
+        protected int offset;
+        protected int length;
+        protected AttributeSet style;
+        protected boolean replace;
+
+        public StyleChangeInstruction(int offset, int length, AttributeSet style, boolean replace) {
+            this.offset = offset;
+            this.length = length;
+            this.style = style;
+            this.replace = replace;
+        }
+
+        public abstract void perform(StyledDocument sd);
+    }
+
+    private static class CharacterStyleChangeInstruction extends StyleChangeInstruction {
+
+        public CharacterStyleChangeInstruction(int offset, int length, AttributeSet style, boolean replace) {
+            super(offset, length, style, replace);
+        }
+
+        @Override
+        public void perform(StyledDocument sd) {
+            sd.setCharacterAttributes(offset, length, style, replace);
+        }
+    }
+
+    private static class ParagraphStyleChangeInstruction extends StyleChangeInstruction {
+
+        public ParagraphStyleChangeInstruction(int offset, int length, AttributeSet style, boolean replace) {
+            super(offset, length, style, replace);
+        }
+
+        @Override
+        public void perform(StyledDocument sd) {
+            sd.setParagraphAttributes(offset, length, style, replace);
+        }
+    }
+
+    private abstract static class HighlightingWorker extends SwingWorker<Object, StyleChangeInstruction> {
+        public void setCharacterAttributes(int offset, int length, AttributeSet style, boolean replace) {
+            publish(new CharacterStyleChangeInstruction(offset, length, style, replace));
+        }
+        public void setParagraphAttributes(int offset, int length, AttributeSet style, boolean replace) {
+            publish(new ParagraphStyleChangeInstruction(offset, length, style, replace));
         }
     }
 }

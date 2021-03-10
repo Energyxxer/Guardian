@@ -1,17 +1,14 @@
 package com.energyxxer.guardian.ui.styledcomponents;
 
 import com.energyxxer.guardian.global.Commons;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.Disposable;
 import com.energyxxer.xswing.menu.XMenu;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import javax.swing.UIManager;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +16,37 @@ import java.util.List;
  * Separator that reacts to window theme changes.
  */
 public class StyledMenu extends XMenu implements Disposable {
+
+    public static final MouseWheelListener NAVIGATE_WITH_MOUSE_WHEEL = e -> {
+        Component thiz = e.getComponent();
+        if(!(thiz.getParent() instanceof JPopupMenu)) return;
+
+        int x = e.getXOnScreen();
+        int thisIndex = ((JPopupMenu) thiz.getParent()).getComponentIndex(thiz);
+        int delta = (e.getWheelRotation() > 0 ? 1 : -1);
+        int nextIndex = thisIndex;
+        int componentCount = thiz.getParent().getComponentCount();
+        Component nextItem;
+        do {
+            nextIndex += delta;
+            if(nextIndex < 0) {
+                nextIndex = componentCount-1;
+            } else if(nextIndex >= componentCount) {
+                nextIndex = 0;
+            }
+
+            nextItem = thiz.getParent().getComponent(nextIndex);
+
+            if(nextIndex == thisIndex) break; //Only one valid item
+
+
+            if(nextItem instanceof JMenuItem && nextItem.isEnabled()) {
+                break;
+            }
+        } while(true);
+
+        GuardianWindow.robot.mouseMove(x, nextItem.getLocationOnScreen().y + nextItem.getHeight()/2);
+    };
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
@@ -43,6 +71,8 @@ public class StyledMenu extends XMenu implements Disposable {
             int borderThickness = Math.max(t.getInteger(1,"General.menu.border.thickness"),0);
             getPopupMenu().setBorder(BorderFactory.createMatteBorder(borderThickness, borderThickness, borderThickness, borderThickness ,t.getColor(new Color(200, 200, 200), "General.menu.border.color")));
         });
+
+        this.addMouseWheelListener(NAVIGATE_WITH_MOUSE_WHEEL);
     }
     public StyledMenu(String text) {
         this(text, null);

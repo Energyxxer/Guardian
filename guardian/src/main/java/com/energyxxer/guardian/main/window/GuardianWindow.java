@@ -86,6 +86,8 @@ public class GuardianWindow {
 
 	private static KeyFixDialog recentlyShownDialog = null;
 
+	public static Robot robot;
+
     public GuardianWindow() {
 		jframe = new JFrame();
 		setTitle("");
@@ -97,6 +99,12 @@ public class GuardianWindow {
 				Preferences.remove("meta.delete_old_jar");
 				Debug.log("Deleted '" + oldJar + "'");
 			}
+		}
+
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			e.printStackTrace();
 		}
 
 		tlm.addThemeChangeListener(t -> jframe.getContentPane().setBackground(t.getColor(new Color(215, 215, 215), "Window.background")));

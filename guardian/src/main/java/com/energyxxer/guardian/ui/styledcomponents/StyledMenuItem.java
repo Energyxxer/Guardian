@@ -5,9 +5,8 @@ import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.Disposable;
 import com.energyxxer.xswing.menu.XMenuItem;
 
-import javax.swing.ImageIcon;
-import java.awt.Color;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -29,6 +28,8 @@ public class StyledMenuItem extends XMenuItem implements Disposable, ActionListe
             updateIcon();
         });
         this.addActionListener(this);
+
+        this.addMouseWheelListener(StyledMenu.NAVIGATE_WITH_MOUSE_WHEEL);
     }
     public StyledMenuItem(String text) {
         this(text, null);
