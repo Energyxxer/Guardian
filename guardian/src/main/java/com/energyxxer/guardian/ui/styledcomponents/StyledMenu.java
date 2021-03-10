@@ -18,10 +18,17 @@ import java.util.List;
 public class StyledMenu extends XMenu implements Disposable {
 
     public static final MouseWheelListener NAVIGATE_WITH_MOUSE_WHEEL = e -> {
+
         Component thiz = e.getComponent();
         if(!(thiz.getParent() instanceof JPopupMenu)) return;
+        MenuElement[] selectedPath = MenuSelectionManager.defaultManager().getSelectedPath();
+        for(int i = 0; i < selectedPath.length-1; i++) {
+            if(selectedPath[i] instanceof StyledPopupMenu) {
+                ((StyledPopupMenu) selectedPath[i]).suppressDispose = true;
+            }
+        }
 
-        int x = e.getXOnScreen();
+        int x = e.getX() + thiz.getLocationOnScreen().x;
         int thisIndex = ((JPopupMenu) thiz.getParent()).getComponentIndex(thiz);
         int delta = (e.getWheelRotation() > 0 ? 1 : -1);
         int nextIndex = thisIndex;
@@ -46,6 +53,18 @@ public class StyledMenu extends XMenu implements Disposable {
         } while(true);
 
         GuardianWindow.robot.mouseMove(x, nextItem.getLocationOnScreen().y + nextItem.getHeight()/2);
+
+        selectedPath[selectedPath.length-1] = (MenuElement) nextItem;
+
+        SwingUtilities.invokeLater(() -> {
+            for(int i = 0; i < selectedPath.length; i++) {
+                if(selectedPath[i] instanceof StyledPopupMenu) {
+                    ((StyledPopupMenu) selectedPath[i]).suppressDispose = false;
+                }
+            }
+            selectedPath[0].getComponent().setVisible(true);
+            MenuSelectionManager.defaultManager().setSelectedPath(selectedPath);
+        });
     };
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
@@ -59,6 +78,7 @@ public class StyledMenu extends XMenu implements Disposable {
 
     public StyledMenu(String text, String icon) {
         super(text);
+        this.setInheritsPopupMenu(true);
 
         tlm.addThemeChangeListener(t -> {
             //this.setBackground(t.getColor(new Color(215, 215, 215), "General.menu.background"));

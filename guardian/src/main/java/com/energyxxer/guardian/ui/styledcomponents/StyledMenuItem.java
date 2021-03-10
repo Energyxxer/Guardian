@@ -20,6 +20,9 @@ public class StyledMenuItem extends XMenuItem implements Disposable, ActionListe
 
     public StyledMenuItem(String text, String icon) {
         if(text != null) setText(text);
+
+        this.setInheritsPopupMenu(true);
+
         this.icon = icon;
         tlm.addThemeChangeListener(t -> {
             this.setRolloverBackground(t.getColor(new Color(190, 190, 190), "General.menu.selected.background"));

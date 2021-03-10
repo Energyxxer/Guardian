@@ -3,13 +3,10 @@ package com.energyxxer.guardian.ui.styledcomponents;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.Disposable;
 
-import javax.swing.BorderFactory;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
+import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,12 +14,12 @@ import java.util.List;
  * Created by User on 12/14/2016.
  */
 public class StyledPopupMenu extends JPopupMenu implements Disposable, PopupMenuListener {
-
     private String namespace = null;
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
     private List<Disposable> disposableChildren = new ArrayList<>();
+    boolean suppressDispose = false;
 
     public StyledPopupMenu() {
         this(null,null);
@@ -83,9 +80,14 @@ public class StyledPopupMenu extends JPopupMenu implements Disposable, PopupMenu
 
     @Override
     public void dispose() {
-        tlm.dispose();
-        disposableChildren.forEach(Disposable::dispose);
-        disposableChildren.clear();
+        if(!suppressDispose) {
+//            Debug.log("Dispose");
+            tlm.dispose();
+            disposableChildren.forEach(Disposable::dispose);
+            disposableChildren.clear();
+        } else {
+//            Debug.log("Dispose (suppressed)");
+        }
     }
 
     @Override
@@ -95,12 +97,11 @@ public class StyledPopupMenu extends JPopupMenu implements Disposable, PopupMenu
 
     @Override
     public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-
+        dispose();
     }
 
     @Override
     public void popupMenuCanceled(PopupMenuEvent e) {
-        dispose();
     }
 
     @Override
@@ -109,4 +110,20 @@ public class StyledPopupMenu extends JPopupMenu implements Disposable, PopupMenu
                 "namespace='" + namespace + '\'' +
                 '}';
     }
+
+//    @Override
+//    protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+//        if(propertyName.equals("JPopupMenu.firePopupMenuCanceled")) {
+//            Debug.log(newValue);
+//            if(newValue == Boolean.TRUE) {
+//                putClientProperty(propertyName, null);
+//
+//                if(System.currentTimeMillis() < scrollTime + 100) {
+//                    Debug.log("OH NO MENU WAS CANCELED WHATEVER WILL I DO");
+//                }
+//            }
+//        } else {
+//            super.firePropertyChange(propertyName, oldValue, newValue);
+//        }
+//    }
 }
