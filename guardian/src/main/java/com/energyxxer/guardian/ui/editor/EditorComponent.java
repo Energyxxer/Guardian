@@ -11,6 +11,7 @@ import com.energyxxer.guardian.global.temp.Lang;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.IndentationManager;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
@@ -36,6 +37,8 @@ import java.util.function.Function;
 
 public class EditorComponent extends AdvancedEditor implements KeyListener, CaretListener, FocusListener {
 
+    public static boolean logHighlighterTimes = false;
+
     private static final int MAX_HIGHLIGHTED_TOKENS_PER_LINE = 150;
     private EditorModule parent;
 
@@ -52,6 +55,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     public static final Preferences.SettingPref<Integer> AUTOREPARSE_DELAY = new Preferences.SettingPref<>("settings.editor.auto_reparse_delay", 500, Integer::parseInt);
     public static final Preferences.SettingPref<Boolean> SHOW_SUGGESTIONS = new Preferences.SettingPref<>("settings.editor.show_suggestions", true, Boolean::parseBoolean);
+
 
     EditorComponent(EditorModule parent) {
         this.parent = parent;
@@ -163,6 +167,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
         if(parent.syntax == null) return null;
 
         try {
+            long startTime = System.currentTimeMillis();
             String text = getText();
 
             Lang lang = parent.getLanguage();
@@ -178,7 +183,11 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             File file = parent.getFileForAnalyzer();
             if(Thread.interrupted()) return null;
+            if(logHighlighterTimes) Debug.log("Pre analysis time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
             Lang.LangAnalysisResponse analysis = file != null ? lang.analyze(file, text, suggestionModule, summaryModule) : null;
+            if(logHighlighterTimes) Debug.log("Analysis time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
             if (analysis == null) return null;
 
             if(Thread.interrupted()) return null;
@@ -193,6 +202,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
     private final ArrayList<String> previousTokenStyles = new ArrayList<>();
 
     private void performTokenStyling(Lang.LangAnalysisResponse analysis, Lang lang, HighlightingWorker worker) {
+        long startTime = System.currentTimeMillis();
         try {
             Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 
@@ -200,6 +210,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(analysis.lexer.getSuggestionModule() != null) {
                 suggestionBox.showSuggestions(analysis.lexer.getSuggestionModule());
             }
+            if(logHighlighterTimes) Debug.log("Suggestion update time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
 
             if(Thread.interrupted()) return;
 
@@ -211,6 +223,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 this.inspector.setInspectionModule(analysis.lexer.getInspectionModule());
                 this.inspector.insertNotices(analysis.notices);
             }
+            if(logHighlighterTimes)  Debug.log("Inspection update time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
 
             if(Thread.interrupted()) return;
 
@@ -220,6 +234,9 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 if(analysis.response.faultyToken != null && analysis.response.faultyToken.value != null && analysis.response.faultyToken.loc != null) sd.setCharacterAttributes(analysis.response.faultyToken.loc.index, analysis.response.faultyToken.value.length(), EditorComponent.this.getStyle("error"), true);
                 if(analysis.lexer instanceof LazyLexer) return;
             }
+
+            if(logHighlighterTimes) Debug.log("Error update time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
 
             if(Thread.interrupted()) return;
 
@@ -329,11 +346,16 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 prevToken = token;
             }
             previousTokenStyles.clear();
+            if(logHighlighterTimes) Debug.log("Character Attribute Update time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
 
             if(analysis.response == null || analysis.response.matched) GuardianWindow.dismissStatus(errorStatus);
 
             if(Thread.interrupted()) return;
             worker.setParagraphAttributes(0, sd.getLength(), defaultStyle, false);
+
+            if(logHighlighterTimes) Debug.log("Post Highlight time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
 
         } catch(Exception x) {
             x.printStackTrace();
@@ -515,5 +537,26 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
         public void setParagraphAttributes(int offset, int length, AttributeSet style, boolean replace) {
             publish(new ParagraphStyleChangeInstruction(offset, length, style, replace));
         }
+    }
+
+    static {
+        ConsoleBoard.registerCommandHandler("highlightertimes", new ConsoleBoard.CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Toggles logging of analysis, suggestion and syntax highlighting times";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("HIGHLIGHTERTIMES: Toggles logging of analysis, suggestion and syntax highlighting times");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                logHighlighterTimes = !logHighlighterTimes;
+                Debug.log("Logging of highlighter times is now: " + logHighlighterTimes);
+            }
+        });
     }
 }

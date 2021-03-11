@@ -135,7 +135,8 @@ public class Commons {
                 if(element instanceof StandardExplorerItem && element.getToken() instanceof FileModuleToken && ((FileModuleToken) element.getToken()).getFile().equals(file)) {
                     GuardianWindow.projectExplorer.setSelected(element, null);
                     if(GuardianWindow.projectExplorer.getParent() instanceof JViewport) {
-                        ((JViewport) GuardianWindow.projectExplorer.getParent()).scrollRectToVisible(new Rectangle(0, element.getLastRecordedOffset(), 1, element.getHeight()));
+                        Rectangle elementRect = new Rectangle(0, element.getLastRecordedOffset(), 1, element.getHeight());
+                        GuardianWindow.projectExplorer.scrollRectToVisible(elementRect);
                     }
                     break;
                 }
