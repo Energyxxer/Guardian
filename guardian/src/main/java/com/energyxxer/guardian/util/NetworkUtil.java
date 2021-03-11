@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 public class NetworkUtil {
@@ -23,8 +24,8 @@ public class NetworkUtil {
 
         InputStream authenticatedResult = null;
         try {
-            authenticatedResult = retrieveStreamForURL((AUTHENTICATED_REQUEST_API + url).replace("&","%26"), true);
-        } catch(IOException x) {
+            authenticatedResult = retrieveStreamForURL((AUTHENTICATED_REQUEST_API + url).replace("&", "%26"), true, 4);
+        } catch (IOException x) {
             Debug.log("Failed authenticated request (and it wasn't 404). Please notify Energyxxer.", Debug.MessageType.ERROR);
             GuardianWindow.showError("Failed authenticated request (and it wasn't 404). Please notify Energyxxer.");
             x.printStackTrace();
@@ -36,7 +37,22 @@ public class NetworkUtil {
 
         //Call to authenticated request API failed. As a backup, do the call to the URL directly.
 
-        return retrieveStreamForURL(url, accept404Null);
+        return retrieveStreamForURL(url, accept404Null, 4);
+    }
+
+    public static InputStream retrieveStreamForURL(String url, boolean accept404Null, int attempts) throws IOException {
+        for(int i = 0; i < attempts; i++) {
+            try {
+                return retrieveStreamForURL(url, accept404Null);
+            } catch(SocketTimeoutException x) {
+                Debug.log("Timed out (" + (i + 1) + "/" + attempts + ")");
+                if(i == attempts-1) {
+                    GuardianWindow.showError("Authenticated request timed out after " + attempts + ".");
+                    throw x;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Impossible Exception (or attempts <= 0)");
     }
 
     @Contract("_, false -> !null")
@@ -48,7 +64,7 @@ public class NetworkUtil {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setInstanceFollowRedirects(true);
 
-        connection.setConnectTimeout(5000);
+        connection.setConnectTimeout(15000);
         connection.setReadTimeout(15000);
 
         connection.connect();
