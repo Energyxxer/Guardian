@@ -22,6 +22,7 @@ import com.energyxxer.xswing.UnifiedDocumentListener;
 import com.energyxxer.xswing.hints.TextHint;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
@@ -290,7 +291,10 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
 
                 }
             });
-            DocumentListener eitherChange = (UnifiedDocumentListener) e -> redoSearch();
+            DocumentListener eitherChange = (UnifiedDocumentListener) e -> {
+                if(e.getType() == DocumentEvent.EventType.CHANGE) return;
+                redoSearch();
+            };
             field.getDocument().addDocumentListener(eitherChange);
             field.getDocument().addDocumentListener((UnifiedDocumentListener) e -> excluded.clear());
             editor.editorComponent.getDocument().addDocumentListener(eitherChange);

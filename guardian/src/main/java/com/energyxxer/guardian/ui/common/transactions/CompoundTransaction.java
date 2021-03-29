@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.common.transactions;
 
+import com.energyxxer.util.Factory;
 import com.energyxxer.util.Lazy;
 
 import java.util.ArrayList;
@@ -19,6 +20,10 @@ public class CompoundTransaction<T> extends Transaction<T> {
 
     public void append(Lazy<Transaction<T>> edit) {
         edits.add(edit);
+    }
+
+    public void append(Factory<Transaction<T>> edit) {
+        append(new Lazy<>(edit));
     }
 
     @Override

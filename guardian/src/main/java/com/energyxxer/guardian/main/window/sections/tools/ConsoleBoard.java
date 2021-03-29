@@ -148,7 +148,7 @@ public class ConsoleBoard extends ToolBoard {
                     e.consume();
                     String command = inputField.getText();
                     inputField.setText("");
-                    submitCommand(command);
+                    submitCommand(command, true);
                 } else if(e.getKeyCode() == KeyEvent.VK_UP) {
                     getPreviousCommand();
                 } else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -304,7 +304,7 @@ public class ConsoleBoard extends ToolBoard {
         return locked;
     }
 
-    public void submitCommand(String command) {
+    public void submitCommand(String command, boolean addToHistory) {
         if(command == null) return;
         if(runningProcess != null && runningProcess.isAlive()) {
             addToHistory(command);
@@ -318,7 +318,7 @@ public class ConsoleBoard extends ToolBoard {
         } else {
             runningProcess = null;
             if(!command.isEmpty()) {
-                addToHistory(command);
+                if(addToHistory) addToHistory(command);
                 runCommand(command);
             }
         }
@@ -327,7 +327,7 @@ public class ConsoleBoard extends ToolBoard {
     public void batchSubmitCommand(Iterable<String> commands) {
         if(commands == null) return;
         for(String command : commands) {
-            submitCommand(command);
+            submitCommand(command, false);
             while(waitForUnlock()) {
                 try {
                     Thread.sleep(10);

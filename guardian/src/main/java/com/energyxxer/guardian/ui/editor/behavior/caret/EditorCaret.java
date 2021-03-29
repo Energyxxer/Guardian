@@ -77,6 +77,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
             @Override
             public void focusGained(FocusEvent e) {
                 flasher.restart();
+                visible = true;
             }
 
             @Override

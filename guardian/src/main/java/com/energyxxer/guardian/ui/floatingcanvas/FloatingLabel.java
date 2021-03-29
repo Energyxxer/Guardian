@@ -2,6 +2,8 @@ package com.energyxxer.guardian.ui.floatingcanvas;
 
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.floatingcanvas.styles.StyleProperty;
+import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.xswing.SystemDefaults;
 
 import java.awt.*;
@@ -9,7 +11,7 @@ import java.awt.event.MouseEvent;
 import java.util.function.Supplier;
 
 public abstract class FloatingLabel extends FloatingComponent {
-    private Font font = SystemDefaults.FONT;
+    public StyleProperty<Font> font = new StyleProperty<Font>(SystemDefaults.FONT) {public void themeUpdated(Theme t) {}};
 
     private Rectangle prevBounds = new Rectangle();
 
@@ -32,12 +34,12 @@ public abstract class FloatingLabel extends FloatingComponent {
 
     @Override
     public void paint(Graphics2D g) {
-        g.setFont(font);
+        g.setFont(font.getCurrent(this));
 
         String text = getText();
         Image icon = getIcon();
 
-        FontMetrics fm = g.getFontMetrics(font);
+        FontMetrics fm = g.getFontMetrics(font.getCurrent(this));
         int width = fm.stringWidth(text);
         int height = fm.getAscent() + fm.getDescent();
 
@@ -69,16 +71,18 @@ public abstract class FloatingLabel extends FloatingComponent {
     }
 
     @Override
+    public void themeUpdated(Theme t) {
+        super.themeUpdated(t);
+        font.themeUpdated(t);
+    }
+
+    @Override
     public Rectangle getBounds() {
         return new Rectangle(prevBounds);
     }
 
-    public Font getFont() {
-        return font;
-    }
-
     public void setFont(Font font) {
-        this.font = font;
+        this.font = new StyleProperty<Font>(font) {public void themeUpdated(Theme t) {}};
     }
 
     public abstract String getText();

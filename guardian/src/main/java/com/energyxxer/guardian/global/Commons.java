@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -244,6 +245,9 @@ public class Commons {
     }
 
     public static boolean isProjectFile(File file) {
+        if(file.toPath().equals(Paths.get(ProjectManager.getWorkspaceDir(), ProjectManager.WORKSPACE_CONFIG_FILE_NAME))) {
+            return true;
+        }
         Project associatedProject = ProjectManager.getAssociatedProject(file);
         if(associatedProject == null) return false;
         if(associatedProject.getProjectType().isProjectIdentity(file)) return true;

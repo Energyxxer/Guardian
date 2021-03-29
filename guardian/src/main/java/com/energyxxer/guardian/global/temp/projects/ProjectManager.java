@@ -1,19 +1,27 @@
 package com.energyxxer.guardian.global.temp.projects;
 
 import com.energyxxer.guardian.langinterface.ProjectType;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class ProjectManager {
+	public static final String WORKSPACE_CONFIG_FILE_NAME = ".guardianworkspace";
+
 	private static ArrayList<Project> loadedProjects = new ArrayList<>();
 	private static String workspaceDir = null;
 
 	public static void loadWorkspace() {
 		if(workspaceDir == null) throw new IllegalStateException("Workspace directory not specified.");
+
 		loadedProjects.clear();
 		
 		File workspace = new File(workspaceDir);
@@ -38,6 +46,20 @@ public class ProjectManager {
 		}
 
 		GuardianWindow.projectExplorer.refresh();
+
+		JsonObject workspaceConfigObj = null;
+
+		File workspaceConfigFile = workspace.toPath().resolve(WORKSPACE_CONFIG_FILE_NAME).toFile();
+		if(workspaceConfigFile.exists()) {
+
+			try(FileReader fr = new FileReader(workspaceConfigFile)) {
+				workspaceConfigObj = new Gson().fromJson(fr, JsonObject.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		Guardian.core.workspaceLoaded(workspaceConfigObj);
 	}
 	
 	public static Project getAssociatedProject(File file) {

@@ -411,7 +411,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
 
     @Override
     public Object getValue() {
-        return getText().intern().hashCode();
+        return getText();
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.energyxxer.guardian.global.temp.lang_defaults.presets.JSONLexerProfil
 import com.energyxxer.guardian.global.temp.lang_defaults.presets.MCFunctionLexerProfile;
 import com.energyxxer.guardian.global.temp.lang_defaults.presets.PropertiesLexerProfile;
 import com.energyxxer.guardian.global.temp.projects.Project;
+import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
 import com.energyxxer.guardian.ui.dialogs.settings.SnippetLexerProfile;
@@ -50,7 +51,7 @@ public class Lang {
     public static final Lang JSON = new Lang("JSON", "JSON",
             false,
             JSONLexerProfile::new,
-            "json", "mcmeta"
+            "json", "mcmeta", ProjectManager.WORKSPACE_CONFIG_FILE_NAME.substring(1)
     ) {
         {
             setIconName("json");

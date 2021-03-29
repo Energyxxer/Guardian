@@ -29,7 +29,7 @@ import java.util.ArrayList;
 public class Guardian {
 	public static final String LICENSE = "MIT License\n" +
 			"\n" +
-			"Copyright (c) 2020 Daniel Cepeda (Energyxxer)\n" +
+			"Copyright (c) 2021 Daniel Cepeda (Energyxxer)\n" +
 			"\n" +
 			"Permission is hereby granted, free of charge, to any person obtaining a copy\n" +
 			"of this software and associated documentation files (the \"Software\"), to deal\n" +
@@ -109,13 +109,13 @@ public class Guardian {
 	}
 
 	private static void loadBindings() {
-		FileModuleToken.addDisplayModuleProvider(f -> {
+		FileModuleToken.addDisplayModuleProvider((f, t) -> {
 			if(f.getName().endsWith(".png")) {
 				return new ImageViewer(f);
 			}
 			return null;
 		});
-		FileModuleToken.addDisplayModuleProvider(f -> {
+		FileModuleToken.addDisplayModuleProvider((f, t) -> {
 			String name = f.getName();
 			if(name.endsWith(".ogg") || name.endsWith(".wav") || name.endsWith(".mp3") || name.endsWith(".aiff") || name.endsWith(".aif") || name.endsWith(".aifc") || name.endsWith(".au") || name.endsWith(".snd")) {
 				return new AudioPlayer(f);

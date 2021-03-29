@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToken, DropTargetExplorerModuleToken {
     public static final ModuleTokenFactory<FileModuleToken> FACTORY = str -> {
@@ -60,7 +60,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     };
     public static final boolean MOVE_TO_TRASH_VERSION_AVAILABLE = !System.getProperty("java.version").startsWith("1.8.");
 
-    private static final ArrayList<Function<File, DisplayModule>> DISPLAY_MODULE_PROVIDERS = new ArrayList<>();
+    private static final ArrayList<BiFunction<File, Tab, DisplayModule>> DISPLAY_MODULE_PROVIDERS = new ArrayList<>();
 
     private final File file;
     private boolean isProjectRoot;
@@ -242,8 +242,8 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
     public DisplayModule createModule(Tab tab) {
         if(file.isFile()) {
             addRecentFile(file);
-            for(Function<File, DisplayModule> provider : DISPLAY_MODULE_PROVIDERS) {
-                DisplayModule result = provider.apply(file);
+            for(BiFunction<File, Tab, DisplayModule> provider : DISPLAY_MODULE_PROVIDERS) {
+                DisplayModule result = provider.apply(file, tab);
                 if(result != null) {
                     return result;
                 }
@@ -519,7 +519,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
         return file;
     }
 
-    public static void addDisplayModuleProvider(Function<File, DisplayModule> provider) {
+    public static void addDisplayModuleProvider(BiFunction<File, Tab, DisplayModule> provider) {
         if(provider != null) DISPLAY_MODULE_PROVIDERS.add(provider);
     }
 }

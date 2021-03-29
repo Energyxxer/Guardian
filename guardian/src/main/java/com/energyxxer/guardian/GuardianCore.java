@@ -3,6 +3,7 @@ package com.energyxxer.guardian;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.ui.common.ProgramUpdateProcess;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.google.gson.JsonObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,5 +89,9 @@ public class GuardianCore {
 
     public Point getSplashVersionCoords() {
         return new Point(512, 320);
+    }
+
+    public void workspaceLoaded(JsonObject config) {
+
     }
 }

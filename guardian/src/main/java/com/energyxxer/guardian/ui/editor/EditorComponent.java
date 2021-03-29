@@ -393,9 +393,11 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
                 @Override
                 protected void process(List<StyleChangeInstruction> chunks) {
+                    long startTime = System.currentTimeMillis();
                     for(StyleChangeInstruction instruction : chunks) {
                         instruction.perform(sd);
                     }
+                    if(logHighlighterTimes) Debug.log("(process " + chunks.size() + " style changes took " + (System.currentTimeMillis() - startTime) + " ms)");
                 }
             },"Text Highlighter");
             highlightingThread.setUncaughtExceptionHandler((t, e) -> {

@@ -204,6 +204,10 @@ public class StyledExplorerMaster extends ExplorerMaster implements Disposable {
         children.add(elem);
     }
 
+    public void addElement(int index, ExplorerElement elem) {
+        children.add(index, elem);
+    }
+
     public void removeElement(ExplorerElement elem) {
         children.remove(elem);
     }

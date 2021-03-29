@@ -43,7 +43,7 @@ public abstract class StyleProperty<T> {
 
         for(int i = 0; i < keys.length; i++) {
             String template = keys[i];
-            normalKeys[i] = template.replace("*.", "");
+            normalKeys[i] = template.replace("*.", "").replace(".*", "");
             rolloverKeys[i] = template.replace("*", "hover");
             pressedKeys[i] = template.replace("*", "pressed");
         }
