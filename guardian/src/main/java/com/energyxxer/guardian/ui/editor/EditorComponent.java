@@ -201,6 +201,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     private final ArrayList<String> previousTokenStyles = new ArrayList<>();
 
+    private static ArrayList<Token> lastHighlightedTokenList;
+
     private void performTokenStyling(Lang.LangAnalysisResponse analysis, Lang lang, HighlightingWorker worker) {
         long startTime = System.currentTimeMillis();
         try {
@@ -241,6 +243,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(Thread.interrupted()) return;
 
             int tokensInLine = 0;
+            Iterable<? extends Map.Entry<String, String[]>> parserStyleSet = Collections.synchronizedSet(parent.parserStyles.entrySet());
 
             for(Token token : analysis.lexer.getStream().tokens) {
                 if(Thread.interrupted()) return;
@@ -298,7 +301,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                     }
 
                     if(analysis.response != null) {
-                        for (Map.Entry<String, String[]> entry : Collections.synchronizedSet(parent.parserStyles.entrySet())) {
+                        for (Map.Entry<String, String[]> entry : parserStyleSet) {
                             String[] tagList = entry.getValue();
                             int startIndex = -1;
                             tgs:
@@ -346,6 +349,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 prevToken = token;
             }
             previousTokenStyles.clear();
+            lastHighlightedTokenList = analysis.lexer.getStream().tokens;
             if(logHighlighterTimes) Debug.log("Character Attribute Update time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
 
@@ -542,7 +546,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
     }
 
     static {
-        ConsoleBoard.registerCommandHandler("highlightertimes", new ConsoleBoard.CommandHandler() {
+        ConsoleBoard.registerCommandHandler("debug.highlighter_times", new ConsoleBoard.CommandHandler() {
             @Override
             public String getDescription() {
                 return "Toggles logging of analysis, suggestion and syntax highlighting times";
@@ -551,13 +555,31 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             @Override
             public void printHelp() {
                 Debug.log();
-                Debug.log("HIGHLIGHTERTIMES: Toggles logging of analysis, suggestion and syntax highlighting times");
+                Debug.log("DEBUG.HIGHLIGHTER_TIMES: Toggles logging of analysis, suggestion and syntax highlighting times");
             }
 
             @Override
             public void handle(String[] args, String rawArgs) {
                 logHighlighterTimes = !logHighlighterTimes;
                 Debug.log("Logging of highlighter times is now: " + logHighlighterTimes);
+            }
+        });
+        ConsoleBoard.registerCommandHandler("debug.dump_tokens", new ConsoleBoard.CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Dumps all of the tokens of the last successful syntax highlighting routine";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("DEBUG.DUMP_TOKENS: Dumps all of the tokens of the last successful syntax highlighting routine");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                System.out.println(lastHighlightedTokenList);
+                if(lastHighlightedTokenList != null) Debug.log("Count: " + lastHighlightedTokenList.size());
             }
         });
     }
