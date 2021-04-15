@@ -50,7 +50,7 @@ public class ThemeListenerManager implements Disposable {
     }
 
     private static Collection<ThemeChangeListener> seen = null;
-    private static ArrayList<ThemeChangeListener> unseen = new ArrayList<>();
+    private static final ArrayList<ThemeChangeListener> unseen = new ArrayList<>();
 
     static {
         ConsoleBoard.registerCommandHandler("tlm", new ConsoleBoard.CommandHandler() {

@@ -4,7 +4,6 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.*;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 /**
@@ -43,12 +42,10 @@ public class JSONLexerProfile extends LexerProfile {
         //Misc
         LexerContext miscellaneousContext = new StringTypeMatchLexerContext(new String[] {",",":"}, new TokenType[] {COMMA, COLON});
 
-        ArrayList<LexerContext> jsonContexts = new ArrayList<>();
-        jsonContexts.add(stringContext);
-        jsonContexts.add(braceContext);
-        jsonContexts.add(miscellaneousContext);
-        jsonContexts.add(numberContext);
-        this.contexts = jsonContexts;
+        contexts.add(stringContext);
+        contexts.add(braceContext);
+        contexts.add(miscellaneousContext);
+        contexts.add(numberContext);
     }
 
     @Override

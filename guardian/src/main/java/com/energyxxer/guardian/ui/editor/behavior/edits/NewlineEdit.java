@@ -17,9 +17,9 @@ import java.util.ArrayList;
 public class NewlineEdit extends Transaction<AdvancedEditor> {
     private CaretProfile previousProfile;
     private CaretProfile nextProfile;
-    private ArrayList<Integer> modificationIndices = new ArrayList<>();
-    private ArrayList<String> previousValues = new ArrayList<>();
-    private ArrayList<String> nextValues = new ArrayList<>();
+    private final ArrayList<Integer> modificationIndices = new ArrayList<>();
+    private final ArrayList<String> previousValues = new ArrayList<>();
+    private final ArrayList<String> nextValues = new ArrayList<>();
 
     private final boolean pushCaret;
 

@@ -22,7 +22,7 @@ public class IndentEdit extends Transaction<AdvancedEditor> {
      * Every even index (0, 2, 4...) contains the position in the document where spaces were added/removed. Doesn't account for indices drifted by adding or removing spaces.
      * Every odd index (1, 3, 5...) contains the amount of spaces added/removed at the position given by the index before it. (negatives for removal, positives for insertion)
      * */
-    private ArrayList<Integer> modifications = new ArrayList<>();
+    private final ArrayList<Integer> modifications = new ArrayList<>();
     private final boolean reverse;
 
     public IndentEdit(AdvancedEditor editor) {

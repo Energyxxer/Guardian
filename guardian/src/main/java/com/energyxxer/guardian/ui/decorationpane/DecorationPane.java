@@ -3,22 +3,9 @@ package com.energyxxer.guardian.ui.decorationpane;
 import com.energyxxer.guardian.global.Status;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +16,7 @@ public class DecorationPane extends JDialog implements MouseListener, MouseMotio
 
     private Status status = new Status("");
 
-    public List<DecorationObject> objects = new ArrayList<>();
+    public final List<DecorationObject> objects = new ArrayList<>();
 
     public DecorationPane(JFrame parent, Dimension size, Image image) {
         super(parent, false);

@@ -37,10 +37,10 @@ import java.util.stream.Collectors;
  * Created by User on 5/16/2017.
  */
 public class ProjectExplorerMaster extends StyledExplorerMaster implements DropTargetListener {
-    private ArrayList<ModuleToken> tokenSources = new ArrayList<>();
+    private final ArrayList<ModuleToken> tokenSources = new ArrayList<>();
 
     private DraggableExplorerModuleToken[] draggingFiles = null;
-    private ArrayList<ExplorerElement> draggingRollover = new ArrayList<>();
+    private final ArrayList<ExplorerElement> draggingRollover = new ArrayList<>();
 
     public static Preferences.SettingPref<Boolean> SAVE_EXPLORER_TREE = new Preferences.SettingPref<>("settings.behavior.save_explorer_tree", true, Boolean::parseBoolean);
 

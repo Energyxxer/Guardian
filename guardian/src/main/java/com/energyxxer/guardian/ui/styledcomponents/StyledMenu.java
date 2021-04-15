@@ -69,7 +69,7 @@ public class StyledMenu extends XMenu implements Disposable {
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
-    private List<Disposable> disposableChildren = new ArrayList<>();
+    private final List<Disposable> disposableChildren = new ArrayList<>();
 
     static {
         UIManager.put("Menu.submenuPopupOffsetX",0);

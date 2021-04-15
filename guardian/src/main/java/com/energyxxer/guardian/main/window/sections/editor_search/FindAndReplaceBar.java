@@ -44,8 +44,8 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
     public TextHint hint = GuardianWindow.hintManager.createTextHint("");
 
     private SearchHighlighter highlighter;
-    ArrayList<Integer> regions = new ArrayList<>();
-    ArrayList<Integer> excluded = new ArrayList<>();
+    final ArrayList<Integer> regions = new ArrayList<>();
+    final ArrayList<Integer> excluded = new ArrayList<>();
     int selectedIndex = 0;
 
     private AdvancedEditor findField;
@@ -427,10 +427,14 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
         return pt;
     }
 
+
+    private final ArrayList<Integer> toReplace = new ArrayList<>();
+    private final ArrayList<String> replacementValues = new ArrayList<>();
+
     private void replaceAll(boolean inSelection) {
         try {
-            ArrayList<Integer> toReplace = new ArrayList<>();
-            ArrayList<String> replacementValues = new ArrayList<>();
+            toReplace.clear();
+            replacementValues.clear();
             Pattern pattern = null;
             String replaceWith = replaceField.getText();
             for (int i = 0; i < regions.size() - 1; i += 2) {

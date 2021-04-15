@@ -40,7 +40,7 @@ public class TabManager {
 	public static Preferences.SettingPref<Boolean> SAVE_OPEN_TABS = new Preferences.SettingPref<>("settings.behavior.save_open_tabs", true, Boolean::parseBoolean);
 	public static final Preferences.SettingPref<Integer> TAB_LIMIT = new Preferences.SettingPref<>("settings.behavior.tab_limit", 0, Integer::parseInt);
 
-	public List<Tab> openTabs = Collections.synchronizedList(new ArrayList<>());
+	public final List<Tab> openTabs = Collections.synchronizedList(new ArrayList<>());
 
 	private Tab selectedTab = null;
 	

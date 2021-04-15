@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Plugins {
-    private static ArrayList<GuardianPluginLoader> loaders = new ArrayList<>();
+    private static final ArrayList<GuardianPluginLoader> loaders = new ArrayList<>();
 
     private static HashMap<PrismarineSuiteConfiguration, LinkedHashMap<String, PrismarinePlugin>> loadedPlugins = new HashMap<>();
 

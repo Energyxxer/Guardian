@@ -42,7 +42,7 @@ public class ConsoleBoard extends ToolBoard {
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
-    private ArrayList<String> commandHistory = new ArrayList<>();
+    private final ArrayList<String> commandHistory = new ArrayList<>();
     private int selectedCommand = -1;
     private String writingCommand = null;
 

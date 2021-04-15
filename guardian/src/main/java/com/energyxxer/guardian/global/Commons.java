@@ -168,15 +168,15 @@ public class Commons {
         Tab selectedTab = GuardianWindow.tabManager.getSelectedTab();
 
         List<ModuleToken> selectedTokens = GuardianWindow.projectExplorer.getSelectedTokens();
-        ArrayList<FileModuleToken> selectedFiles = new ArrayList<>();
+        File selectedFile = null;
         for(ModuleToken token : selectedTokens) {
-            if(token instanceof FileModuleToken) selectedFiles.add((FileModuleToken) token);
+            if(token instanceof FileModuleToken) selectedFile = ((FileModuleToken) token).getFile();
         }
 
         if(selectedTab != null && selectedTab.token instanceof FileModuleToken) {
             selected = ProjectManager.getAssociatedProject(((FileModuleToken) selectedTab.token).getFile());
-        } else if(selectedFiles.size() > 0) {
-            selected = ProjectManager.getAssociatedProject(selectedFiles.get(0).getFile());
+        } else if(selectedFile != null) {
+            selected = ProjectManager.getAssociatedProject(selectedFile);
         }
         return selected;
     }

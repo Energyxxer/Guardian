@@ -6,9 +6,9 @@ import java.util.ArrayList;
  * Created by User on 1/5/2017.
  */
 public class TransactionManager<T> {
-    private ArrayList<Transaction<T>> transactions = new ArrayList<>();
+    private final ArrayList<Transaction<T>> transactions = new ArrayList<>();
     private int currentTransaction = 0;
-    private ArrayList<TransactionListener<T>> listeners = new ArrayList<>();
+    private final ArrayList<TransactionListener<T>> listeners = new ArrayList<>();
 
     /**
      * Time interval in milliseconds within which transactions will be redone and undone together.

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class TabInsertionEdit extends Transaction<AdvancedEditor> {
     private CaretProfile previousProfile;
     private CaretProfile nextProfile;
-    private ArrayList<Integer> spacesAdded = new ArrayList<>();
+    private final ArrayList<Integer> spacesAdded = new ArrayList<>();
 
     public TabInsertionEdit(AdvancedEditor editor) {
         this.previousProfile = editor.getCaret().getProfile();

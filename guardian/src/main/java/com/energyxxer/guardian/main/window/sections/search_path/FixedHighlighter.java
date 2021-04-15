@@ -16,7 +16,7 @@ public class FixedHighlighter implements Highlighter.HighlightPainter {
     private Color highlightColor;
     private Color highlightBorderColor;
 
-    private ArrayList<Integer> regions = new ArrayList<>();
+    private final ArrayList<Integer> regions = new ArrayList<>();
 
     private boolean enabled = true;
 

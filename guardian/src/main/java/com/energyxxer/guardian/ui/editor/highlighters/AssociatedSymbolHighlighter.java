@@ -35,7 +35,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
     private final AdvancedEditor editor;
 
     private boolean shouldRender = false;
-    private ArrayList<Rectangle> rectangles = new ArrayList<>();
+    private final ArrayList<Rectangle> rectangles = new ArrayList<>();
     private Rectangle hoveringRectangle = null;
 
     private int prevSeenDot = -1;

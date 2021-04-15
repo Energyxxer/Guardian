@@ -25,8 +25,8 @@ import static com.energyxxer.xswing.ScalableDimension.descaleEvent;
 public class ExplorerMaster extends JComponent implements MouseListener, MouseMotionListener, StyleProvider {
     protected HashMap<ExplorerFlag, Boolean> explorerFlags = new HashMap<>();
 
-    protected List<ExplorerElement> children = Collections.synchronizedList(new ArrayList<>());
-    protected List<ExplorerElement> selectedItems = Collections.synchronizedList(new ArrayList<>());
+    protected final List<ExplorerElement> children = Collections.synchronizedList(new ArrayList<>());
+    protected final List<ExplorerElement> selectedItems = Collections.synchronizedList(new ArrayList<>());
 
     protected ExplorerElement rolloverItem = null;
 
@@ -35,9 +35,9 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
     protected boolean pressConsumed = false;
     protected boolean transferStarted = false;
 
-    private ArrayList<ModuleToken> expandedElements = new ArrayList<>();
+    private final ArrayList<ModuleToken> expandedElements = new ArrayList<>();
 
-    protected ArrayList<ExplorerElement> flatList = new ArrayList<>();
+    protected final ArrayList<ExplorerElement> flatList = new ArrayList<>();
     private int contentWidth = 0;
     private int offsetY = 0;
 
@@ -67,6 +67,8 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
 
     public void refresh() {}
 
+    private final ArrayList<ExplorerElement> renderingChildren = new ArrayList<>();
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -80,9 +82,10 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
 
         g = new ScalableGraphics2D(g);
 
-        ArrayList<ExplorerElement> toRender = new ArrayList<>(children);
+        renderingChildren.clear();
+        renderingChildren.addAll(children);
 
-        for(ExplorerElement i : toRender) {
+        for(ExplorerElement i : renderingChildren) {
             i.render(g);
         }
 
@@ -292,13 +295,15 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
         selectionUpdated();
     }
 
+    private final List<ModuleToken> selectedTokensOut = Collections.synchronizedList(new ArrayList<>());
+
     public List<ModuleToken> getSelectedTokens() {
-        List<ModuleToken> list = new ArrayList<>();
+        selectedTokensOut.clear();
         selectedItems.forEach(item -> {
             ModuleToken path = item.getToken();
-            if(path != null) list.add(path);
+            if(path != null) selectedTokensOut.add(path);
         });
-        return list;
+        return selectedTokensOut;
     }
 
     public List<ExplorerElement> getSelectedItems() {
@@ -393,10 +398,6 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
 
     public ArrayList<ModuleToken> getExpandedElements() {
         return expandedElements;
-    }
-
-    public void setExpandedElements(ArrayList<ModuleToken> expandedElements) {
-        this.expandedElements = expandedElements;
     }
 
     public List<ExplorerElement> getChildren() {

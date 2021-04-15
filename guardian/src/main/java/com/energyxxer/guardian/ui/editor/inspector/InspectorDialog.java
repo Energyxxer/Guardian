@@ -49,7 +49,7 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
     private boolean locked = false;
     private boolean forceLocked = false;
 
-    private ArrayList<ExecutableInspectionToken> activeTokens = new ArrayList<>();
+    private final ArrayList<ExecutableInspectionToken> activeTokens = new ArrayList<>();
     private int activeIndex;
 
     public InspectorDialog(Inspector inspector) {

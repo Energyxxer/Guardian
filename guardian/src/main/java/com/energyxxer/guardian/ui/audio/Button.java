@@ -21,7 +21,7 @@ public class Button extends FloatingPanel {
     private IntStyleProperty borderThickness = new IntStyleProperty(2);
     private ColorStyleProperty borderColor = new ColorStyleProperty(Color.BLACK);
 
-    private ArrayList<Runnable> clickEvents = new ArrayList<>();
+    private final ArrayList<Runnable> clickEvents = new ArrayList<>();
 
     private String iconName;
 

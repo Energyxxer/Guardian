@@ -18,9 +18,9 @@ import java.util.ArrayList;
  */
 public class InsertionEdit extends Transaction<AdvancedEditor> {
     private String value;
-    private ArrayList<Integer> undoIndices = new ArrayList<>();
-    private ArrayList<String> previousValues = new ArrayList<>();
-    private ArrayList<String> writingValues = new ArrayList<>();
+    private final ArrayList<Integer> undoIndices = new ArrayList<>();
+    private final ArrayList<String> previousValues = new ArrayList<>();
+    private final ArrayList<String> writingValues = new ArrayList<>();
     private CaretProfile previousProfile;
 
     public InsertionEdit(String value, AdvancedEditor editor) {

@@ -21,10 +21,10 @@ public class Settings {
 	private static JDialog dialog = new JDialog(GuardianWindow.jframe);
 	//static Theme t;
 
-	private static ArrayList<Runnable> openEvents = new ArrayList<>();
-	private static ArrayList<Runnable> applyEvents = new ArrayList<>();
-	private static ArrayList<Runnable> cancelEvents = new ArrayList<>();
-	private static ArrayList<Runnable> closeEvents = new ArrayList<>();
+	private static final ArrayList<Runnable> openEvents = new ArrayList<>();
+	private static final ArrayList<Runnable> applyEvents = new ArrayList<>();
+	private static final ArrayList<Runnable> cancelEvents = new ArrayList<>();
+	private static final ArrayList<Runnable> closeEvents = new ArrayList<>();
 
 	private static JPanel currentSection;
 

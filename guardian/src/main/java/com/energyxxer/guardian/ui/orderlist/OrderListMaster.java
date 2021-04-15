@@ -1,9 +1,9 @@
 package com.energyxxer.guardian.ui.orderlist;
 
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.HintStylizer;
 import com.energyxxer.guardian.ui.explorer.base.StyleProvider;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
 import com.energyxxer.xswing.hints.TextHint;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.*;
 
 public class OrderListMaster extends JComponent implements MouseListener, MouseMotionListener, StyleProvider {
-    ArrayList<OrderListElement> children = new ArrayList<>();
+    final ArrayList<OrderListElement> children = new ArrayList<>();
     private int y = 0;
 
     private OrderListElement rolloverElement = null;
@@ -95,6 +95,8 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
         this.addMouseMotionListener(this);
     }
 
+    private final ArrayList<OrderListElement> renderingChildren = new ArrayList<>();
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -107,9 +109,10 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
 
         int draggedY = -1;
 
-        ArrayList<OrderListElement> toRender = new ArrayList<>(children);
+        renderingChildren.clear();
+        renderingChildren.addAll(children);
 
-        for(OrderListElement element : toRender) {
+        for(OrderListElement element : renderingChildren) {
             if(element != draggedElement) {
                 element.render(g.create());
             } else draggedY = y;

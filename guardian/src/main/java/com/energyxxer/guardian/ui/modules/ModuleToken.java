@@ -60,7 +60,7 @@ public interface ModuleToken {
     }
 
     class Static {
-        public static List<ModuleTokenFactory> tokenFactories = new ArrayList<>();
+        public static final List<ModuleTokenFactory> tokenFactories = new ArrayList<>();
 
         static {
             tokenFactories.add(FileModuleToken.FACTORY);

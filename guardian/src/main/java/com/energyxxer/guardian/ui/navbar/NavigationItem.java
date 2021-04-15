@@ -13,7 +13,7 @@ public class NavigationItem extends NavigationElement {
     private String icon = null;
     private String hintText = null;
 
-    private ArrayList<Runnable> actions = new ArrayList<>();
+    private final ArrayList<Runnable> actions = new ArrayList<>();
 
     public NavigationItem(NavigatorMaster master, String icon) {
         super(master);

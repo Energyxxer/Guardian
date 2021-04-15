@@ -58,8 +58,8 @@ public class FindResults extends QueryResult {
     public static class ProjectResult extends QueryResult implements NonStandardModuleToken {
         private String iconName = "folder";
         private File projectRoot;
-        private HashMap<String, SubProjectResult> subResults = new HashMap<>();
-        private ArrayList<FileOccurrence> loneResults = new ArrayList<>();
+        private final HashMap<String, SubProjectResult> subResults = new HashMap<>();
+        private final ArrayList<FileOccurrence> loneResults = new ArrayList<>();
 
         public ProjectResult(File projectRoot) {
             this.projectRoot = projectRoot;
@@ -241,7 +241,7 @@ public class FindResults extends QueryResult {
 
     public static class FileResult extends QueryResult implements NonStandardModuleToken {
         private FileModuleToken file;
-        private ArrayList<FileOccurrence> occurrences = new ArrayList<>();
+        private final ArrayList<FileOccurrence> occurrences = new ArrayList<>();
 
         public FileResult(File file) {
             this.file = new FileModuleToken(file);

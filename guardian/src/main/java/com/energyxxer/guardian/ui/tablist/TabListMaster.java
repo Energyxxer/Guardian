@@ -18,7 +18,7 @@ import java.util.HashMap;
 import static com.energyxxer.xswing.ScalableDimension.descaleEvent;
 
 public class TabListMaster extends JComponent implements MouseListener, MouseMotionListener {
-    ArrayList<TabListElement> children = new ArrayList<>();
+    final ArrayList<TabListElement> children = new ArrayList<>();
     private int x = 0;
 
     private TabListElement rolloverElement = null;
@@ -92,6 +92,8 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
         this.addMouseMotionListener(this);
     }
 
+    private final ArrayList<TabListElement> renderingChildren = new ArrayList<>();
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -104,9 +106,10 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
 
         int draggedX = -1;
 
-        ArrayList<TabListElement> toRender = new ArrayList<>(children);
+        renderingChildren.clear();
+        renderingChildren.addAll(children);
 
-        for(TabListElement element : toRender) {
+        for(TabListElement element : renderingChildren) {
             if(element != draggedElement) {
                 element.render(g.create());
             } else draggedX = x;
@@ -310,18 +313,20 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
         repaint();
     }
 
-    public Tab getFallbackTab(Tab tab) {
-        ArrayList<Tab> allTabs = new ArrayList<>();
-        for(TabListElement element : children) {
-            if(element instanceof TabItem && ((TabItem) element).getAssociatedTab() != null) allTabs.add(((TabItem) element).getAssociatedTab());
-        }
-        int index = allTabs.indexOf(tab);
-        if(index == -1) return null;
-        allTabs.remove(index);
-        if(allTabs.size() == 0) return null;
+    private final ArrayList<Tab> fallbackAllTabs = new ArrayList<>();
 
-        Tab left = (index >= 1) ? allTabs.get(index-1) : null;
-        Tab right = (index < allTabs.size()) ? allTabs.get(index) : null;
+    public Tab getFallbackTab(Tab tab) {
+        fallbackAllTabs.clear();
+        for(TabListElement element : children) {
+            if(element instanceof TabItem && ((TabItem) element).getAssociatedTab() != null) fallbackAllTabs.add(((TabItem) element).getAssociatedTab());
+        }
+        int index = fallbackAllTabs.indexOf(tab);
+        if(index == -1) return null;
+        fallbackAllTabs.remove(index);
+        if(fallbackAllTabs.size() == 0) return null;
+
+        Tab left = (index >= 1) ? fallbackAllTabs.get(index-1) : null;
+        Tab right = (index < fallbackAllTabs.size()) ? fallbackAllTabs.get(index) : null;
         if(left == null) return right;
         if(right == null) return left;
 

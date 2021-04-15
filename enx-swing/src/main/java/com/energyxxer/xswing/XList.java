@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class XList<T> extends JPanel {
 
-	private ArrayList<T> options = new ArrayList<>();
+	private final ArrayList<T> options = new ArrayList<>();
 	
 	protected int selected = 0;
 
@@ -20,7 +20,7 @@ public class XList<T> extends JPanel {
 	ComponentStyle rolloverStyle = new ComponentStyle(null);
 	ComponentStyle selectedStyle = new ComponentStyle(null);
 	
-	private ArrayList<ListSelectionListener> listSelectionListeners = new ArrayList<>();
+	private final ArrayList<ListSelectionListener> listSelectionListeners = new ArrayList<>();
 
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

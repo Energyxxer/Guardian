@@ -59,7 +59,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
 
     Style defaultParagraphStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
     Style collapsedParagraphStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
-    private ArrayList<String> styles = new ArrayList<>();
+    private final ArrayList<String> styles = new ArrayList<>();
     HashMap<String, String[]> parserStyles = new HashMap<>();
 
     private Lazy<FindAndReplaceBar> searchBar = new Lazy<>(() -> new FindAndReplaceBar(this));

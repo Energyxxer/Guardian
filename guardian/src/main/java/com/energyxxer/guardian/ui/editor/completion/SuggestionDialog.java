@@ -58,7 +58,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
 
     private SuggestionModule activeResults = null;
 
-    private ArrayList<ExpandableSuggestionToken> activeTokens = new ArrayList<>();
+    private final ArrayList<ExpandableSuggestionToken> activeTokens = new ArrayList<>();
     private boolean safe = false;
 
     public SuggestionDialog(EditorComponent editor) {
@@ -165,7 +165,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
                         any = true;
                     }
                     if(!createdEverywhereSnippets && i == results.getSuggestions().size()-1) {
-                        results.getSuggestions().addAll(SnippetManager.createSuggestionsForTag(null));
+                        SnippetManager.createSuggestionsForTag(null, results.getSuggestions());
                         createdEverywhereSnippets = true;
                     }
                 }
@@ -194,8 +194,8 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
 
     private static Pattern SNIPPET_MARKER_PATTERN = Pattern.compile("\\$([A-Z_]+)\\$");
 
-    private ArrayList<CaretProfile> snippetVariables = new ArrayList<>();
-    private ArrayList<String> snippetVariableNames = new ArrayList<>();
+    private final ArrayList<CaretProfile> snippetVariables = new ArrayList<>();
+    private final ArrayList<String> snippetVariableNames = new ArrayList<>();
     private CaretProfile snippetEnd = new CaretProfile();
     private int snippetVariableActive = -1;
     private boolean snippetProfilesLocked = false;

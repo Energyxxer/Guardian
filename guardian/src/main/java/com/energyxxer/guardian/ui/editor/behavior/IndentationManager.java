@@ -15,8 +15,8 @@ public class IndentationManager {
     private String openingChars = "{[(";
     private String closingChars = "}])";
 
-    protected ArrayList<IndentationChange> indents = new ArrayList<>();
-    private Stack<Integer> bracesSeen = new Stack<>();
+    protected final ArrayList<IndentationChange> indents = new ArrayList<>();
+    private final Stack<Integer> bracesSeen = new Stack<>();
 
     public IndentationManager(AdvancedEditor editor) {
         this.editor = editor;

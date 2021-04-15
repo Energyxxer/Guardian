@@ -22,7 +22,7 @@ public class CommentEdit extends Transaction<AdvancedEditor> {
      * Must contain even entries.
      * Every index contains the position in the document where comment markers were added/removed.
      * */
-    private ArrayList<Integer> modifications = new ArrayList<>();
+    private final ArrayList<Integer> modifications = new ArrayList<>();
     private final String commentMarker;
     private boolean uncomment = false;
 

@@ -10,15 +10,15 @@ import java.util.ArrayList;
 @SuppressWarnings("unused")
 public class XDropdownMenu<T> extends XButton {
 
-    private ArrayList<T> options = new ArrayList<>();
-    private ArrayList<ImageIcon> icons = new ArrayList<>();
+    private final ArrayList<T> options = new ArrayList<>();
+    private final ArrayList<ImageIcon> icons = new ArrayList<>();
 
     protected int selected = -1;
 
     private Factory<JPopupMenu> popupFactory = JPopupMenu::new;
     private Factory<JMenuItem> itemFactory = JMenuItem::new;
 
-    private ArrayList<ChoiceListener<T>> choiceListeners = new ArrayList<>();
+    private final ArrayList<ChoiceListener<T>> choiceListeners = new ArrayList<>();
 
     public XDropdownMenu() {
         super(" ");

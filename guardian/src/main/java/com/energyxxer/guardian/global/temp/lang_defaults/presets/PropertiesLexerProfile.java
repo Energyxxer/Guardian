@@ -6,7 +6,6 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -96,9 +95,7 @@ public class PropertiesLexerProfile extends LexerProfile {
             }
         };
 
-        ArrayList<LexerContext> propertiesContexts = new ArrayList<>();
-        propertiesContexts.add(propertyContext);
-        this.contexts = propertiesContexts;
+        contexts.add(propertyContext);
     }
 
     @Override

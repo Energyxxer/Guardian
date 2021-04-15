@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class LineDuplicationEdit extends Transaction<AdvancedEditor> {
 
     private CaretProfile previousProfile;
-    private ArrayList<Integer> copiedLines = new ArrayList<>();
+    private final ArrayList<Integer> copiedLines = new ArrayList<>();
 
     public LineDuplicationEdit(AdvancedEditor editor) {
         previousProfile = editor.getCaret().getProfile();

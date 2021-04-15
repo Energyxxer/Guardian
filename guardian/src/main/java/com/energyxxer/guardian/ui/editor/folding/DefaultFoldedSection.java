@@ -6,7 +6,7 @@ import java.util.List;
 public class DefaultFoldedSection implements FoldableSection {
     private int sectionStartIndex;
     private String foldedText;
-    private ArrayList<FoldableSection> subSections = new ArrayList<>();
+    private final ArrayList<FoldableSection> subSections = new ArrayList<>();
 
     public DefaultFoldedSection(int sectionStartIndex, String foldedText) {
         this.sectionStartIndex = sectionStartIndex;

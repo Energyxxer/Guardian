@@ -31,7 +31,7 @@ public class StandardExplorerItem extends ExplorerElement {
 
     private boolean detailed = false;
 
-    private ArrayList<MouseListener> mouseListeners = new ArrayList<>();
+    private final ArrayList<MouseListener> mouseListeners = new ArrayList<>();
 
     public StandardExplorerItem(ModuleToken token, StandardExplorerItem parent, List<String> toOpen) {
         this(parent, parent.getMaster(), token, toOpen);
@@ -222,7 +222,7 @@ public class StandardExplorerItem extends ExplorerElement {
         this.token.onInteract();
         if(token.isExpandable()) {
             if(expanded) collapse();
-            else expand(new ArrayList<>());
+            else expand(null);
         } else if(token.isModuleSource()) {
             GuardianWindow.tabManager.openTab(token);
         }
@@ -261,7 +261,7 @@ public class StandardExplorerItem extends ExplorerElement {
     public void mousePressed(MouseEvent e) {
         if(token.isExpandable() && e.getButton() == MouseEvent.BUTTON1 && e.getX() >= x && e.getX() <= x + master.getRowHeight()) {
             if(expanded) collapse();
-            else expand(new ArrayList<>());
+            else expand(null);
             e.consume();
         } else {
             master.setSelected(this, e);

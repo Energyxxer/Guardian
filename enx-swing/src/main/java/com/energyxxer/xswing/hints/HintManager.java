@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class HintManager {
     private final JFrame owner;
-    private ArrayList<Hint> hints = new ArrayList<>();
+    private final ArrayList<Hint> hints = new ArrayList<>();
     private Timer timer = new Timer();
 
     private static final int FADE_DISTANCE = 30;

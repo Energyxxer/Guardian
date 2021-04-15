@@ -13,8 +13,8 @@ import java.util.ArrayList;
 public class LineDeletionEdit extends Transaction<AdvancedEditor> {
 
     private CaretProfile previousProfile;
-    private ArrayList<Integer> modificationLines = new ArrayList<>();
-    private ArrayList<String> previousValues = new ArrayList<>();
+    private final ArrayList<Integer> modificationLines = new ArrayList<>();
+    private final ArrayList<String> previousValues = new ArrayList<>();
 
     public LineDeletionEdit(AdvancedEditor editor) {
         previousProfile = editor.getCaret().getProfile();

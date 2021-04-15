@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ProcessManager {
-    private static List<AbstractProcess> activeProcesses = Collections.synchronizedList(new ArrayList<>());
+    private static final List<AbstractProcess> activeProcesses = Collections.synchronizedList(new ArrayList<>());
 
     public static void queueProcess(AbstractProcess process) {
         if(activeProcesses.contains(process)) return;

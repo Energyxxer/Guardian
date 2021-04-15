@@ -10,7 +10,7 @@ public class LiveTestCase {
     private final String title;
     private final String description;
 
-    private ArrayList<LiveTestResult> results = new ArrayList<>();
+    private final ArrayList<LiveTestResult> results = new ArrayList<>();
 
     public LiveTestCase(String code, Class associatedClass, String title, String description) {
         this.code = code;

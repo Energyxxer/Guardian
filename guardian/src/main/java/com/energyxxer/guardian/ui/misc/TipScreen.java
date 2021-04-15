@@ -1,7 +1,7 @@
 package com.energyxxer.guardian.ui.misc;
 
-import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.global.Resources;
+import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
@@ -24,7 +24,7 @@ public class TipScreen extends JComponent {
     private static final int TIP_PERIOD = 15;
 
     private Random random = new Random();
-    private ArrayList<String> tipList = new ArrayList<>();
+    private final ArrayList<String> tipList = new ArrayList<>();
     private int currentTipIndex = -1;
     private String currentTip = "";
 

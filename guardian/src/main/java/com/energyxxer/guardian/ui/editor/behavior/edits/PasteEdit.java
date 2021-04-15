@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class PasteEdit extends Transaction<AdvancedEditor> {
     private String[] values;
-    private ArrayList<String> previousValues = new ArrayList<>();
+    private final ArrayList<String> previousValues = new ArrayList<>();
     private CaretProfile previousProfile;
 
     public PasteEdit(String value, AdvancedEditor editor) {

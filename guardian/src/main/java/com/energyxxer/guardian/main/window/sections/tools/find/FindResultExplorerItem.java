@@ -6,7 +6,6 @@ import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.function.Predicate;
 
 public class FindResultExplorerItem extends StandardExplorerItem {
@@ -29,7 +28,7 @@ public class FindResultExplorerItem extends StandardExplorerItem {
             super.render(g);
         } else {
             if(!expanded) {
-                this.expand(new ArrayList<>());
+                this.expand(null);
             }
             for(ExplorerElement element : children) {
                 element.render(g);

@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.ui.dialogs.settings;
 
 import com.energyxxer.guardian.global.ContentSwapper;
+import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.ui.ToolbarButton;
 import com.energyxxer.guardian.ui.editor.completion.snippets.Snippet;
 import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetContext;
@@ -9,9 +10,8 @@ import com.energyxxer.guardian.ui.explorer.base.ActionHostExplorerItem;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPaneLayout;
 import com.energyxxer.guardian.ui.styledcomponents.Padding;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.Disposable;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.hints.Hint;
@@ -27,7 +27,7 @@ public class SettingsSnippets extends JPanel implements ContentSwapper {
 
     ThemeListenerManager tlm = new ThemeListenerManager();
 
-    private ArrayList<Snippet> snippets = new ArrayList<>();
+    private final ArrayList<Snippet> snippets = new ArrayList<>();
 
     private final JPanel content;
     private final StyledExplorerMaster master;

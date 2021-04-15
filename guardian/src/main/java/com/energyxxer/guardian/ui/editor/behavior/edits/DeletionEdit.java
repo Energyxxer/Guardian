@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class DeletionEdit extends Transaction<AdvancedEditor> {
     private boolean wholeWord = false;
     private boolean forwards = false;
-    private ArrayList<String> previousValues = new ArrayList<>();
+    private final ArrayList<String> previousValues = new ArrayList<>();
     private CaretProfile previousProfile;
     private CaretProfile nextProfile = null;
     private int deletionAmount = -1;

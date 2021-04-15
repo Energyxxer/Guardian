@@ -9,9 +9,10 @@ import java.util.ArrayList;
  * Created by User on 1/6/2017.
  */
 public class CompoundTransaction<T> extends Transaction<T> {
-    private ArrayList<Lazy<Transaction<T>>> edits = new ArrayList<>();
+    private final ArrayList<Lazy<Transaction<T>>> edits;
 
     public CompoundTransaction() {
+        this.edits = new ArrayList<>();
     }
 
     public CompoundTransaction(ArrayList<Lazy<Transaction<T>>> edits) {

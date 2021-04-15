@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class DragInsertionEdit extends Transaction<AdvancedEditor> {
     private String value;
-    private ArrayList<String> previousValues = new ArrayList<>();
+    private final ArrayList<String> previousValues = new ArrayList<>();
     private CaretProfile previousProfile;
 
     public DragInsertionEdit(String value, AdvancedEditor editor) {

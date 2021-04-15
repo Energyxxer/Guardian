@@ -47,7 +47,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
                         " If this test never receives any positive results, that method will be removed."));
     }
 
-    private List<Dot> dots = Collections.synchronizedList(new ArrayList<>());
+    private final List<Dot> dots = Collections.synchronizedList(new ArrayList<>());
     private AdvancedEditor editor;
     private Timer flasher;
     private ActionListener flasherHandler;
@@ -200,6 +200,8 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         }
     }
 
+    private final ArrayList<Dot> paintingDots = new ArrayList<>();
+
     @Override
     public void paint(Graphics g) {
         if(!editor.isFocusOwner()) return;
@@ -210,10 +212,11 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
 
             TextUI mapper = getComponent().getUI();
 
-            ArrayList<Dot> allDots = new ArrayList<>(dots);
+            paintingDots.clear();
+            paintingDots.addAll(dots);
 
             int dotIndex = 0;
-            for (Dot dot : allDots) {
+            for (Dot dot : paintingDots) {
                 Rectangle r = mapper.modelToView(getComponent(), dot.index, getDotBias());
 
                 boolean shouldPaint = !(dragSelectMode == RECTANGLE && dot == bufferedDot) && !(dragSelectMode == CHAR && dotIndex >= rectangleDotsStartIndex);
@@ -240,13 +243,15 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         }
     }
 
+    private final ArrayList<Dot> readjustRectDots = new ArrayList<>();
     private void readjustRect() {
         try {
-            ArrayList<Dot> allDots = new ArrayList<>(dots);
+            readjustRectDots.clear();
+            readjustRectDots.addAll(dots);
 
             Rectangle unionRect = null;
 
-            for (Dot dot : allDots) {
+            for (Dot dot : readjustRectDots) {
                 Rectangle r = editor.modelToView(dot.index);
                 if(unionRect == null) unionRect = r; else unionRect = unionRect.union(r);
             }
@@ -344,8 +349,8 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         return dots.get(Math.min(upperBound, dots.size()-1)).index;
     }
 
-    public ArrayList<Dot> getDots() {
-        return new ArrayList<>(this.dots);
+    public List<Dot> getDots() {
+        return this.dots;
     }
 
     public CaretProfile getProfile() {
@@ -730,7 +735,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         return transferData;
     }
 
-    private ArrayList<Runnable> caretPaintListeners = new ArrayList<>();
+    private final ArrayList<Runnable> caretPaintListeners = new ArrayList<>();
 
     public void addCaretPaintListener(@NotNull Runnable runnable) {
         caretPaintListeners.add(runnable);

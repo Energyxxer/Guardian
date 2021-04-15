@@ -10,7 +10,7 @@ import java.util.List;
 
 public class FloatingCanvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
     private Dimension size = new Dimension(0,0);
-    public List<FloatingComponent> objects = new ArrayList<>();
+    public final List<FloatingComponent> objects = new ArrayList<>();
 
     private FloatingComponent rollover = null;
     private FloatingComponent pressed = null;

@@ -23,7 +23,7 @@ public class NavigatorMaster extends JComponent implements MouseListener, MouseM
 
     private Constant orientation = HORIZONTAL;
 
-    private ArrayList<NavigationElement> elements = new ArrayList<>();
+    private final ArrayList<NavigationElement> elements = new ArrayList<>();
 
     protected HashMap<String, Color> colors = new HashMap<>();
 

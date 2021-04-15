@@ -5,7 +5,6 @@ import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.guardian.global.temp.lang_defaults.presets.mcfunction.MCFunction;
 
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -14,8 +13,6 @@ public class MCFunctionLexerProfile extends LexerProfile {
     private static final Pattern numberRegex = Pattern.compile("([+-]?\\d+(\\.\\d+)?[bdfsL]?)");
 
     public MCFunctionLexerProfile() {
-
-        this.contexts = new ArrayList<>();
     }
 
     @Override

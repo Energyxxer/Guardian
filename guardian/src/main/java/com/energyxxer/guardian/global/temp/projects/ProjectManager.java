@@ -16,7 +16,7 @@ import java.util.Collection;
 public class ProjectManager {
 	public static final String WORKSPACE_CONFIG_FILE_NAME = ".guardianworkspace";
 
-	private static ArrayList<Project> loadedProjects = new ArrayList<>();
+	private static final ArrayList<Project> loadedProjects = new ArrayList<>();
 	private static String workspaceDir = null;
 
 	public static void loadWorkspace() {

@@ -11,7 +11,7 @@ import java.util.function.Function;
  */
 public class CaretProfile implements Iterable<Integer> {
 
-    private ArrayList<Integer> list = new ArrayList<>();
+    private final ArrayList<Integer> list = new ArrayList<>();
     private boolean dotMergeDisabled = false;
 
     public CaretProfile() {}

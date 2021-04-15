@@ -6,7 +6,6 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -44,7 +43,6 @@ public class SnippetLexerProfile extends LexerProfile {
                 return Arrays.asList(VARIABLE_MARKER, END_MARKER);
             }
         };
-        this.contexts = new ArrayList<>();
         contexts.add(endContext);
     }
 

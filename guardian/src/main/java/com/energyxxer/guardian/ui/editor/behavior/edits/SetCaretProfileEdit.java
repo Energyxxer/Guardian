@@ -4,11 +4,8 @@ import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 
-import java.util.ArrayList;
-
 public class SetCaretProfileEdit extends Transaction<AdvancedEditor> {
     private CaretProfile nextProfile;
-    private ArrayList<String> previousValues = new ArrayList<>();
     private CaretProfile previousProfile;
 
     public SetCaretProfileEdit(CaretProfile nextProfile, AdvancedEditor editor) {

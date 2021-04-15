@@ -9,6 +9,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static com.energyxxer.guardian.ui.editor.behavior.caret.DragSelectMode.CHAR;
 import static com.energyxxer.guardian.ui.editor.behavior.caret.DragSelectMode.RECTANGLE;
@@ -68,7 +69,7 @@ public class EditorSelectionPainter implements Highlighter.HighlightPainter {
         AdvancedEditor editor = (AdvancedEditor) c;
         g.setColor(editor.hasFocus() ? editor.getSelectionColor() : editor.getSelectionUnfocusedColor());
 
-        ArrayList<Dot> dots = caret.getDots();
+        List<Dot> dots = caret.getDots();
 
         int dotIndex = 0;
         for(Dot dot : dots) {

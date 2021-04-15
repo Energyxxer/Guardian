@@ -18,7 +18,7 @@ public class StyledPopupMenu extends JPopupMenu implements Disposable, PopupMenu
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
-    private List<Disposable> disposableChildren = new ArrayList<>();
+    private final List<Disposable> disposableChildren = new ArrayList<>();
     boolean suppressDispose = false;
 
     public StyledPopupMenu() {

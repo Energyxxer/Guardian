@@ -687,7 +687,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         return index;
     }
 
-    private ArrayList<Consumer<Function<Integer, Integer>>> characterDriftListeners = new ArrayList<>();
+    private final ArrayList<Consumer<Function<Integer, Integer>>> characterDriftListeners = new ArrayList<>();
 
     public void registerCharacterDrift(Function<Integer, Integer> h) {
         for(Consumer<Function<Integer, Integer>> listener : characterDriftListeners) {
@@ -708,7 +708,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     }
 
     private Dimension defaultSize = null;
-    private ArrayList<Consumer<Dimension>> defaultSizeListeners = new ArrayList<>();
+    private final ArrayList<Consumer<Dimension>> defaultSizeListeners = new ArrayList<>();
 
     public void addDefaultSizeListener(Consumer<Dimension> l) {
         defaultSizeListeners.add(l);

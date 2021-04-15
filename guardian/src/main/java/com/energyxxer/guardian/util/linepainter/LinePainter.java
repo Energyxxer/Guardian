@@ -27,7 +27,7 @@ public class LinePainter
 
     private Rectangle lastView;
 
-    private ArrayList<LinePaintListener> paintListeners = new ArrayList<>();
+    private final ArrayList<LinePaintListener> paintListeners = new ArrayList<>();
     private boolean enabled = true;
 
     /*

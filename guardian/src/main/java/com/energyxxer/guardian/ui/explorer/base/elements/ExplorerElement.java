@@ -26,7 +26,7 @@ public abstract class ExplorerElement implements MouseListener, MouseMotionListe
         this.master = master;
     }
 
-    protected ArrayList<ExplorerElement> children = new ArrayList<>();
+    protected final ArrayList<ExplorerElement> children = new ArrayList<>();
 
     public abstract void render(Graphics g);
 

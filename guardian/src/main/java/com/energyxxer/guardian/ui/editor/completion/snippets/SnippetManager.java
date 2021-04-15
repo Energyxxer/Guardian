@@ -2,13 +2,14 @@ package com.energyxxer.guardian.ui.editor.completion.snippets;
 
 import com.energyxxer.commodore.CommandUtils;
 import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
+import com.energyxxer.enxlex.suggestions.Suggestion;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.temp.Lang;
 import com.energyxxer.guardian.global.temp.lang_defaults.presets.JSONLexerProfile;
-import com.energyxxer.guardian.ui.editor.completion.SnippetSuggestion;
 import com.energyxxer.util.logger.Debug;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public final class SnippetManager {
     private static ArrayList<Snippet> snippets = new ArrayList<>();
@@ -24,15 +25,13 @@ public final class SnippetManager {
         return snippets;
     }
 
-    public static ArrayList<SnippetSuggestion> createSuggestionsForTag(String tag) {
-        ArrayList<SnippetSuggestion> list = new ArrayList<>();
+    public static void createSuggestionsForTag(String tag, List<Suggestion> list) {
         for(Snippet snippet : snippets) {
             if(!snippet.expanderApplied && snippet.isContextEnabledForTag(tag)) {
                 list.add(snippet.createSuggestion());
                 snippet.expanderApplied = true;
             }
         }
-        return list;
     }
 
     public static void load() {
