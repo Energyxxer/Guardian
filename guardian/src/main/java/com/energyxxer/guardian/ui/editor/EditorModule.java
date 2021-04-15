@@ -37,7 +37,8 @@ import java.awt.event.MouseListener;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -60,7 +61,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     Style defaultParagraphStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
     Style collapsedParagraphStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
     private final ArrayList<String> styles = new ArrayList<>();
-    HashMap<String, String[]> parserStyles = new HashMap<>();
+    List<HierarchicalStyle> hierarchicalStyles = Collections.synchronizedList(new ArrayList<>());
 
     private Lazy<FindAndReplaceBar> searchBar = new Lazy<>(() -> new FindAndReplaceBar(this));
     private boolean searchBarVisible = false;
@@ -230,12 +231,12 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
         for(String key : this.styles) {
             editorComponent.removeStyle(key);
         }
-        for(String key : this.parserStyles.keySet()) {
-            editorComponent.removeStyle(key);
+        for(HierarchicalStyle style : this.hierarchicalStyles) {
+            editorComponent.removeStyle(style.key);
         }
         editorComponent.removeStyle("_DEFAULT_STYLE");
         this.styles.clear();
-        this.parserStyles.clear();
+        this.hierarchicalStyles.clear();
     }
 
     private void setSyntax(Theme newSyntax) {
@@ -260,8 +261,8 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
             if(style == null) {
                 style = editorComponent.addStyle(name, null);
                 this.styles.add(name);
-                if(name.startsWith("$") && name.contains(".")) {
-                    parserStyles.put(name, name.substring(1).toUpperCase(Locale.ENGLISH).split("\\."));
+                if(name.startsWith("$")) {
+                    hierarchicalStyles.add(new HierarchicalStyle(name));
                 }
             }
             switch(value.substring(value.lastIndexOf(".")+1)) {
@@ -507,5 +508,19 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
             editorComponent.highlight();
         }
         return true;
+    }
+
+    public static class HierarchicalStyle {
+        public String key;
+        public String[] parts;
+
+        public HierarchicalStyle(String key) {
+            this(key, key.substring(1).toUpperCase(Locale.ENGLISH).split("\\."));
+        }
+
+        public HierarchicalStyle(String key, String[] parts) {
+            this.key = key;
+            this.parts = parts;
+        }
     }
 }

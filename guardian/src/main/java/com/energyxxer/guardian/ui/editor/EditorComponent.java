@@ -3,6 +3,7 @@ package com.energyxxer.guardian.ui.editor;
 import com.energyxxer.enxlex.lexical_analysis.LazyLexer;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSection;
+import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
@@ -17,6 +18,7 @@ import com.energyxxer.guardian.ui.editor.behavior.IndentationManager;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.guardian.ui.editor.inspector.Inspector;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
+import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.Nullable;
 
@@ -243,7 +245,6 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(Thread.interrupted()) return;
 
             int tokensInLine = 0;
-            Iterable<? extends Map.Entry<String, String[]>> parserStyleSet = Collections.synchronizedSet(parent.parserStyles.entrySet());
 
             for(Token token : analysis.lexer.getStream().tokens) {
                 if(Thread.interrupted()) return;
@@ -288,43 +289,6 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                             worker.setCharacterAttributes(token.loc.index + section.start, section.length, attrStyle, false);
                         }
                     }
-                    for(String tag : token.tags) {
-                        Style attrStyle = EditorComponent.this.getStyle("$" + tag.toLowerCase(Locale.ENGLISH));
-                        if(attrStyle == null) continue;
-
-                        if(prevToken != null && previousTokenStyles.contains(tag.toLowerCase(Locale.ENGLISH))) {
-                            styleStart = prevToken.loc.index + prevToken.value.length();
-                        }
-                        previousTokenStyles.add(tag.toLowerCase(Locale.ENGLISH));
-
-                        worker.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
-                    }
-
-                    if(analysis.response != null) {
-                        for (Map.Entry<String, String[]> entry : parserStyleSet) {
-                            String[] tagList = entry.getValue();
-                            int startIndex = -1;
-                            tgs:
-                            do {
-                                startIndex = indexOf(token.tags, tagList[0], startIndex + 1);
-                                if (startIndex < 0) break;
-                                for (int i = 0; i < tagList.length; i++) {
-                                    if (startIndex + i >= token.tags.size() || !tagList[i].equalsIgnoreCase(token.tags.get(startIndex + i)))
-                                        continue tgs;
-                                }
-                                Style attrStyle = EditorComponent.this.getStyle(entry.getKey());
-                                if (prevToken != null && previousTokenStyles.contains(entry.getKey())) {
-                                    styleStart = prevToken.loc.index + prevToken.value.length();
-                                }
-                                if(entry.getKey().equals("$class_function.dynamic_function.dynamic_function.code_block.statement_list")) {
-                                    worker.setParagraphAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), parent.collapsedParagraphStyle, false);
-                                }
-                                if (attrStyle == null) continue;
-                                previousTokenStyles.add(entry.getKey());
-                                worker.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
-                            } while (true);
-                        }
-                    }
                 }
                 while(previousTokenStylesIndex > 0) {
                     previousTokenStyles.remove(0);
@@ -353,6 +317,46 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(logHighlighterTimes) Debug.log("Character Attribute Update time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
 
+            try {
+                if(analysis.response != null && parent.hierarchicalStyles.size() > 0) {
+                    analysis.response.pattern.traverse(leaf -> {
+                        if(Thread.interrupted()) throw new InterruptedException();
+                        for(EditorModule.HierarchicalStyle style : parent.hierarchicalStyles) {
+                            if(style.parts[style.parts.length-1].equalsIgnoreCase(leaf.getName())) {
+                                int i = style.parts.length-2;
+
+                                boolean valid = true;
+
+                                TokenPattern<?> parent = leaf;
+                                while(i >= 0) {
+                                    parent = parent.parent;
+                                    if(parent.getName().equalsIgnoreCase(style.parts[i])) {
+                                        i--;
+                                    }
+                                    else if(!parent.getName().isEmpty()) {
+                                        valid = false;
+                                        break;
+                                    }
+                                }
+
+                                if(valid) {
+                                    Style attrStyle = EditorComponent.this.getStyle(style.key);
+                                    StringBounds bounds = leaf.getStringBounds();
+                                    if(attrStyle != null) {
+                                        worker.setCharacterAttributes(bounds.start.index, bounds.end.index - bounds.start.index, attrStyle, false);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch(InterruptedException x) {
+                return;
+            }
+
+            if(logHighlighterTimes) Debug.log("Hierarchical Attribute Update time: " + (System.currentTimeMillis() - startTime) + " ms");
+            startTime = System.currentTimeMillis();
+
             if(analysis.response == null || analysis.response.matched) GuardianWindow.dismissStatus(errorStatus);
 
             if(Thread.interrupted()) return;
@@ -365,13 +369,6 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             x.printStackTrace();
             GuardianWindow.showException(x);
         }
-    }
-
-    private static <T> int indexOf(ArrayList<T> arr, T value, int fromIndex) {
-        for(int i = fromIndex; i < arr.size(); i++) {
-            if(Objects.equals(arr.get(i), value)) return i;
-        }
-        return -1;
     }
 
     void highlight() {
@@ -583,4 +580,6 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             }
         });
     }
+
+    private static class InterruptedException extends RuntimeException {}
 }
