@@ -35,8 +35,8 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
     private BufferedImage img;
     private double scale = 1;
 
-    private int offsetX = 0;
-    private int offsetY = 0;
+    private double offsetX = 0;
+    private double offsetY = 0;
     private Point cursorPoint = new Point(0,0);
     private Point posOnImage = new Point(0,0);
 
@@ -243,8 +243,8 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
         Point center = this.getCenterPoint();
 
         return new Point(
-                (int) (p.x * scale) + (center.x - ((int) (imgSize.width * scale)/2)) + offsetX,
-                (int) (p.y * scale) + (center.y - ((int) (imgSize.height * scale)/2)) + offsetY
+                (int) ((p.x * scale) + (center.x - ((int) (imgSize.width * scale)/2)) + offsetX),
+                (int) ((p.y * scale) + (center.y - ((int) (imgSize.height * scale)/2)) + offsetY)
         );
     }
 
@@ -253,16 +253,12 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
     }
 
     private Rectangle centerDimension() {
-        Dimension dim = new Dimension(imgSize);
-        dim.width *= scale;
-        dim.height *= scale;
         Dimension bounds = new Dimension(this.getWidth(), this.getHeight());
-        return new Rectangle(
-                (bounds.width/2)-(dim.width/2) + offsetX,
-                (bounds.height/2)-(dim.height/2) + offsetY,
-                dim.width,
-                dim.height
-        );
+        double x1 = ((bounds.width/2.0)-(imgSize.width*scale/2) + offsetX);
+        double y1 = ((bounds.height/2.0)-(imgSize.height*scale/2) + offsetY);
+        double x2 = ((bounds.width/2.0)+(imgSize.width*scale/2) + offsetX);
+        double y2 = ((bounds.height/2.0)+(imgSize.height*scale/2) + offsetY);
+        return new Rectangle((int)x1, (int)y1, (int)(x2 - x1), (int)(y2 - y1));
     }
 
     private static Dimension getScaledDimension(Dimension imgSize, Dimension boundary) {
