@@ -13,40 +13,65 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
         this.tint = tint;
     }
 
-    protected void checkRaster(Raster r) {
-        if (r.getSampleModel().getDataType() != DataBuffer.TYPE_INT) {
-            throw new IllegalStateException("Expected integer sample type");
+    protected void checkRasterCombination(Raster a, Raster b) {
+        if (a.getSampleModel().getDataType() != b.getSampleModel().getDataType()) {
+            throw new IllegalStateException("Expected consistent input raster data types: " + a.getSampleModel().getDataType() + ", " + b.getSampleModel().getDataType());
         }
     }
 
     @Override
     public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
-        checkRaster(src);
-        checkRaster(dstIn);
-        checkRaster(dstOut);
+        checkRasterCombination(dstIn, dstOut);
+
+        int srcType = src.getSampleModel().getDataType();
+        int dstType = dstIn.getSampleModel().getDataType();
 
         int width = Math.min(src.getWidth(), dstIn.getWidth());
         int height = Math.min(src.getHeight(), dstIn.getHeight());
         int x, y;
-        int[] srcPixels = new int[width];
-        int[] dstPixels = new int[width];
+        Object srcPixels = srcType == DataBuffer.TYPE_INT ? new int[width] : new byte[width * 4];
+        Object dstPixels = dstType == DataBuffer.TYPE_INT ? new int[width] : new byte[width * 4];
 
         for (y=0; y < height; y++) {
             src.getDataElements(0, y, width, 1, srcPixels);
             dstIn.getDataElements(0, y, width, 1, dstPixels);
 
             for (x=0; x < width; x++) {
-                dstPixels[x] = mixPixel(srcPixels[x], dstPixels[x]);
+                int srcColor = srcType == DataBuffer.TYPE_INT ? ((int[])srcPixels)[x] : pack(((byte[])srcPixels)[4*x], ((byte[])srcPixels)[4*x+1], ((byte[])srcPixels)[4*x+2], ((byte[])srcPixels)[4*x+3]);
+                int dstColor = dstType == DataBuffer.TYPE_INT ? ((int[])dstPixels)[x] : pack(((byte[])dstPixels)[4*x], ((byte[])dstPixels)[4*x+1], ((byte[])dstPixels)[4*x+2], ((byte[])dstPixels)[4*x+3]);
+
+                int mixedColor = mixPixel(srcColor, dstColor);
+
+                if(dstType == DataBuffer.TYPE_INT) {
+                    ((int[])dstPixels)[x] = mixedColor;
+                } else {
+                    unpack(mixedColor, (byte[]) dstPixels, 4*x);
+                }
             }
 
             dstOut.setDataElements(0, y, width, 1, dstPixels);
         }
     }
 
+    private static void unpack(int color, byte[] dstPixels, int i) {
+        byte a = (byte) ((color >> 24) & 0xFF);
+        byte r = (byte) ((color >> 16) & 0xFF);
+        byte g = (byte) ((color >> 8) & 0xFF);
+        byte b = (byte) ((color) & 0xFF);
+        dstPixels[i] = a;
+        dstPixels[i+1] = r;
+        dstPixels[i+2] = g;
+        dstPixels[i+3] = b;
+    }
+
+    private static int pack(byte a, byte r, byte g, byte b) {
+        return (b) | (g << 8) | (r << 16) | (a << 24);
+    }
+
     private int mixPixel(int src, int dst) {
 
         int sa = (src >> 24) & 0xFF;
-//        int da = (dst >> 24) & 0xFF;
+        sa = (sa * tint.getAlpha()) / 255;
         int da = 255;
         int a = Math.min(255, sa + da);
 
