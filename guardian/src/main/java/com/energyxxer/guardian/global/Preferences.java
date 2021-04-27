@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.global;
 
 import com.energyxxer.commodore.CommandUtils;
+import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.WorkspaceDialog;
 import com.energyxxer.guardian.main.window.GuardianWindow;
@@ -259,13 +260,16 @@ public class Preferences {
 
     public static void setWorkspace(File workspace) {
         Preferences.put("workspace_dir", workspace.getAbsolutePath());
-        GuardianWindow.projectExplorer.refresh();
 
         WORKSPACE_HISTORY.remove(workspace.getAbsolutePath());
         WORKSPACE_HISTORY.add(workspace.getAbsolutePath());
 
         saveWorkspaceHistory();
         MenuItems.regenerateChangeWorkspaceMenu();
+
+        ProjectManager.setWorkspaceDir(workspace.toString());
+        ProjectManager.loadWorkspace();
+        GuardianWindow.projectExplorer.refresh();
     }
 
     private static void saveWorkspaceHistory() {

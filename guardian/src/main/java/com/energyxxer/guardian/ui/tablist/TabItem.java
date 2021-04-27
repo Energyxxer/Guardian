@@ -194,14 +194,12 @@ public class TabItem extends TabListElement {
             if(this.associatedTab != null) {
                 if(e.getButton() == MouseEvent.BUTTON1) {
                     manager.setSelectedTab(this.associatedTab);
-                    if(e.getClickCount() % 2 == 0) {
-                        token.onInteract();
-                    }
                 }
             } else {
                 selected = true;
-                master.repaint();
             }
+            token.onInteract();
+            master.repaint();
         }
     }
 

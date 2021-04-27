@@ -1,6 +1,5 @@
 package com.energyxxer.guardian.ui.modules;
 
-import com.energyxxer.guardian.files.FileType;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.FileManager;
 import com.energyxxer.guardian.global.Preferences;
@@ -12,11 +11,9 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.dialogs.PromptDialog;
-import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.editor.EditorModule;
 import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
-import com.energyxxer.guardian.ui.styledcomponents.StyledMenu;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.util.FileCommons;
@@ -277,46 +274,11 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
         else newPath = file.getParent();
 
         if(context == TokenContext.EXPLORER) {
-            StyledMenu newMenu = new StyledMenu("New");
-
-            menu.add(newMenu);
 
             Project project = ProjectManager.getAssociatedProject(file);
             String projectDir = (project != null) ? project.getRootDirectory().getPath() + File.separator : null;
 
-            // --------------------------------------------------
-
-
-            boolean anyMenuItem = false;
-            {
-                for(ProjectType projectType : ProjectType.values()) {
-                    anyMenuItem = true;
-                    StyledMenuItem item = new StyledMenuItem(projectType.getName(), projectType.getDefaultProjectIconName());
-                    item.addActionListener(e -> {
-                        ProjectDialog.create(projectType);
-                    });
-                    newMenu.add(item);
-                }
-            }
-
-            // --------------------------------------------------
-
-            if(anyMenuItem) newMenu.addSeparator();
-
-            // --------------------------------------------------
-
-            int prevGroup = 0;
-            for(FileType type : FileType.values()) {
-                if(type.canCreate(projectDir, path + File.separator)) {
-                    if(type.group != prevGroup) {
-                        if(anyMenuItem) newMenu.addSeparator();
-                        prevGroup = type.group;
-                    }
-
-                    newMenu.add(type.createMenuItem(newPath));
-                    anyMenuItem = true;
-                }
-            }
+            menu.add(MenuItems.newMenu("New", type -> type.canCreate(projectDir, path + File.separator), newPath, false));
         }
         menu.addSeparator();
 

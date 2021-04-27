@@ -58,18 +58,21 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
         byte r = (byte) ((color >> 16) & 0xFF);
         byte g = (byte) ((color >> 8) & 0xFF);
         byte b = (byte) ((color) & 0xFF);
-        dstPixels[i] = a;
-        dstPixels[i+1] = r;
-        dstPixels[i+2] = g;
-        dstPixels[i+3] = b;
+        dstPixels[i] = r;
+        dstPixels[i+1] = g;
+        dstPixels[i+2] = b;
+        dstPixels[i+3] = a;
     }
 
-    private static int pack(byte a, byte r, byte g, byte b) {
-        return (b) | (g << 8) | (r << 16) | (a << 24);
+    private static int pack(byte r, byte g, byte b, byte a) {
+        int ir = (r + 255) % 255;
+        int ig = (g + 255) % 255;
+        int ib = (b + 255) % 255;
+        int ia = (a + 255) % 255;
+        return (ia << 24) | (ir << 16) | (ig << 8) | ib;
     }
 
     private int mixPixel(int src, int dst) {
-
         int sa = (src >> 24) & 0xFF;
         sa = (sa * tint.getAlpha()) / 255;
         int da = 255;

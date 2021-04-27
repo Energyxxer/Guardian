@@ -204,6 +204,7 @@ public class ProjectDialog {
     public static void create(ProjectType projectType) {
         targetProjectType = projectType;
         nameField.setText("");
+        nameField.selectAll();
         validateInput();
 
         Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();

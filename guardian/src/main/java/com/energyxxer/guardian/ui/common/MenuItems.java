@@ -4,13 +4,20 @@ import com.energyxxer.guardian.files.FileType;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.langinterface.ProjectType;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
+import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectFromTemplateDialog;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenu;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.function.Predicate;
 
 import static com.energyxxer.guardian.main.window.sections.MenuBar.createItemForAction;
 
@@ -20,13 +27,15 @@ import static com.energyxxer.guardian.main.window.sections.MenuBar.createItemFor
 public class MenuItems {
 	private static StyledMenu CHANGE_WORKSPACE_MENU;
 
-	public static StyledMenu newMenu(String title) {
+	public static StyledMenu newMenu(String title, Predicate<FileType> canCreate, String newPath, boolean permanent) {
 		StyledMenu newMenu = new StyledMenu(title);
 
 		// --------------------------------------------------
 
+		boolean anyMenuItem = false;
 		{
 			for(ProjectType projectType : ProjectType.values()) {
+				anyMenuItem = true;
 				StyledMenuItem item = new StyledMenuItem(projectType.getName(), projectType.getDefaultProjectIconName());
 				item.addActionListener(e -> {
 					ProjectDialog.create(projectType);
@@ -37,19 +46,35 @@ public class MenuItems {
 
 		// --------------------------------------------------
 
-		newMenu.addSeparator();
+		if(anyMenuItem) newMenu.addSeparator();
+		anyMenuItem = false;
 
-		int prevGroup = -1;
-		boolean anyAdded = false;
+		// --------------------------------------------------
+
+
+		int prevGroup = 0;
 		for(FileType type : FileType.values()) {
-			if(type.group != prevGroup) {
-				if(anyAdded) newMenu.addSeparator();
-				prevGroup = type.group;
-			}
+			if(canCreate.test(type)) {
+				if(type.group != prevGroup) {
+					if(anyMenuItem) newMenu.addSeparator();
+					prevGroup = type.group;
+				}
 
-			newMenu.add(createNewFileItem(type));
-			anyAdded = true;
+				if(permanent) {
+					newMenu.add(createNewFileItem(type));
+				} else {
+					newMenu.add(type.createMenuItem(newPath));
+				}
+				anyMenuItem = true;
+			}
 		}
+
+		// --------------------------------------------------
+
+		if(anyMenuItem) newMenu.addSeparator();
+		anyMenuItem = false;
+
+		newMenu.add(createNewProjectFromTemplateMenu(permanent));
 
 		return newMenu;
 	}
@@ -64,6 +89,71 @@ public class MenuItems {
 			}
 		});
 		return item;
+	}
+
+	private static StyledMenu createNewProjectFromTemplateMenu(boolean updateOnOpen) {
+		StyledMenu newMenu = new StyledMenu("Project from Template");
+
+
+		StyledMenuItem defaultItem = new StyledMenuItem("Select Template");
+		defaultItem.addActionListener(e -> {
+			ProjectFromTemplateDialog.create(null);
+		});
+
+		newMenu.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				defaultItem.doClick();
+			}
+		});
+
+		if(updateOnOpen) {
+			newMenu.addMenuListener(new MenuListener() {
+
+				private long selectedWhen;
+
+				@Override
+				public void menuSelected(MenuEvent e) {
+					if(selectedWhen < System.currentTimeMillis() - 50) {
+						newMenu.removeAll();
+						newMenu.add(defaultItem);
+						newMenu.addSeparator();
+
+						fillProjectTemplateMenu(newMenu);
+					}
+					selectedWhen = System.currentTimeMillis();
+				}
+
+				@Override
+				public void menuDeselected(MenuEvent e) {
+				}
+
+				@Override
+				public void menuCanceled(MenuEvent e) {
+				}
+			});
+		} else {
+			newMenu.add(defaultItem);
+			newMenu.addSeparator();
+			fillProjectTemplateMenu(newMenu);
+		}
+
+		return newMenu;
+	}
+
+	private static void fillProjectTemplateMenu(StyledMenu newMenu) {
+		File[] templateRoots = Guardian.core.getProjectTemplatesDir().listFiles();
+		if(templateRoots != null) {
+			for(File templateRoot : templateRoots) {
+				if(templateRoot.isDirectory()) {
+					StyledMenuItem templateItem = new StyledMenuItem(templateRoot.getName(), "package");
+					templateItem.addActionListener(e -> {
+						ProjectFromTemplateDialog.create(templateRoot);
+					});
+					newMenu.add(templateItem);
+				}
+			}
+		}
 	}
 
 	public enum FileMenuItem {

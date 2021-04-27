@@ -26,24 +26,9 @@ public class ProjectManager {
 		
 		File workspace = new File(workspaceDir);
 
-		File[] fileList = workspace.listFiles();
-		if (fileList == null) {
-			return;
-		}
+		loadProjectsInDir(workspace);
+		loadProjectsInDir(Guardian.core.getGlobalLibrariesDir());
 
-		for(File file : fileList) {
-			if(file.isDirectory()) {
-				ProjectType projectType = ProjectType.getProjectTypeForRoot(file);
-
-				if(projectType != null) {
-					try {
-						loadedProjects.add(projectType.createProjectFromRoot(new File(file.getAbsolutePath())));
-					} catch (RuntimeException x) {
-						x.printStackTrace();
-					}
-				}
-			}
-		}
 
 		GuardianWindow.projectExplorer.refresh();
 
@@ -60,6 +45,31 @@ public class ProjectManager {
 		}
 
 		Guardian.core.workspaceLoaded(workspaceConfigObj);
+	}
+
+	private static void loadProjectsInDir(File dir) {
+		if(dir.isDirectory()) {
+			File[] libFileList = dir.listFiles();
+			if (libFileList != null) {
+				for(File file : libFileList) {
+					loadProjectAtRoot(file);
+				}
+			}
+		}
+	}
+
+	private static void loadProjectAtRoot(File file) {
+		if(file.isDirectory()) {
+			ProjectType projectType = ProjectType.getProjectTypeForRoot(file);
+
+			if(projectType != null) {
+				try {
+					loadedProjects.add(projectType.createProjectFromRoot(new File(file.getAbsolutePath())));
+				} catch (RuntimeException x) {
+					x.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public static Project getAssociatedProject(File file) {

@@ -36,7 +36,7 @@ public class MenuBar extends JMenuBar {
 
             // --------------------------------------------------
 
-            menu.add(MenuItems.newMenu("New"));
+            menu.add(MenuItems.newMenu("New", t -> true, null, true));
             menu.add(MenuItems.changeWorkspaceMenu());
             menu.add(createItemForAction("RELOAD_WORKSPACE"));
 

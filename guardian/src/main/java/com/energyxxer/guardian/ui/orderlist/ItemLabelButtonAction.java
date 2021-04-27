@@ -11,8 +11,6 @@ public class ItemLabelButtonAction implements ItemAction {
 
     private JComponent component;
 
-    protected int selected = -1;
-
     protected String label = "";
     protected ImageIcon icon = null;
 
@@ -21,11 +19,11 @@ public class ItemLabelButtonAction implements ItemAction {
     }
 
 
-    private void setLabel(String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
-    private void setIcon(ImageIcon icon) {
+    public void setIcon(ImageIcon icon) {
         this.icon = icon;
     }
 

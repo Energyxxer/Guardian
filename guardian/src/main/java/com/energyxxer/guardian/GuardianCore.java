@@ -83,6 +83,14 @@ public class GuardianCore {
         return getMainDirectory().resolve("resources").resolve("typemaps").toFile();
     }
 
+    public File getProjectTemplatesDir() {
+        return getMainDirectory().resolve("resources").resolve("project_templates").toFile();
+    }
+
+    public File getGlobalLibrariesDir() {
+        return getMainDirectory().resolve("libraries").toFile();
+    }
+
     public void populateResources() {
 
     }

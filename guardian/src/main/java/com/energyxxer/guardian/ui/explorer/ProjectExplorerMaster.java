@@ -3,15 +3,15 @@ package com.energyxxer.guardian.ui.explorer;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
+import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
 import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerSeparator;
-import com.energyxxer.guardian.ui.modules.DraggableExplorerModuleToken;
-import com.energyxxer.guardian.ui.modules.FileModuleToken;
-import com.energyxxer.guardian.ui.modules.ModuleToken;
-import com.energyxxer.guardian.ui.modules.WorkspaceRootModuleToken;
+import com.energyxxer.guardian.ui.modules.*;
+import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
+import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.util.FileCommons;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableGraphics2D;
@@ -23,6 +23,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.*;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -54,6 +55,7 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         explorerFlags.put(ExplorerFlag.DEBUG_WIDTH, Preferences.get("explorer.debug_width","false").equals("true"));
 
         this.tokenSources.add(new WorkspaceRootModuleToken());
+        this.tokenSources.add(new LibrariesRootModuleToken());
 
         this.setDropTarget(new DropTarget(this, TransferHandler.COPY_OR_MOVE, this));
 
@@ -137,10 +139,14 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         this.getExpandedElements().clear();
 
         for(ModuleToken source : tokenSources) {
+            boolean any = false;
             for(ModuleToken token : source.getSubTokens()) {
+                any = true;
                 this.children.add(new StandardExplorerItem(token, this, toOpen));
             }
-            this.children.add(new ExplorerSeparator(this));
+            if(any) {
+                this.children.add(new ExplorerSeparator(this));
+            }
         }
 
         repaint();
@@ -327,5 +333,35 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         } catch (UnsupportedFlavorException | IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        super.mousePressed(e);
+        if(e.isPopupTrigger() && getElementAtMousePos(e) == null) {
+            showMenu(e);
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        super.mouseReleased(e);
+        if(e.isPopupTrigger() && getElementAtMousePos(e) == null) {
+            showMenu(e);
+        }
+    }
+
+    private void showMenu(MouseEvent e) {
+        StyledPopupMenu menu = new StyledPopupMenu();
+
+        menu.add(MenuItems.newMenu("New", type -> true, null, false));
+
+        menu.addSeparator();
+
+        StyledMenuItem openInSystemItem = new StyledMenuItem("Show in System Explorer", "explorer");
+        openInSystemItem.addActionListener(a -> Commons.showInSystemExplorer(Preferences.getWorkspace().toString()));
+        menu.add(openInSystemItem);
+
+        menu.show(this, e.getX(), e.getY());
     }
 }

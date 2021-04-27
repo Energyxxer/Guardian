@@ -44,4 +44,7 @@ public abstract class OrderListElement implements MouseListener, MouseMotionList
 
     public abstract String getToolTipText();
     public abstract Point getToolTipLocation();
+
+    public void onReorder() {
+    }
 }

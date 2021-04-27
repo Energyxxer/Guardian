@@ -1,9 +1,12 @@
 package com.energyxxer.guardian.util;
 
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
+import com.energyxxer.util.logger.Debug;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -102,6 +105,23 @@ public class FileCommons {
             } else {
                 return file;
             }
+        }
+    }
+
+    public static void writeFile(Path path, String content) {
+        path.getParent().toFile().mkdirs();
+        try {
+            path.toFile().createNewFile();
+
+            try(PrintWriter writer = new PrintWriter(path.toFile(), "UTF-8")) {
+                writer.print(content);
+            } catch (IOException x) {
+                Debug.log(x.getMessage());
+                GuardianWindow.showException(x);
+            }
+        } catch (IOException x) {
+            x.printStackTrace();
+            GuardianWindow.showException(x);
         }
     }
 

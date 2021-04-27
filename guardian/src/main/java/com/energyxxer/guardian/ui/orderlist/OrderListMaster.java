@@ -244,17 +244,25 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
         if(draggedElement != null) {
             draggedElement.mouseDragged(e);
             dragPoint = e.getPoint();
+            int dragIndex = children.indexOf(draggedElement);
             int y = 0;
             for (int i = 0; i < children.size(); i++) {
                 OrderListElement element = children.get(i);
                 int h = element.getHeight();
                 int center = (int) (e.getY() + (0.5 - dragPivot * h));
                 if (center >= y && center < y + h) {
-                    children.remove(draggedElement);
                     if (center <= y + h / 2) {
-                        children.add(i, draggedElement);
+                        if(element != draggedElement) {
+                            children.remove(draggedElement);
+                            children.add(i, draggedElement);
+                            draggedElement.onReorder();
+                        }
                     } else {
-                        children.add(Math.min(i + 1, children.size()), draggedElement);
+                        if(dragIndex != Math.min(i + 1, children.size()-1)) {
+                            children.remove(draggedElement);
+                            children.add(Math.min(i + 1, children.size()), draggedElement);
+                            draggedElement.onReorder();
+                        }
                     }
                     break;
                 }
@@ -298,6 +306,7 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
         children.remove(element);
         if(selectedElement == element) selectedElement = null;
         if(rolloverElement == element) rolloverElement = null;
+        element.onReorder();
         repaint();
     }
 
@@ -329,6 +338,7 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
         children.remove(index);
         children.add(index-1, element);
         selectElement(element);
+        element.onReorder();
     }
 
     public void moveDown(OrderListElement element) {
@@ -338,6 +348,7 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
         children.remove(index);
         children.add(index+1, element);
         selectElement(element);
+        element.onReorder();
     }
 
     public List<OrderListElement> getAllElements() {

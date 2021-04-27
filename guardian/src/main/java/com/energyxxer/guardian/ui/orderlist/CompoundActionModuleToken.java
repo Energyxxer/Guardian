@@ -41,4 +41,8 @@ public interface CompoundActionModuleToken extends ModuleToken {
 
     @NotNull
     List<ItemAction> getActions();
+
+    default boolean canRemove() {return true;}
+
+    default void onReorder() {}
 }
