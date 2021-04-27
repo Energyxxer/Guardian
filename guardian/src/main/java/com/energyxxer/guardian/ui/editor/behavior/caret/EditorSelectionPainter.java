@@ -8,7 +8,6 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.energyxxer.guardian.ui.editor.behavior.caret.DragSelectMode.CHAR;
@@ -25,7 +24,7 @@ public class EditorSelectionPainter implements Highlighter.HighlightPainter {
         this.caret = caret;
     }
 
-    public static Collection<Rectangle> getRectanglesForBounds(AdvancedEditor editor, StringBounds bounds) throws BadLocationException {
+    public static List<Rectangle> getRectanglesForBounds(AdvancedEditor editor, StringBounds bounds) throws BadLocationException {
         ArrayList<Rectangle> rects = new ArrayList<>();
         boolean midDrawn = false;
 

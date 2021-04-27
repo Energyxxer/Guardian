@@ -1,11 +1,10 @@
 package com.energyxxer.guardian.ui;
 
-import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.xswing.hints.Hint;
-import com.energyxxer.xswing.hints.TextHint;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class HintStylizer {
 
@@ -18,10 +17,7 @@ public class HintStylizer {
 
         hint.setBackgroundColor(t.getColor(Color.BLACK, "Hint."+type+".background","Hint.background"));
         hint.setBorderColor(t.getColor(Color.WHITE, "Hint."+type+".border","Hint.border"));
-        if(hint instanceof TextHint) {
-            TextHint thint = (TextHint) hint;
-            thint.setForeground(t.getColor(Color.WHITE, "Hint."+type+".foreground","Hint.foreground","General.foreground"));
-            thint.setFont(t.getFont("Hint."+type,"Hint","General"));
-        }
+        hint.setForeground(t.getColor(Color.WHITE, "Hint."+type+".foreground","Hint.foreground","General.foreground"));
+        hint.setFont(t.getFont("Hint."+type,"Hint","General"));
     }
 }

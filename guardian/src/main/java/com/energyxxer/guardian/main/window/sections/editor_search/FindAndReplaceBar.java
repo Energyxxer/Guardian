@@ -505,6 +505,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
         tlm.dispose();
         findField.dispose();
         replaceField.dispose();
+        hint.dispose();
     }
 
     public void setFindText(String text) {

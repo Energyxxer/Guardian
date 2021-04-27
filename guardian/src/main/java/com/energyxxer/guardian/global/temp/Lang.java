@@ -33,6 +33,7 @@ import com.energyxxer.guardian.ui.editor.completion.snippets.Snippet;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaLexerProfile;
 import com.energyxxer.prismarine.plugins.syntax.PrismarineMetaProductions;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
+import com.energyxxer.prismarine.summaries.SummarySymbol;
 import com.energyxxer.prismarine.summaries.SymbolSuggestion;
 import com.energyxxer.util.Factory;
 import com.energyxxer.util.logger.Debug;
@@ -287,6 +288,10 @@ public class Lang {
     }
 
     public String getIconKeyForSuggestionTags(Collection<String> tags) {
+        return null;
+    }
+
+    public String formatDocumentation(SummarySymbol sym) {
         return null;
     }
 

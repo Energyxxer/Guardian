@@ -71,6 +71,12 @@ public class HintManager {
         return newHint;
     }
 
+    public HTMLHint createHTMLHint(String text) {
+        HTMLHint newHint = new HTMLHint(owner, text);
+        this.hints.add(newHint);
+        return newHint;
+    }
+
     public Hint createHint(Function<JFrame, ? extends Hint> constructor) {
         Hint newHint = constructor.apply(owner);
         this.hints.add(newHint);

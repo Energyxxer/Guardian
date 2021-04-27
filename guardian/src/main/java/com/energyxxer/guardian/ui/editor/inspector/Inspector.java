@@ -8,6 +8,7 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.HintStylizer;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.util.Disposable;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.xswing.hints.TextHint;
 
@@ -25,7 +26,7 @@ import java.util.function.Function;
 /**
  * Created by User on 1/1/2017.
  */
-public class Inspector implements Highlighter.HighlightPainter, MouseMotionListener {
+public class Inspector implements Highlighter.HighlightPainter, MouseMotionListener, Disposable {
 
     private Inspection rolloverItem = null;
 
@@ -203,5 +204,10 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
 
     public void showHints(int index) {
         dialog.showHints(index);
+    }
+
+    @Override
+    public void dispose() {
+        hint.dispose();
     }
 }

@@ -6,6 +6,8 @@ import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.find.FileOccurrence;
 import com.energyxxer.guardian.main.window.sections.tools.find.FindResults;
+import com.energyxxer.guardian.ui.HintStylizer;
+import com.energyxxer.guardian.ui.editor.EditorComponent;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorSelectionPainter;
@@ -15,6 +17,8 @@ import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.prismarine.summaries.SummarySymbol;
 import com.energyxxer.util.StringBounds;
+import com.energyxxer.xswing.hints.HTMLHint;
+import com.energyxxer.xswing.hints.Hint;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -40,6 +44,8 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
 
     private int prevSeenDot = -1;
 
+    private HTMLHint docHint = GuardianWindow.hintManager.createHTMLHint("a");
+
     public AssociatedSymbolHighlighter(AdvancedEditor editor, EditorCaret caret) {
         this.editor = editor;
 
@@ -54,6 +60,11 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
 
         editor.addMouseListener(this);
         editor.addMouseMotionListener(this);
+
+        docHint.setPreferredPos(Hint.ABOVE);
+        docHint.setInteractive(false);
+        docHint.setOutDelay(1);
+        docHint.setPadding(6);
     }
 
     private void updateRectangles() {
@@ -137,6 +148,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        SummarySymbol oldSelectedSymbol = this.selectedSymbol;
         selectedSymbol = null;
 
         if(e.isControlDown()) {
@@ -156,22 +168,46 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                     if(highlightedUsage != null && highlightedUsage.symbolName.equals(word)) {
                         SummarySymbol selectedSymbol = highlightedUsage.fetchSymbol(lastSuccessfulSummary);
                         if(selectedSymbol != null) {
-                            for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
-                                if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
+                            if(oldSelectedSymbol != selectedSymbol) {
+                                for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
+                                    if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
 
-                                StringBounds bounds = usage.pattern.getStringBounds();
+                                    StringBounds bounds = usage.pattern.getStringBounds();
 
-                                SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
+                                    SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
 
-                                if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
+                                    if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
 
-                                if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getDeclarationPattern() != null) { //If this usage refers to the identifier that's currently selected...
-                                    this.selectedSymbol = selectedSymbol;
-                                    selectedDeclaration = bounds.start.index == selectedSymbol.getDeclarationPattern().getStringLocation().index;
-                                    hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds()).stream().findFirst().get();
-                                    editor.repaint();
+                                    if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getDeclarationPattern() != null) { //If this usage refers to the identifier that's currently selected...
+                                        this.selectedSymbol = selectedSymbol;
+                                        selectedDeclaration = bounds.start.index == selectedSymbol.getDeclarationPattern().getStringLocation().index;
+                                        hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds()).get(0);
+                                        editor.repaint();
+                                        break;
+                                    }
                                 }
+
+                                String documentation = ((EditorComponent) editor).getParentModule().getLanguage().formatDocumentation(selectedSymbol);
+
+                                if(documentation != null) {
+                                    Rectangle highlightedRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, highlightedUsage.pattern.getStringBounds()).get(0);
+                                    HintStylizer.style(docHint);
+                                    docHint.setText(documentation);
+                                    docHint.show(
+                                            new Point(
+                                                    editor.getLocationOnScreen().x + highlightedRectangle.x + highlightedRectangle.width/2,
+                                                    editor.getLocationOnScreen().y + highlightedRectangle.y
+                                            ),
+                                            () -> editor.isShowing() && this.selectedSymbol == selectedSymbol
+                                    );
+                                } else {
+                                    docHint.dismiss();
+                                }
+                            } else {
+                                this.selectedSymbol = oldSelectedSymbol;
                             }
+                        } else {
+                            docHint.dismiss();
                         }
                     }
                 }
