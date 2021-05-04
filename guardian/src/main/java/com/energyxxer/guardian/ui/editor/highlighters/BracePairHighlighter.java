@@ -2,15 +2,16 @@ package com.energyxxer.guardian.ui.editor.highlighters;
 
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
+import com.energyxxer.util.Disposable;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 
-public class BracePairHighlighter implements Highlighter.HighlightPainter {
+public class BracePairHighlighter implements Highlighter.HighlightPainter, Disposable {
 
-    private final AdvancedEditor editor;
+    private AdvancedEditor editor;
 
     private boolean shouldRender = false;
     private Rectangle nearRectangle = null;
@@ -83,5 +84,10 @@ public class BracePairHighlighter implements Highlighter.HighlightPainter {
             g.fillRect(nearRectangle.x, nearRectangle.y, nearRectangle.width, nearRectangle.height);
             g.fillRect(farRectangle.x, farRectangle.y, farRectangle.width, farRectangle.height);
         }
+    }
+
+    @Override
+    public void dispose() {
+        editor = null;
     }
 }

@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.util.linenumber;
 
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.util.Disposable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -16,7 +17,7 @@ import java.awt.event.AdjustmentListener;
 import java.util.HashMap;
 
 public class TextLineNumber extends JPanel
-		implements CaretListener, DocumentListener, AdjustmentListener
+		implements CaretListener, DocumentListener, AdjustmentListener, Disposable
 {
 	public static final float LEFT = 0.0f;
 	public static final float CENTER = 0.5f;
@@ -282,5 +283,10 @@ public class TextLineNumber extends JPanel
 	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		documentChanged();
+	}
+
+	@Override
+	public void dispose() {
+		component = null;
 	}
 }

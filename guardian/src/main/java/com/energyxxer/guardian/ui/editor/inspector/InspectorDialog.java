@@ -300,6 +300,8 @@ public class InspectorDialog extends JDialog implements KeyListener, FocusListen
             tlm.dispose();
             explorer.dispose();
         }
+        editor = null;
+        explorer = null;
         disposed = true;
     }
 }

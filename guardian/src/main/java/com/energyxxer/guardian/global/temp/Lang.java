@@ -291,7 +291,7 @@ public class Lang {
         return null;
     }
 
-    public String formatDocumentation(SummarySymbol sym) {
+    public String formatDocumentation(SummarySymbol sym, PrismarineSummaryModule summary) {
         return null;
     }
 

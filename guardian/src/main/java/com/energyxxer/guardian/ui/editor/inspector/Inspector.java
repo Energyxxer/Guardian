@@ -139,7 +139,7 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
                     if(!hint.isShowing()) {
                         hint.setText(inspection.getDescription());
                         HintStylizer.style(hint, inspection.getSeverity().name().toLowerCase(Locale.ENGLISH));
-                        hint.show(e.getLocationOnScreen(), () -> rolloverItem != null && editor.isShowing());
+                        hint.show(e.getLocationOnScreen(), () -> rolloverItem != null && editor != null && editor.isShowing());
                     }
                 } else if(!hint.isShowing()) {
                     hint.updateLocation(e.getLocationOnScreen());
@@ -209,5 +209,11 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
     @Override
     public void dispose() {
         hint.dispose();
+        editor.removeMouseMotionListener(this);
+        editor = null;
+
+        inspectionModule = null;
+        if(dialog != null) dialog.dispose();
+        dialog = null;
     }
 }

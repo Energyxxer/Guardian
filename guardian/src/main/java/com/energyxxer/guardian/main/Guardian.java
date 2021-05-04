@@ -254,6 +254,23 @@ public class Guardian {
 				throw new RuntimeException("Exception triggered via the console");
 			}
 		});
+		ConsoleBoard.registerCommandHandler("gc", new ConsoleBoard.CommandHandler() {
+			@Override
+			public String getDescription() {
+				return "Calls the garbage collector";
+			}
+
+			@Override
+			public void printHelp() {
+				Debug.log();
+				Debug.log("GC: Calls the garbage collector");
+			}
+
+			@Override
+			public void handle(String[] args, String rawArgs) {
+				System.gc();
+			}
+		});
 
 		Debug.log("java path: " + System.getProperty("java.home")
 				+ File.separator + "bin" + File.separator + "java");

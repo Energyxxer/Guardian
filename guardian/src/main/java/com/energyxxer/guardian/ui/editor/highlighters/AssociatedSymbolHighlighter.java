@@ -36,7 +36,7 @@ import java.util.HashMap;
 
 public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter, MouseMotionListener, MouseListener {
 
-    private final AdvancedEditor editor;
+    private AdvancedEditor editor;
 
     private boolean shouldRender = false;
     private final ArrayList<Rectangle> rectangles = new ArrayList<>();
@@ -187,7 +187,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                                     }
                                 }
 
-                                String documentation = ((EditorComponent) editor).getParentModule().getLanguage().formatDocumentation(selectedSymbol);
+                                String documentation = ((EditorComponent) editor).getParentModule().getLanguage().formatDocumentation(selectedSymbol, lastSuccessfulSummary);
 
                                 if(documentation != null) {
                                     Rectangle highlightedRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, highlightedUsage.pattern.getStringBounds()).get(0);

@@ -53,7 +53,7 @@ public abstract class ProjectType {
 
     public abstract String getDefaultProjectIconName();
 
-    public abstract Project createProjectFromRoot(File file);
+    public abstract Project createProjectFromRoot(File file) throws Exception;
 
     public abstract Project createNew(Path rootPath);
 

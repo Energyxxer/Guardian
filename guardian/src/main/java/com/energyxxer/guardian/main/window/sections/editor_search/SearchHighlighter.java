@@ -1,7 +1,6 @@
 package com.energyxxer.guardian.main.window.sections.editor_search;
 
 import com.energyxxer.guardian.ui.editor.EditorComponent;
-import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.util.StringBounds;
 
 import javax.swing.text.BadLocationException;
@@ -12,7 +11,6 @@ import java.awt.*;
 public class SearchHighlighter implements Highlighter.HighlightPainter {
 
     private final FindAndReplaceBar finder;
-    private final AdvancedEditor editor;
 
     private Color highlightColor;
     private Color selectedColor;
@@ -20,9 +18,8 @@ public class SearchHighlighter implements Highlighter.HighlightPainter {
     private Color selectedBorderColor;
     private boolean enabled = true;
 
-    public SearchHighlighter(FindAndReplaceBar finder, EditorComponent editor) {
+    public SearchHighlighter(FindAndReplaceBar finder) {
         this.finder = finder;
-        this.editor = editor;
     }
 
     @Override
@@ -37,24 +34,24 @@ public class SearchHighlighter implements Highlighter.HighlightPainter {
             boolean excluded = finder.excluded.contains(start);
 
             try {
-                StringBounds bounds = new StringBounds(editor.getLocationForOffset(start),editor.getLocationForOffset(end));
+                StringBounds bounds = new StringBounds(((EditorComponent) c).getLocationForOffset(start), ((EditorComponent) c).getLocationForOffset(end));
 
                 for (int l = bounds.start.line; l <= bounds.end.line; l++) {
                     Rectangle rectangle;
                     if (l == bounds.start.line) {
-                        rectangle = ((AdvancedEditor) c).modelToView(bounds.start.index);
+                        rectangle = c.modelToView(bounds.start.index);
                         if (bounds.start.line == bounds.end.line) {
-                            rectangle.width = ((AdvancedEditor) c).modelToView(bounds.end.index).x - rectangle.x;
+                            rectangle.width = c.modelToView(bounds.end.index).x - rectangle.x;
                         } else {
                             rectangle.width = c.getWidth() - rectangle.x;
                         }
                     } else if (l == bounds.end.line) {
-                        rectangle = ((AdvancedEditor) c).modelToView(bounds.end.index);
-                        rectangle.width = rectangle.x - ((AdvancedEditor) c).modelToView(0).x;
-                        rectangle.x = ((AdvancedEditor) c).modelToView(0).x; //0
+                        rectangle = c.modelToView(bounds.end.index);
+                        rectangle.width = rectangle.x - c.modelToView(0).x;
+                        rectangle.x = c.modelToView(0).x; //0
                     } else {
-                        rectangle = ((AdvancedEditor) c).modelToView(bounds.start.index);
-                        rectangle.x = ((AdvancedEditor) c).modelToView(0).x; //0
+                        rectangle = c.modelToView(bounds.start.index);
+                        rectangle.x = c.modelToView(0).x; //0
                         rectangle.y += rectangle.height * (l - bounds.start.line);
                         rectangle.width = c.getWidth();
                     }
@@ -85,7 +82,7 @@ public class SearchHighlighter implements Highlighter.HighlightPainter {
                     }
 
                     if(excluded) {
-                        g.setColor(editor.getForeground());
+                        g.setColor(c.getForeground());
                         g.fillRect(rectangle.x, rectangle.y + rectangle.height/2 + 1, rectangle.width, 1);
                     }
                 }

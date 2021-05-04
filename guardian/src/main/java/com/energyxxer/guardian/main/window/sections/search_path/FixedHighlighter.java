@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.main.window.sections.search_path;
 
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.util.Disposable;
 import com.energyxxer.util.StringBounds;
 
 import javax.swing.text.BadLocationException;
@@ -9,9 +10,9 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class FixedHighlighter implements Highlighter.HighlightPainter {
+public class FixedHighlighter implements Highlighter.HighlightPainter, Disposable {
 
-    private final AdvancedEditor editor;
+    private AdvancedEditor editor;
 
     private Color highlightColor;
     private Color highlightBorderColor;
@@ -107,5 +108,10 @@ public class FixedHighlighter implements Highlighter.HighlightPainter {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    @Override
+    public void dispose() {
+        editor = null;
     }
 }

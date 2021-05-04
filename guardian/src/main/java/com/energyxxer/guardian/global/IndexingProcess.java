@@ -28,7 +28,7 @@ public class IndexingProcess extends AbstractProcess {
                     File tabFile = ((EditorModule) tab.module).getFileForAnalyzer();
                     PrismarineSummaryModule fileSummary = project.getSummary().getSummaryForFile(tabFile);
                     if(fileSummary != null) {
-//                        Debug.log("Updated file summary for tab " + tab.getName());
+                        Debug.log("Updated file summary for tab " + tab.getName());
                         ((SuggestionDialog) ((EditorModule) tab.module).editorComponent.getSuggestionInterface()).setSummary(fileSummary, true);
                     }
                 }

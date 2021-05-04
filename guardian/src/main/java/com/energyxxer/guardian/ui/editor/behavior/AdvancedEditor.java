@@ -819,6 +819,13 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     @Override
     public void dispose() {
         tlm.dispose();
+        suggestionInterface = null;
+        for(Highlighter.Highlight highlight : getHighlighter().getHighlights()) {
+            Highlighter.HighlightPainter painter = highlight.getPainter();
+            if(painter instanceof Disposable) {
+                ((Disposable) painter).dispose();
+            }
+        }
     }
 
     @Override

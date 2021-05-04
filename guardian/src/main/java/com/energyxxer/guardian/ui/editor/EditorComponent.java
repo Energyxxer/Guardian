@@ -409,6 +409,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 } else {
                     GuardianWindow.showException(e.getMessage());
                 }
+                highlightingThread = null;
             });
             highlightingWorker.execute();
 
@@ -454,6 +455,9 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
         timer.cancel();
         timer.purge();
         suggestionBox.dispose();
+        parent = null;
+        inspector = null;
+        suggestionBox = null;
     }
 
     @Override

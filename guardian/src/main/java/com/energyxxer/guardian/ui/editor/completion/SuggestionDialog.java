@@ -527,6 +527,10 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
             tlm.dispose();
             explorer.dispose();
         }
+        summary = null;
+        lastSuccessfulSummary = null;
+        scrollPane = null;
+        activeTokens.clear();
         disposed = true;
     }
 

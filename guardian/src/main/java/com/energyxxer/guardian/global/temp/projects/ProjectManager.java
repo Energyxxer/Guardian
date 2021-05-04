@@ -65,7 +65,8 @@ public class ProjectManager {
 			if(projectType != null) {
 				try {
 					loadedProjects.add(projectType.createProjectFromRoot(new File(file.getAbsolutePath())));
-				} catch (RuntimeException x) {
+				} catch (Exception x) {
+					GuardianWindow.showException(x);
 					x.printStackTrace();
 				}
 			}
@@ -116,5 +117,10 @@ public class ProjectManager {
 			if(project.getRootDirectory().equals(file)) return true;
 		}
 		return false;
+	}
+
+	public static void unloadProject(Project project) {
+		loadedProjects.remove(project);
+		GuardianWindow.projectExplorer.refresh();
 	}
 }

@@ -39,7 +39,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
 
     private ThemeListenerManager tlm;
 
-    private final EditorModule editor;
+    private EditorModule editor;
 
     public TextHint hint = GuardianWindow.hintManager.createTextHint("");
 
@@ -60,7 +60,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
         super(new BorderLayout());
         this.editor = editor;
         this.tlm = new ThemeListenerManager();
-        this.highlighter = new SearchHighlighter(this, editor.editorComponent);
+        this.highlighter = new SearchHighlighter(this);
         infoLabel = new StyledLabel("", tlm);
         infoLabel.setStyle(Font.BOLD);
         //this.setPreferredSize(new ScalableDimension(0, 60));
@@ -506,6 +506,7 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
         findField.dispose();
         replaceField.dispose();
         hint.dispose();
+        editor = null;
     }
 
     public void setFindText(String text) {

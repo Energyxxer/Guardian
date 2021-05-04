@@ -476,8 +476,11 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     @Override
     public void dispose() {
         this.disposeTLM();
-        editorComponent.dispose();
         if(searchBar.hasValue()) searchBar.getValue().dispose();
+        editorComponent.dispose();
+        tln.dispose();
+        tln = null;
+        editorComponent = null;
     }
 
     public void setEditable(boolean editable) {
