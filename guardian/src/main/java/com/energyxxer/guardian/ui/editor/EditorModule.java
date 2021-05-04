@@ -287,18 +287,20 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     }
 
     public void setText(String text) {
-        editorComponent.setText(text);
+        if(editorComponent != null) {
+            editorComponent.setText(text);
 
-        editorComponent.highlight();
+            editorComponent.highlight();
+        }
     }
 
     public String getText() {
-        return editorComponent.getText();
+        return editorComponent != null ? editorComponent.getText() : "";
     }
 
     @Override
     public void undoableEditHappened(UndoableEditEvent e) {
-        if (!e.getEdit().getPresentationName().equals("style change")) {
+        if (!e.getEdit().getPresentationName().equals("style change") && editorComponent != null) {
             editorComponent.highlight();
             if(associatedTab != null) associatedTab.onEdit();
         }
