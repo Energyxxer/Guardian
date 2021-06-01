@@ -116,7 +116,7 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
             this.x += element.getWidth();
         }
 
-        Dimension newSize = new Dimension(Math.max(this.x, 1), (int)Math.ceil(height * ScalableGraphics2D.SCALE_FACTOR));
+        Dimension newSize = new Dimension(Math.max((int)Math.ceil(this.x * ScalableGraphics2D.SCALE_FACTOR), 1), (int)Math.ceil(height * ScalableGraphics2D.SCALE_FACTOR));
 
         if(!newSize.equals(this.getPreferredSize())) {
             this.setPreferredSize(newSize);

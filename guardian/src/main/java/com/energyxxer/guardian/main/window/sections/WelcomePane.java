@@ -40,7 +40,7 @@ public class WelcomePane extends JPanel {
         contentPanel.add(tipPanel, BorderLayout.NORTH);
         contentPanel.add(buttonPanel, BorderLayout.CENTER);
 
-        tipScreen = new TipScreen();
+        tipScreen = new TipScreen(tlm);
         tipPanel.add(tipScreen, BorderLayout.CENTER);
 
         tlm.addThemeChangeListener(t -> {

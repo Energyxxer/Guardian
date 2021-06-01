@@ -2,6 +2,7 @@ package com.energyxxer.guardian.ui.misc;
 
 import com.energyxxer.guardian.global.Resources;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
@@ -30,7 +31,7 @@ public class TipScreen extends JComponent {
 
     private TimerTask task;
 
-    public TipScreen() {
+    public TipScreen(ThemeListenerManager tlm) {
         this.setOpaque(false);
 
         tipList.addAll(Resources.tips);
@@ -38,7 +39,9 @@ public class TipScreen extends JComponent {
 
         timer = new Timer();
 
-        this.setPreferredSize(new ScalableDimension(800, 100));
+        tlm.addThemeChangeListener(t -> {
+            this.setPreferredSize(new ScalableDimension(800, 100));
+        });
     }
 
     public void start() {
@@ -113,7 +116,7 @@ public class TipScreen extends JComponent {
         g.setColor(this.getForeground());
         g.setFont(this.getFont());
         FontMetrics metrics = g.getFontMetrics();
-        g.drawString(currentTip, (this.getWidth()-metrics.stringWidth(currentTip))/2, (this.getHeight()-metrics.getHeight())/2);
+        g.drawString(currentTip, (int)Math.ceil(this.getWidth() / ScalableGraphics2D.SCALE_FACTOR - metrics.stringWidth(currentTip))/2, (this.getHeight()-metrics.getHeight())/2);
 
         g.dispose();
     }
