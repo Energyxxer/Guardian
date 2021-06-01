@@ -34,7 +34,7 @@ public class HintManager {
                             continue;
                         }
                         if(hint.timer == 0) {
-                            hint.forceShow();
+                            SwingUtilities.invokeLater(hint::forceShow);
                         }
                     } else if(hint.timer == 0) {
                         if(hint.isShowing()) {
@@ -48,7 +48,7 @@ public class HintManager {
                         double distance = hint.getDistanceFromPoint(MouseInfo.getPointerInfo().getLocation());
                         if(distance >= FORCE_HIDE_DISTANCE) {
                             hint.timer = 0;
-                            hint.dismiss();
+                            SwingUtilities.invokeLater(hint::dismiss);
                             continue;
                         }
                         if(hint.shouldContinueShowing()) {
@@ -57,7 +57,7 @@ public class HintManager {
                         }
                         hint.timer--;
                         if(hint.timer == 0) {
-                            hint.dismiss();
+                            SwingUtilities.invokeLater(hint::dismiss);
                         }
                     }
                 }
