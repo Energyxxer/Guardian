@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by User on 2/10/2017.
@@ -185,7 +186,7 @@ public class ProjectFromTemplateDialog {
         if(!valid) return;
         String name = nameField.getText().trim();
 
-        ProjectTemplates.create(Guardian.core.getProjectTemplatesDir().toPath().resolve(templateField.getValue()).toFile(), name);
+        ProjectTemplates.create(templateRootsUsed[templateField.getValueIndex()-1], name);
 
         GuardianWindow.projectExplorer.refresh();
 
@@ -231,6 +232,7 @@ public class ProjectFromTemplateDialog {
         okButton.setEnabled(valid);
     }
 
+    private static File[] templateRootsUsed = null;
 
     public static void create(File selectedTemplateRoot) {
         nameField.setText(selectedTemplateRoot == null ? "" : selectedTemplateRoot.getName());
@@ -250,17 +252,16 @@ public class ProjectFromTemplateDialog {
         options.add("<Select Template>");
         int valueIndex = 0;
 
-        File[] templateRoots = Guardian.core.getProjectTemplatesDir().listFiles();
-        if(templateRoots != null) {
-            int i = 0;
-            for(File templateRoot : templateRoots) {
-                if(templateRoot.isDirectory()) {
-                    options.add(templateRoot.getName());
-                    if(templateRoot.equals(selectedTemplateRoot)) {
-                        valueIndex = i+1;
-                    }
-                    i++;
+        List<File> templateRoots = Guardian.core.getProjectTemplateRoots();
+        templateRootsUsed = templateRoots.toArray(new File[0]);
+        int i = 0;
+        for(File templateRoot : templateRoots) {
+            if(templateRoot.isDirectory()) {
+                options.add(templateRoot.getName());
+                if(templateRoot.equals(selectedTemplateRoot)) {
+                    valueIndex = i+1;
                 }
+                i++;
             }
         }
 

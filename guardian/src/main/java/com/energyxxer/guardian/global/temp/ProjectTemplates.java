@@ -50,9 +50,29 @@ public class ProjectTemplates {
                     break;
                 }
 
+                case "TEMPLATE_INSIDE_PROJECT_NAME": {
+                    if(templateRoot.toPath().startsWith(Guardian.core.getGlobalLibrariesDir().toPath())) {
+                        result = templateRoot.toPath().getName(Guardian.core.getGlobalLibrariesDir().toPath().getNameCount()).toString();
+                    } else if(templateRoot.toPath().startsWith(Preferences.getWorkspace().toPath())) {
+                        result = templateRoot.toPath().getName(Preferences.getWorkspace().toPath().getNameCount()).toString();
+                    }
+                    break;
+                }
+                case "TEMPLATE_INSIDE_PROJECT_ROOT": {
+                    if(templateRoot.toPath().startsWith(Guardian.core.getGlobalLibrariesDir().toPath())) {
+                        result = templateRoot.toPath().getRoot().resolve(templateRoot.toPath().subpath(0, Guardian.core.getGlobalLibrariesDir().toPath().getNameCount()+1)).toString();
+                    } else if(templateRoot.toPath().startsWith(Preferences.getWorkspace().toPath())) {
+                        result = templateRoot.toPath().getRoot().resolve(templateRoot.toPath().subpath(0, Preferences.getWorkspace().toPath().getNameCount()+1)).toString();
+                    }
+                    break;
+                }
+
                 case "UUID": {
                     result = UUID.randomUUID().toString();
                     break;
+                }
+                default: {
+                    result = Guardian.core.getTemplateVariable(s.toUpperCase(Locale.ENGLISH), destination, templateRoot);
                 }
             }
 

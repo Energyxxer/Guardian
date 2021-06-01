@@ -17,6 +17,7 @@ import javax.swing.event.MenuListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static com.energyxxer.guardian.main.window.sections.MenuBar.createItemForAction;
@@ -142,16 +143,14 @@ public class MenuItems {
 	}
 
 	private static void fillProjectTemplateMenu(StyledMenu newMenu) {
-		File[] templateRoots = Guardian.core.getProjectTemplatesDir().listFiles();
-		if(templateRoots != null) {
-			for(File templateRoot : templateRoots) {
-				if(templateRoot.isDirectory()) {
-					StyledMenuItem templateItem = new StyledMenuItem(templateRoot.getName(), "package");
-					templateItem.addActionListener(e -> {
-						ProjectFromTemplateDialog.create(templateRoot);
-					});
-					newMenu.add(templateItem);
-				}
+		List<File> templateRoots = Guardian.core.getProjectTemplateRoots();
+		for(File templateRoot : templateRoots) {
+			if(templateRoot.isDirectory()) {
+				StyledMenuItem templateItem = new StyledMenuItem(templateRoot.getName(), "package");
+				templateItem.addActionListener(e -> {
+					ProjectFromTemplateDialog.create(templateRoot);
+				});
+				newMenu.add(templateItem);
 			}
 		}
 	}

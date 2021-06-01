@@ -1,5 +1,7 @@
 package com.energyxxer.guardian;
 
+import com.energyxxer.guardian.global.temp.projects.Project;
+import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.ui.common.ProgramUpdateProcess;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
@@ -10,7 +12,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 public class GuardianCore {
     protected Class resourceRegistry = GuardianCore.class;
@@ -87,6 +91,23 @@ public class GuardianCore {
         return getMainDirectory().resolve("resources").resolve("project_templates").toFile();
     }
 
+    private final ArrayList<File> templateRootsReturn = new ArrayList<>();
+    public ArrayList<File> getProjectTemplateRoots() {
+        templateRootsReturn.clear();
+        File mainTemplatesDir = getProjectTemplatesDir();
+        if(mainTemplatesDir != null && mainTemplatesDir.isDirectory()) {
+            //noinspection ConstantConditions
+            Collections.addAll(templateRootsReturn, mainTemplatesDir.listFiles());
+        }
+        for(Project project : ProjectManager.getLoadedProjects()) {
+            File subTemplatesDir = project.getRootDirectory().toPath().resolve("project_templates").toFile();
+            if(subTemplatesDir.exists() && subTemplatesDir.isDirectory()) {
+                Collections.addAll(templateRootsReturn, subTemplatesDir.listFiles());
+            }
+        }
+        return templateRootsReturn;
+    }
+
     public File getGlobalLibrariesDir() {
         return getMainDirectory().resolve("libraries").toFile();
     }
@@ -101,5 +122,9 @@ public class GuardianCore {
 
     public void workspaceLoaded(JsonObject config) {
 
+    }
+
+    public String getTemplateVariable(String s, File destination, File templateRoot) {
+        return null;
     }
 }
