@@ -15,7 +15,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 
 public class NetworkUtil {
-    private static final String AUTHENTICATED_REQUEST_API = "https://energyxxer.com/api/guardian/request.php?url=";
+    public static final String AUTHENTICATED_REQUEST_API = "https://energyxxer.com/api/guardian/request.php?url=";
 
     public static final String IP_REGEX = "(?:[0-9]{1,3}\\.){3}[0-9]{1,3}";
 

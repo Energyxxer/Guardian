@@ -35,9 +35,15 @@ public class IndexingProcess extends AbstractProcess {
             }
         });
         summarizer.addCompletionListener(() -> {
-            Debug.log("Finished indexing project: " + project.getName());
-            this.updateStatus("");
-            this.finalizeProcess(true);
+            if(summarizer.isSuccessful()) {
+                Debug.log("Finished indexing project: " + project.getName());
+                this.updateStatus("");
+                this.finalizeProcess(true);
+            } else {
+                Debug.log("Failed to index project: " + project.getName());
+                this.updateStatus("Failed to index project: " + project.getName() + ". Address any issues then reload the workspace.");
+                this.finalizeProcess(false);
+            }
         });
         initializeThread(this::startSummarizer);
     }

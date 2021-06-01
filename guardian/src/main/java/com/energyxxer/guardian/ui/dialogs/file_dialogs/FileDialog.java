@@ -1,8 +1,8 @@
 package com.energyxxer.guardian.ui.dialogs.file_dialogs;
 
+import com.energyxxer.guardian.files.FileType;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
-import com.energyxxer.guardian.files.FileType;
 import com.energyxxer.guardian.ui.styledcomponents.StyledButton;
 import com.energyxxer.guardian.ui.styledcomponents.StyledIcon;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
@@ -179,6 +179,7 @@ public class FileDialog {
 
         File newFile = new File(path);
         try {
+            newFile.getParentFile().mkdirs();
             boolean successful = newFile.createNewFile();
 
             if (!successful) {

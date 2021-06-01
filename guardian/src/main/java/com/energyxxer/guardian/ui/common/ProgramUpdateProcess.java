@@ -7,6 +7,7 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.actions.ActionManager;
 import com.energyxxer.guardian.ui.commodoreresources.DefinitionUpdateProcess;
 import com.energyxxer.guardian.ui.dialogs.OptionDialog;
+import com.energyxxer.guardian.util.NetworkUtil;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.util.processes.AbstractProcess;
 
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import static com.energyxxer.guardian.util.NetworkUtil.retrieveStreamForURL;
 import static com.energyxxer.guardian.util.NetworkUtil.retrieveStreamForURLAuth;
 
 public class ProgramUpdateProcess extends AbstractProcess {
@@ -58,7 +60,13 @@ public class ProgramUpdateProcess extends AbstractProcess {
                     Preferences.put("meta.delete_old_jar", Guardian.RUNNING_PATH.getPath());
 
                     updateStatusAndProgress("Downloading new JAR", -1);
-                    InputStream is = retrieveStreamForURLAuth(updateAvailable.downloadUrl, false);
+
+                    InputStream is;
+                    if(updateAvailable.authOnly) {
+                        is = retrieveStreamForURL(NetworkUtil.AUTHENTICATED_REQUEST_API + updateAvailable.downloadUrl + "&custom_header=accept:application/octet-stream", false);
+                    } else {
+                        is = retrieveStreamForURLAuth(updateAvailable.downloadUrl, false);
+                    }
                     Files.copy(is, newJar, StandardCopyOption.REPLACE_EXISTING);
                     is.close();
 
@@ -85,12 +93,21 @@ public class ProgramUpdateProcess extends AbstractProcess {
         public String jarName;
         public String htmlUrl;
         public String downloadUrl;
+        public boolean authOnly;
 
         public ProgramVersionInfo(String name, String jarName, String htmlUrl, String downloadUrl) {
             this.name = name;
             this.jarName = jarName;
             this.htmlUrl = htmlUrl;
             this.downloadUrl = downloadUrl;
+        }
+
+        public ProgramVersionInfo(String name, String jarName, String htmlUrl, String downloadUrl, boolean authOnly) {
+            this.name = name;
+            this.jarName = jarName;
+            this.htmlUrl = htmlUrl;
+            this.downloadUrl = downloadUrl;
+            this.authOnly = authOnly;
         }
     }
 }
