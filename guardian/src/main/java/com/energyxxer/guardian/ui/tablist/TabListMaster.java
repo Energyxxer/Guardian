@@ -340,4 +340,8 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
     public void setMayRearrange(boolean mayRearrange) {
         this.mayRearrange = mayRearrange;
     }
+
+    public ArrayList<TabListElement> getTabItems() {
+        return children;
+    }
 }

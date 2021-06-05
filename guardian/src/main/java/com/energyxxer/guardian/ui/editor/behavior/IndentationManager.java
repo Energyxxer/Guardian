@@ -17,6 +17,7 @@ public class IndentationManager {
 
     protected final ArrayList<IndentationChange> indents = new ArrayList<>();
     private final Stack<Integer> bracesSeen = new Stack<>();
+    private boolean pairsSyntaxDriven = false;
 
     public IndentationManager(AdvancedEditor editor) {
         this.editor = editor;
@@ -106,12 +107,23 @@ public class IndentationManager {
         return isOpeningBrace(ch) || isClosingBrace(ch);
     }
 
-    public void setBraceSet(String openingBraces, String closingBraces) {
+    public IndentationManager setBraceSet(String openingBraces, String closingBraces) {
         this.openingChars = openingBraces;
         this.closingChars = closingBraces;
         textChanged(editor.getText());
 
         braceMatcher = Pattern.compile("[" + Pattern.quote(openingBraces + closingBraces) + "]");
+
+        return this;
+    }
+
+    public IndentationManager setPairCompletionSyntaxDriven(boolean syntaxDriven) {
+        this.pairsSyntaxDriven = syntaxDriven;
+        return this;
+    }
+
+    public boolean isPairCompletionSyntaxDriven() {
+        return pairsSyntaxDriven;
     }
 
     private int binarySearchBraceIndex(int index) {

@@ -56,6 +56,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
     private boolean locked = false;
     private boolean forceLocked = false;
 
+    private SuggestionModule latestResults = null;
     private SuggestionModule activeResults = null;
 
     private final ArrayList<ExpandableSuggestionToken> activeTokens = new ArrayList<>();
@@ -129,6 +130,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
     }
 
     public void showSuggestions(SuggestionModule results) {
+        latestResults = results;
         if(this.isVisible()) return;
         if(!safe) return;
         activeResults = results;
@@ -190,6 +192,14 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
                 });
             }
         });
+    }
+
+    public SuggestionModule getActiveResults() {
+        return activeResults;
+    }
+
+    public SuggestionModule getLatestResults() {
+        return latestResults;
     }
 
     private static Pattern SNIPPET_MARKER_PATTERN = Pattern.compile("\\$([A-Z_]+)\\$");

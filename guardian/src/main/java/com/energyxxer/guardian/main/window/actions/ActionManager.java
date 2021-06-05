@@ -25,6 +25,7 @@ import com.energyxxer.guardian.ui.common.ProgramUpdateProcess;
 import com.energyxxer.guardian.ui.dialogs.KeyStrokeDialog;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
 import com.energyxxer.guardian.ui.dialogs.settings.Settings;
+import com.energyxxer.guardian.ui.tablist.TabItem;
 import com.energyxxer.util.logger.Debug;
 
 import java.awt.*;
@@ -67,6 +68,46 @@ public class ActionManager {
                         "Close All Tabs For Project", "Close all tabs",
                         KeyMap.requestMapping("tab.close_project").setGroupName("Tabs"),
                         () -> GuardianWindow.tabManager.closeAllTabsForProject(Commons.getActiveProject())
+                )
+        );
+        actions.put("PREVIOUS_TAB",
+                new ProgramAction(
+                        "Previous Tab", "Switch to the previous tab",
+                        KeyMap.requestMapping("tab.previous", KeyMap.identifierToStrokes("cs+\t")).setGroupName("Tabs"),
+                        () -> {
+                            Tab selectedTab = GuardianWindow.tabManager.getSelectedTab();
+                            if(selectedTab != null) {
+                                int index = GuardianWindow.tabList.getTabItems().indexOf(selectedTab.getLinkedTabItem());
+                                int startIndex = index;
+                                do {
+                                    index--;
+                                    if(index < 0) {
+                                        index = GuardianWindow.tabList.getTabItems().size() - 1;
+                                    }
+                                } while(!(GuardianWindow.tabList.getTabItems().get(index) instanceof TabItem) && index != startIndex);
+                                GuardianWindow.tabManager.setSelectedTab(((TabItem) GuardianWindow.tabList.getTabItems().get(index)).getAssociatedTab());
+                            }
+                        }
+                )
+        );
+        actions.put("NEXT_TAB",
+                new ProgramAction(
+                        "Next Tab", "Switch to the next tab",
+                        KeyMap.requestMapping("tab.next", KeyMap.identifierToStrokes("c+\t")).setGroupName("Tabs"),
+                        () -> {
+                            Tab selectedTab = GuardianWindow.tabManager.getSelectedTab();
+                            if(selectedTab != null) {
+                                int index = GuardianWindow.tabList.getTabItems().indexOf(selectedTab.getLinkedTabItem());
+                                int startIndex = index;
+                                do {
+                                    index++;
+                                    if(index >= GuardianWindow.tabList.getTabItems().size()) {
+                                        index = 0;
+                                    }
+                                } while(!(GuardianWindow.tabList.getTabItems().get(index) instanceof TabItem) && index != startIndex);
+                                GuardianWindow.tabManager.setSelectedTab(((TabItem) GuardianWindow.tabList.getTabItems().get(index)).getAssociatedTab());
+                            }
+                        }
                 )
         );
         actions.put("SAVE",

@@ -1,10 +1,13 @@
 package com.energyxxer.guardian.ui.editor.behavior.edits;
 
+import com.energyxxer.enxlex.suggestions.PairSuggestion;
+import com.energyxxer.enxlex.suggestions.Suggestion;
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
+import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.util.StringUtil;
 
 import javax.swing.text.AbstractDocument;
@@ -65,10 +68,34 @@ public class InsertionEdit extends Transaction<AdvancedEditor> {
                     }
                 }
                 int caretOffset = 0;
-                if(valueToWrite.length() == 1 && Dot.SMART_KEYS_BRACES.get() && target.getIndentationManager().isOpeningBrace(valueToWrite) && target.getIndentationManager().isBalanced()) {
-                    valueToWrite += target.getIndentationManager().getMatchingBraceChar(valueToWrite);
-                    caretOffset--;
-                } else if(valueToWrite.length() == 1 &&
+                boolean pairCompleted = false;
+                if(target.getIndentationManager().isPairCompletionSyntaxDriven()) {
+                    if(valueToWrite.length() == 1
+                            && (Dot.SMART_KEYS_BRACES.get() && target.getIndentationManager().isOpeningBrace(valueToWrite) || Dot.SMART_KEYS_QUOTES.get() && "\"'".contains(valueToWrite))) {
+                        if(target.getSuggestionInterface() != null && ((SuggestionDialog) target.getSuggestionInterface()).getLatestResults() != null) {
+                            for(Suggestion suggestion : ((SuggestionDialog) target.getSuggestionInterface()).getLatestResults().getSuggestions()) {
+                                if(
+                                        suggestion instanceof PairSuggestion
+                                                && ((PairSuggestion) suggestion).getStartIndex() <= previousProfile.get(i)
+                                                && previousProfile.get(i) <= ((PairSuggestion) suggestion).getEndIndex()
+                                                && ((PairSuggestion) suggestion).getOpenSymbol().equals(valueToWrite)
+                                ) {
+                                    valueToWrite += ((PairSuggestion) suggestion).getCloseSymbol();
+                                    caretOffset--;
+                                    pairCompleted = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if(valueToWrite.length() == 1 && Dot.SMART_KEYS_BRACES.get() && target.getIndentationManager().isOpeningBrace(valueToWrite) && target.getIndentationManager().isBalanced()) {
+                        valueToWrite += target.getIndentationManager().getMatchingBraceChar(valueToWrite);
+                        caretOffset--;
+                        pairCompleted = true;
+                    }
+                }
+                if(!pairCompleted && valueToWrite.length() == 1 &&
                         ((
                                 Dot.SMART_KEYS_BRACES.get() &&
                                 target.getIndentationManager().isClosingBrace(valueToWrite) &&
@@ -82,9 +109,6 @@ public class InsertionEdit extends Transaction<AdvancedEditor> {
                         ) && result.startsWith(valueToWrite,start) ) {
                     valueToWrite = "";
                     caretOffset++;
-                } else if(valueToWrite.length() == 1 && Dot.SMART_KEYS_QUOTES.get() && "\"'".contains(valueToWrite) && !target.getStyledDocument().getCharacterElement(start).getAttributes().containsAttributes(target.getStyle(AdvancedEditor.STRING_STYLE)) && !target.getStyledDocument().getCharacterElement(start).getAttributes().containsAttributes(target.getStyle(AdvancedEditor.STRING_ESCAPE_STYLE))) {
-                    valueToWrite += valueToWrite;
-                    caretOffset--;
                 }
 
                 undoIndices.add(start);

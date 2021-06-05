@@ -28,6 +28,8 @@ public class SuggestionExpander {
                 lang.expandComplexSuggestion((ComplexSuggestion) suggestion, tokens, dialog, suggestionModule);
             }
             return tokens;
+        } else if(suggestion instanceof PairSuggestion) {
+            return Collections.emptyList();
         }
         throw new IllegalArgumentException();
     }
