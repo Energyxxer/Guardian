@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.ui.editor;
 
 import com.energyxxer.enxlex.lexical_analysis.LazyLexer;
+import com.energyxxer.enxlex.lexical_analysis.inspections.Inspection;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSection;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
@@ -227,6 +228,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 this.inspector.setInspectionModule(analysis.lexer.getInspectionModule());
                 this.inspector.insertNotices(analysis.notices);
             }
+
             if(logHighlighterTimes)  Debug.log("Inspection update time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
 
@@ -311,7 +313,6 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                     }
                 }
 
-
                 prevToken = token;
             }
             previousTokenStyles.clear();
@@ -358,6 +359,12 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             if(logHighlighterTimes) Debug.log("Hierarchical Attribute Update time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
+
+            for(Inspection inspection : analysis.lexer.getInspectionModule().getInspections()) {
+                if(inspection.getForceStyle() != null) {
+                    worker.setCharacterAttributes(inspection.getStartIndex(), inspection.getEndIndex() - inspection.getStartIndex(), EditorComponent.this.getStyle(inspection.getForceStyle()), false);
+                }
+            }
 
             if(analysis.response == null || analysis.response.matched) GuardianWindow.dismissStatus(errorStatus);
 

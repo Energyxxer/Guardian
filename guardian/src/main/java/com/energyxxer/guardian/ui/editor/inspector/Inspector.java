@@ -97,13 +97,23 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
                             rectangle.width = c.getFont().getSize();
                         }
 
-                        if ("SQUIGGLE".equals(GuardianWindow.getTheme().getString("Inspector." + item.getSeverity().name().toLowerCase() + ".style", "default:HIGHLIGHT").toUpperCase(Locale.ENGLISH))) {
-                            for (int x = rectangle.x; x < rectangle.x + rectangle.width; x += 4) {
-                                g.drawLine(x, rectangle.y + rectangle.height, x + 2, rectangle.y + rectangle.height - 2);
-                                g.drawLine(x + 2, rectangle.y + rectangle.height - 2, x + 4, rectangle.y + rectangle.height);
+                        String renderStyle = GuardianWindow.getTheme().getString("Inspector." + item.getSeverity().name().toLowerCase() + ".style", "default:HIGHLIGHT").toUpperCase(Locale.ENGLISH);
+
+                        switch(renderStyle) {
+                            case "SQUIGGLE": {
+                                for (int x = rectangle.x; x < rectangle.x + rectangle.width; x += 4) {
+                                    g.drawLine(x, rectangle.y + rectangle.height, x + 2, rectangle.y + rectangle.height - 2);
+                                    g.drawLine(x + 2, rectangle.y + rectangle.height - 2, x + 4, rectangle.y + rectangle.height);
+                                }
+                                break;
                             }
-                        } else {
-                            g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+                            case "UNDERLINE": {
+                                g.fillRect(rectangle.x, rectangle.y + rectangle.height - 3, rectangle.width, 1);
+                                break;
+                            }
+                            default: {
+                                g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+                            }
                         }
                     }
                 } catch (BadLocationException e) {
