@@ -297,6 +297,8 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
                 if(getIndentationManager().getBraceMatcher().matcher(token.value).find() && !lang.isBraceToken(token)) {
                     worker.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(IndentationManager.NULLIFY_BRACE_STYLE), false);
+                } else if(lang.isBraceToken(token)) {
+                    worker.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(IndentationManager.FORCE_BRACE_STYLE), false);
                 }
 
                 if(lang.isStringToken(token)) {

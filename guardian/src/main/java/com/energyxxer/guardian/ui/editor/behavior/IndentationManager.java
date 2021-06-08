@@ -8,12 +8,15 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 
 public class IndentationManager {
+    public static final String FORCE_BRACE_STYLE = "__BRACE_FORCE";
     public static final String NULLIFY_BRACE_STYLE = "__INDENTATION_CANCEL";
     protected final AdvancedEditor editor;
     protected boolean dirty = false;
     protected String text;
     private String openingChars = "{[(";
     private String closingChars = "}])";
+    private String weakOpeningChars = "";
+    private String weakClosingChars = "";
 
     protected final ArrayList<IndentationChange> indents = new ArrayList<>();
     private final Stack<Integer> bracesSeen = new Stack<>();
@@ -22,6 +25,7 @@ public class IndentationManager {
     public IndentationManager(AdvancedEditor editor) {
         this.editor = editor;
 
+        editor.getStyledDocument().addStyle(FORCE_BRACE_STYLE, null);
         editor.getStyledDocument().addStyle(NULLIFY_BRACE_STYLE, null);
 
         setBraceSet("{[(","}])");
@@ -56,18 +60,24 @@ public class IndentationManager {
             int openingIndex = openingChars.indexOf(c);
             int closingIndex = closingChars.indexOf(c);
 
+            boolean strong = isStrongBrace(c);
+
             if(openingIndex >= 0) {
                 //bracesSeen.push(openingIndex);
-                indents.add(new IndentationChange(i, +1));
+                indents.add(new IndentationChange(i, +1, strong));
             } else if(closingIndex >= 0) {
                 /*int matchingBraceIndex = closingIndex;
                 if(!bracesSeen.isEmpty()) {
                     matchingBraceIndex = bracesSeen.pop();
                 }*/
-                indents.add(new IndentationChange(i, -1));
+                indents.add(new IndentationChange(i, -1, strong));
             }
         }
         dirty = false;
+    }
+
+    private boolean isStrongBrace(char c) {
+        return !weakOpeningChars.contains(""+c) && !weakClosingChars.contains(""+c);
     }
 
     public boolean isBalanced() {
@@ -116,6 +126,11 @@ public class IndentationManager {
 
         return this;
     }
+    public IndentationManager setWeakBraces(String openingBraces, String closingBraces) {
+        this.weakOpeningChars = openingBraces;
+        this.weakClosingChars = closingBraces;
+        return this;
+    }
 
     public IndentationManager setPairCompletionSyntaxDriven(boolean syntaxDriven) {
         this.pairsSyntaxDriven = syntaxDriven;
@@ -149,7 +164,9 @@ public class IndentationManager {
 
     private boolean isRealIndent(IndentationChange indent) {
         AttributeSet characterAttributes = editor.getStyledDocument().getCharacterElement(indent.index).getAttributes();
-        return !characterAttributes.containsAttributes(editor.getStyle(NULLIFY_BRACE_STYLE)) && !characterAttributes.containsAttributes(editor.getStyle(AdvancedEditor.STRING_STYLE));
+        return !characterAttributes.containsAttributes(editor.getStyle(NULLIFY_BRACE_STYLE))
+                && !characterAttributes.containsAttributes(editor.getStyle(AdvancedEditor.STRING_STYLE))
+                && (indent.strong || characterAttributes.containsAttributes(editor.getStyle(FORCE_BRACE_STYLE)));
     }
 
     public int getMatchingBraceIndex(int braceCheckIndex) {
@@ -180,10 +197,12 @@ public class IndentationManager {
     private static class IndentationChange {
         int index;
         int change;
+        boolean strong;
 
-        public IndentationChange(int index, int change) {
+        public IndentationChange(int index, int change, boolean strong) {
             this.index = index;
             this.change = change;
+            this.strong = strong;
         }
 
         @Override

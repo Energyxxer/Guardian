@@ -80,7 +80,7 @@ public class Resources {
                     }
                 }
             }
-        } catch (IOException x) {
+        } catch (Exception x) {
             x.printStackTrace();
         }
 
