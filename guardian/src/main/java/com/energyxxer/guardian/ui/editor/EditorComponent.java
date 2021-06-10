@@ -321,7 +321,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             startTime = System.currentTimeMillis();
 
             try {
-                if(analysis.response != null && parent.hierarchicalStyles.size() > 0) {
+                if(analysis.response != null && parent != null && parent.hierarchicalStyles.size() > 0) {
                     analysis.response.pattern.traverse(leaf -> {
                         if(Thread.interrupted()) throw new InterruptedException();
                         for(EditorModule.HierarchicalStyle style : parent.hierarchicalStyles) {
