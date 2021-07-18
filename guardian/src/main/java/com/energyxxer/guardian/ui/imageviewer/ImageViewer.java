@@ -177,17 +177,18 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
         boolean animated = new File(file.getPath() + ".mcmeta").exists();
 
         if(imgSize.width == imgSize.height) {
-            GuardianWindow.statusBar.setCaretInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y  * 16) / imgSize.height),4)));
+            GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y  * 16) / imgSize.height),4)));
         } else if(imgSize.width % imgSize.height == 0 || imgSize.height % imgSize.width == 0) {
             String animationText = animated ? "Animated" : "Missing animation";
             if(imgSize.width > imgSize.height) {
-                GuardianWindow.statusBar.setCaretInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x % imgSize.height * 16) / imgSize.height, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y * 16) / imgSize.height),4)) + "    " + animationText);
+                GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x % imgSize.height * 16) / imgSize.height, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y * 16) / imgSize.height),4)) + "    " + animationText);
             } else {
-                GuardianWindow.statusBar.setCaretInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y % imgSize.width * 16) / imgSize.width),4)) + "    " + animationText);
+                GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y % imgSize.width * 16) / imgSize.width),4)) + "    " + animationText);
             }
         } else {
-            GuardianWindow.statusBar.setCaretInfo("Invalid aspect ratio");
+            GuardianWindow.statusBar.setSelectionInfo("Invalid aspect ratio");
         }
+        GuardianWindow.statusBar.setCaretInfo(imgSize.width + "x" + imgSize.height);
     }
 
     @Override
