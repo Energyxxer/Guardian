@@ -186,7 +186,7 @@ class SettingsBehavior extends JPanel {
                     content.add(label);
                 }
                 {
-                    StyledLabel label = new StyledLabel("Also applies to most other explorer elements such as notice elements and code suggestions.","Settings.content", tlm);
+                    StyledLabel label = new StyledLabel("Also applies to other explorer elements such as code suggestions.","Settings.content", tlm);
                     label.setStyle(Font.ITALIC);
                     content.add(label);
                 }

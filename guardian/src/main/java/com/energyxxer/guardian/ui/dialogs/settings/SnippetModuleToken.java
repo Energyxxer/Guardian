@@ -91,7 +91,9 @@ public class SnippetModuleToken implements CompoundActionModuleToken, Disposable
         editor.updateSyntax();
         editor.setText(snippet.getText());
         editor.editorComponent.getDocument().addUndoableEditListener(e -> {
-            snippet.setText(editor.getText());
+            if(!"style change".equals(e.getEdit().getPresentationName())) {
+                snippet.setText(editor.getText());
+            }
         });
         advancedPanel.add(editor, BorderLayout.CENTER);
         advancedPanel.add(new JPanel(new BorderLayout()) {
@@ -251,7 +253,6 @@ public class SnippetModuleToken implements CompoundActionModuleToken, Disposable
 
     @Override
     public void onInteract() {
-        Debug.log("Interact with snippet: " + snippet.getShorthand());
         parent.setContent(settingsPanel);
         shorthandField.requestFocus();
         shorthandField.setSelectionStart(0);
