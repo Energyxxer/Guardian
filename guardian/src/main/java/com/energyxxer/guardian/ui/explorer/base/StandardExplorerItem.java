@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.explorer.base;
 
+import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
@@ -19,6 +20,8 @@ import java.util.List;
 import static com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor.isPlatformControlDown;
 
 public class StandardExplorerItem extends ExplorerElement {
+    public static final Preferences.SettingPref<Boolean> ONE_CLICK_OPEN = new Preferences.SettingPref<>("settings.behavior.one_click_open", false, Boolean::parseBoolean);
+
     private ExplorerElement parent;
 
     private ModuleToken token;
@@ -219,12 +222,16 @@ public class StandardExplorerItem extends ExplorerElement {
     }
 
     public void interact() {
+        interact(null);
+    }
+
+    public void interact(MouseEvent e) {
         this.token.onInteract();
         if(token.isExpandable()) {
             if(expanded) collapse();
             else expand(null);
         } else if(token.isModuleSource()) {
-            GuardianWindow.tabManager.openTab(token);
+            GuardianWindow.tabManager.openTab(token, ONE_CLICK_OPEN.get() && (e == null || !(e.getClickCount() % 2 == 0)));
         }
     }
 
@@ -251,8 +258,8 @@ public class StandardExplorerItem extends ExplorerElement {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(e.getButton() == MouseEvent.BUTTON1 && !isPlatformControlDown(e) && e.getClickCount() % 2 == 0 && (!token.isExpandable() || e.getX() < x || e.getX() > x + master.getRowHeight())) {
-            this.interact();
+        if(e.getButton() == MouseEvent.BUTTON1 && !isPlatformControlDown(e) && (ONE_CLICK_OPEN.get() || e.getClickCount() % 2 == 0) && (!token.isExpandable() || e.getX() < x || e.getX() > x + master.getRowHeight())) {
+            this.interact(e);
         }
         dispatchMouseEvent(e);
     }

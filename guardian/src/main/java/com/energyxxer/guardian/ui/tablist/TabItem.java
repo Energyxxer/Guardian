@@ -67,6 +67,9 @@ public class TabItem extends TabListElement {
     @Override
     public void render(Graphics g) {
         g.setFont(master.getFont());
+        if(associatedTab != null && associatedTab.isTemporary()) {
+            g.setFont(g.getFont().deriveFont(Font.ITALIC));
+        }
         FontMetrics fm = g.getFontMetrics();
 
         boolean iconOnly = this.name == null;
@@ -325,5 +328,9 @@ public class TabItem extends TabListElement {
         this.token = newToken;
         updateName();
         updateIcon();
+    }
+
+    public TabManager getManager() {
+        return manager;
     }
 }

@@ -26,6 +26,8 @@ public class Tab {
 	private String name;
 	private TabItem tabItem;
 
+	private boolean temporary = false;
+
 	@Override
 	public String toString() {
 		return "Tab [title=" + getName() + ", token=" + token + ", visible=" + visible + "]";
@@ -56,6 +58,7 @@ public class Tab {
 
 	public void onEdit() {
 		if(module != null) this.setSaved(savedValue == null || savedValue.equals(module.getValue()));
+		setTemporary(false);
 	}
 
 	public void updateName() {
@@ -83,6 +86,7 @@ public class Tab {
 			savedValue = val;
 			setSaved(true);
 		}
+		setTemporary(false);
 	}
 
 
@@ -147,5 +151,16 @@ public class Tab {
 		tabItem.transform(newToken);
 
 		return true;
+	}
+
+	public boolean isTemporary() {
+		return temporary;
+	}
+
+	public void setTemporary(boolean temporary) {
+		if(temporary != this.temporary) {
+			this.temporary = temporary;
+			if(tabItem != null) tabItem.getManager().getTabList().repaint();
+		}
 	}
 }

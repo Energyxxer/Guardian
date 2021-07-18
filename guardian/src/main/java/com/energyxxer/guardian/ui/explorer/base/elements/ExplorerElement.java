@@ -76,6 +76,7 @@ public abstract class ExplorerElement implements MouseListener, MouseMotionListe
     }
 
     public void interact() {}
+    public void interact(MouseEvent e) {interact();}
 
     @Override
     public void themeChanged(Theme t) {

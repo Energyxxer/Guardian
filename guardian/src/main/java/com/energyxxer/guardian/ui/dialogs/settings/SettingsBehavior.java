@@ -1,11 +1,12 @@
 package com.energyxxer.guardian.ui.dialogs.settings;
 
-import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
-import com.energyxxer.guardian.ui.modules.FileModuleToken;
-import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.global.TabManager;
 import com.energyxxer.guardian.ui.commodoreresources.DefinitionUpdateProcess;
 import com.energyxxer.guardian.ui.common.ProgramUpdateProcess;
+import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
+import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
+import com.energyxxer.guardian.ui.modules.FileModuleToken;
+import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.StyledCheckBox;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.styledcomponents.StyledTextField;
@@ -164,6 +165,30 @@ class SettingsBehavior extends JPanel {
                     Settings.addApplyEvent(() -> FileModuleToken.DELETE_MOVES_TO_TRASH.set(showExtensions.isSelected()));
 
                     content.add(showExtensions);
+                }
+            }
+            {
+                {
+                    content.add(new Padding(15));
+                }
+                {
+                    StyledCheckBox singleClickInteract = new StyledCheckBox("Single-click explorer interact","Settings.content");
+                    singleClickInteract.setAlignmentX(Component.LEFT_ALIGNMENT);
+                    Settings.addOpenEvent(() -> singleClickInteract.setSelected(StandardExplorerItem.ONE_CLICK_OPEN.get()));
+                    Settings.addApplyEvent(() -> StandardExplorerItem.ONE_CLICK_OPEN.set(singleClickInteract.isSelected()));
+
+                    content.add(singleClickInteract);
+                }
+
+                {
+                    StyledLabel label = new StyledLabel("If checked, files will open and folders will expand with a single click.","Settings.content", tlm);
+                    label.setStyle(Font.ITALIC);
+                    content.add(label);
+                }
+                {
+                    StyledLabel label = new StyledLabel("Also applies to most other explorer elements such as notice elements and code suggestions.","Settings.content", tlm);
+                    label.setStyle(Font.ITALIC);
+                    content.add(label);
                 }
             }
 

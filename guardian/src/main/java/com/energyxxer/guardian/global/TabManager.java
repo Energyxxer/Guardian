@@ -65,10 +65,19 @@ public class TabManager {
 	}
 
 	public void openTab(ModuleToken token) {
+		openTab(token, false);
+	}
+
+	public void openTab(ModuleToken token, boolean temporary) {
 		for (int i = 0; i < openTabs.size(); i++) {
 			if (openTabs.get(i).token.equals(token)) {
 				setSelectedTab(openTabs.get(i));
+				if(!temporary) openTabs.get(i).setTemporary(false);
 				return;
+			}
+			if(temporary && openTabs.get(i).isTemporary()) {
+				closeTab(openTabs.get(i), true);
+				i--;
 			}
 		}
 		//Have to open a new one
@@ -78,6 +87,7 @@ public class TabManager {
 			openTabs.stream().filter(Tab::isSaved).sorted(Comparator.comparing(t -> t.openedTimeStamp)).limit(toClose).forEach(this::closeTab);
 		}
 		Tab nt = new Tab(token);
+		nt.setTemporary(temporary);
 		openTabs.add(nt);
 		tabList.addTab(new TabItem(this, nt));
 		setSelectedTab(nt);
@@ -194,12 +204,13 @@ public class TabManager {
 		if(!SAVE_OPEN_TABS.get()) return;
 		StringBuilder sb = new StringBuilder();
 		for(Tab tab : openTabs) {
+			if(tab.isTemporary()) continue;
 			if(selectedTab != tab) {
 				sb.append(tab.token.getIdentifier());
 				sb.append(File.pathSeparator);
 			}
 		}
-		if(selectedTab != null) {
+		if(selectedTab != null && !selectedTab.isTemporary()) {
 			sb.append(selectedTab.token.getIdentifier());
 			sb.append(File.pathSeparator);
 		}
