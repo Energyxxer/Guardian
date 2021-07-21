@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.ui.explorer;
 
 import com.energyxxer.enxlex.report.Notice;
+import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerMaster;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
@@ -35,6 +36,13 @@ public class NoticeGroupElement extends ExplorerElement {
         }
 
         this.x = master.getInitialIndent() + (indentation * master.getIndentPerLevel());
+
+        for(Notice notice : notices) {
+            if(notice.getType() == NoticeType.ERROR) {
+                expand();
+                break;
+            }
+        }
     }
 
     @Override
