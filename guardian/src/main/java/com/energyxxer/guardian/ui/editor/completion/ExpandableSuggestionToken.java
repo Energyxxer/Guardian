@@ -32,7 +32,7 @@ public class ExpandableSuggestionToken implements SuggestionToken, ModuleToken {
 
     protected float alpha = 1f;
 
-    protected boolean caseSensitive = true;
+    protected boolean caseSensitive = false;
 
     protected ExpandableSuggestionToken() {
 
