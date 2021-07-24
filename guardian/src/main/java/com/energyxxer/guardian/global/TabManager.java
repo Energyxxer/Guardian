@@ -90,7 +90,7 @@ public class TabManager {
 		nt.setTemporary(temporary);
 		openTabs.add(nt);
 		tabList.addTab(new TabItem(this, nt));
-		setSelectedTab(nt);
+		setSelectedTab(nt, !temporary);
 	}
 
 	private void selectLocation(Tab tab, int index, int length) {
@@ -168,6 +168,10 @@ public class TabManager {
 	}
 
 	public void setSelectedTab(Tab tab) {
+		setSelectedTab(tab, true);
+	}
+
+	public void setSelectedTab(Tab tab, boolean focus) {
 		tabList.selectTab(tab);
 		if (selectedTab != null) {
 			selectedTab = null;
@@ -181,7 +185,7 @@ public class TabManager {
 			}
 			if(changeWindowInfo) GuardianWindow.setTitle(((linkedProject != null) ? linkedProject + " - " : "") + tab.getName());
 			moduleComponent.setContent(tab.getModuleComponent());
-			tab.onSelect();
+			tab.onSelect(focus);
 		} else {
 			if(changeWindowInfo) {
 				GuardianWindow.statusBar.setCaretInfo(Commons.DEFAULT_CARET_DISPLAY_TEXT);

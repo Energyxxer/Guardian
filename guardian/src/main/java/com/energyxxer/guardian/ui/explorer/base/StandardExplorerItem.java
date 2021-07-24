@@ -232,6 +232,9 @@ public class StandardExplorerItem extends ExplorerElement {
             else expand(null);
         } else if(token.isModuleSource()) {
             GuardianWindow.tabManager.openTab(token, ONE_CLICK_OPEN.get() && (e == null || !(e.getClickCount() % 2 == 0)));
+            SwingUtilities.invokeLater(() -> {
+                SwingUtilities.invokeLater(master::requestFocus);
+            });
         }
     }
 

@@ -47,10 +47,10 @@ public class Tab {
 		this.name = token.getTitle();
 	}
 
-	public void onSelect() {
+	public void onSelect(boolean focus) {
 		openedTimeStamp = new Date().getTime();
 		if(module != null) {
-			module.focus();
+			if(focus) module.focus();
 			module.onSelect();
 			module.displayCaretInfo();
 		}
