@@ -246,7 +246,7 @@ public class ConsoleBoard extends ToolBoard {
             @Override
             public void handle(String[] args, String rawArgs) {
                 String command = String.join(" ", args).substring("exec".length()).trim();
-                ProcessBuilder pb = new ProcessBuilder(splitCommandIntoArgs(command)).redirectErrorStream(true);
+                ProcessBuilder pb = new ProcessBuilder(splitCommandIntoArgs(command)).redirectErrorStream(true).directory(Preferences.getWorkspace());
 
                 GuardianWindow.consoleBoard.lock();
 
