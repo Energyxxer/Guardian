@@ -71,7 +71,7 @@ public class TabManager {
 	public void openTab(ModuleToken token, boolean temporary) {
 		for (int i = 0; i < openTabs.size(); i++) {
 			if (openTabs.get(i).token.equals(token)) {
-				setSelectedTab(openTabs.get(i));
+				setSelectedTab(openTabs.get(i), !temporary);
 				if(!temporary) openTabs.get(i).setTemporary(false);
 				return;
 			}
