@@ -24,10 +24,8 @@
 
 package de.ralleytn.simple.audio;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.*;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -226,6 +224,55 @@ public class BufferedAudio extends AbstractAudio {
 			
 		} catch(Exception exception) {
 			
+			throw new AudioException(exception);
+		}
+	}
+
+	public AudioInputStream getAudioInputStreamForResource() throws AudioException {
+		return Audio.getAudioInputStream(this.resource);
+	}
+
+	public static byte[] getSampleData(AudioInputStream ais) throws AudioException {
+		try {
+			int position;
+
+			if (ais.getFrameLength() != -1L) {
+				byte[] buffer = new byte[(int)ais.getFrameLength() * ais.getFormat().getFrameSize()];
+				int var3 = 512 * ais.getFormat().getFrameSize();
+
+				int bytesReadThisIteration;
+				for(position = 0; position != buffer.length; position += bytesReadThisIteration) {
+					if (var3 > buffer.length - position) {
+						var3 = buffer.length - position;
+					}
+
+					bytesReadThisIteration = ais.read(buffer, position, var3);
+					if (bytesReadThisIteration == -1) {
+						break;
+					}
+
+					if (bytesReadThisIteration == 0) {
+						Thread.yield();
+					}
+				}
+
+				return buffer;
+			} else {
+				ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+				byte[] buffer = new byte[512 * ais.getFormat().getFrameSize()];
+
+				while((position = ais.read(buffer)) != -1) {
+					bytes.write(buffer, 0, position);
+
+					if (position == 0) {
+						Thread.yield();
+					}
+				}
+
+				return bytes.toByteArray();
+			}
+		} catch(Exception exception) {
+
 			throw new AudioException(exception);
 		}
 	}

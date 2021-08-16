@@ -288,6 +288,40 @@ public class ConsoleBoard extends ToolBoard {
                 }
             }
         });
+        registerCommandHandler("gc", new CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Invokes the Garbage Collector";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("GC: Invokes the Garbage Collector");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                System.gc();
+            }
+        });
+        registerCommandHandler("breakpoint", new CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Pauses program execution at a breakpoint";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("BREAKPOINT: Pauses program execution at a breakpoint");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                Debug.log();
+            }
+        });
     }
 
     private transient boolean locked = false;
