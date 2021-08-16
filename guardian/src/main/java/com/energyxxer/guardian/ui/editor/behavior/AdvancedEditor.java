@@ -369,6 +369,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     }
 
     public static boolean richTextCopy = true;
+    public static boolean htmlCopy = false;
 
     private void copyOrCut(boolean cut) {
         try {
@@ -397,7 +398,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 }
 
                 Clipboard clipboard = this.getToolkit().getSystemClipboard();
-                clipboard.setContents(new MultiStringSelection(plainText, htmlText), null);
+                clipboard.setContents(new MultiStringSelection(htmlCopy ? htmlText : plainText, htmlText), null);
             }
 
             if(cut) {
@@ -969,7 +970,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 }
 
                 sb.append(styleOpens);
-                sb.append(as[i].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br> "));
+                sb.append(as[i].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"));
             }
             if (pc != null) {
                 sb.append("</span>");
@@ -996,19 +997,37 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         ConsoleBoard.registerCommandHandler("richcopy", new ConsoleBoard.CommandHandler() {
             @Override
             public String getDescription() {
-                return "Toggles rich text copying from the editor (experimental)";
+                return "Toggles rich text copying from the editor";
             }
 
             @Override
             public void printHelp() {
                 Debug.log();
-                Debug.log("RICHCOPY: Toggles rich text copying from the editor (experimental)");
+                Debug.log("RICHCOPY: Toggles rich text copying from the editor");
             }
 
             @Override
             public void handle(String[] args, String rawArgs) {
                 richTextCopy = !richTextCopy;
                 Debug.log("Rich text copying is now: " + richTextCopy);
+            }
+        });
+        ConsoleBoard.registerCommandHandler("htmlcopy", new ConsoleBoard.CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Toggles html copying from the editor";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("HTMLCOPY: Toggles rich text copying from the editor");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                htmlCopy = !htmlCopy;
+                Debug.log("HTML copying is now: " + htmlCopy);
             }
         });
     }
