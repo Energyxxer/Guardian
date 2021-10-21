@@ -118,7 +118,9 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
                 focus();
             }
         });
-        scrollPane.getViewport().addChangeListener(l -> editorComponent.viewportChanged());
+        scrollPane.getViewport().addChangeListener(l -> {
+            if(editorComponent != null) editorComponent.viewportChanged();
+        });
 
         addThemeChangeListener();
 
@@ -394,6 +396,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     }
 
     public void updateSyntax(Theme t) {
+        if(editorComponent == null) return;
         collapsedParagraphStyle = editorComponent.addStyle("_COLLAPSED_STYLE", null);
         StyleConstants.setLineSpacing(collapsedParagraphStyle, -1f);
         StyleConstants.setFontSize(collapsedParagraphStyle, 0);

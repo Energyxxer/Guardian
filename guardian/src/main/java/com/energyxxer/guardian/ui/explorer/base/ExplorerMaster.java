@@ -44,6 +44,7 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
     protected HashMap<String, Color> colors = new HashMap<>();
     protected HashMap<String, Integer> styleNumbers = new HashMap<>();
     protected HashMap<String, Image> assets = new HashMap<>();
+    protected HashMap<String, Font> fonts = new HashMap<>();
 
     protected int rowHeight = 20;
     protected int indentPerLevel = 20;

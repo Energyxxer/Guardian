@@ -186,10 +186,12 @@ public class StandardExplorerItem extends ExplorerElement {
 
             String subTitle = token.getSubTitle();
             if(subTitle != null) {
+                g.setFont(master.fonts.get("subtitle"));
                 g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), (int)(g.getColor().getAlpha() * 0.75)));
                 x += 16;
                 g.drawString(subTitle, x, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
                 x += metrics.stringWidth(subTitle);
+                g.setFont(master.getFont());
             }
         }
 

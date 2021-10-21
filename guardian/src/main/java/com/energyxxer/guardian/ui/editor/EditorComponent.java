@@ -185,7 +185,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             }
 
             File file = parent.getFileForAnalyzer();
-            if(Thread.interrupted()) return null;
+            if(parent == null || Thread.interrupted()) return null;
             if(logHighlighterTimes) Debug.log("Pre analysis time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
             Lang.LangAnalysisResponse analysis = file != null ? lang.analyze(file, text, suggestionModule, summaryModule) : null;
@@ -193,7 +193,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             startTime = System.currentTimeMillis();
             if (analysis == null) return null;
 
-            if(Thread.interrupted()) return null;
+            if(parent == null || Thread.interrupted()) return null;
             return analysis;
         } catch(Exception x) {
             x.printStackTrace();
@@ -207,6 +207,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
     private static ArrayList<Token> lastHighlightedTokenList;
 
     private void performTokenStyling(Lang.LangAnalysisResponse analysis, Lang lang, HighlightingWorker worker) {
+        if(parent == null) return;
         long startTime = System.currentTimeMillis();
         try {
             Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
@@ -218,7 +219,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(logHighlighterTimes) Debug.log("Suggestion update time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
 
-            if(Thread.interrupted()) return;
+            if(parent == null || Thread.interrupted()) return;
 
             Token prevToken = null;
             previousTokenStyles.clear();
@@ -232,7 +233,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(logHighlighterTimes)  Debug.log("Inspection update time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
 
-            if(Thread.interrupted()) return;
+            if(parent == null || Thread.interrupted()) return;
 
             if(analysis.response != null && !analysis.response.matched) {
                 errorStatus.setMessage(analysis.response.getErrorMessage() + (analysis.response.faultyToken != null ? ". (line " + analysis.response.faultyToken.loc.line + " column " + analysis.response.faultyToken.loc.column + ")" : ""));
@@ -244,12 +245,12 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(logHighlighterTimes) Debug.log("Error update time: " + (System.currentTimeMillis() - startTime) + " ms");
             startTime = System.currentTimeMillis();
 
-            if(Thread.interrupted()) return;
+            if(parent == null || Thread.interrupted()) return;
 
             int tokensInLine = 0;
 
             for(Token token : analysis.lexer.getStream().tokens) {
-                if(Thread.interrupted()) return;
+                if(parent == null || Thread.interrupted()) return;
                 boolean shouldPaintStyles = true;
                 if(prevToken != null && prevToken.loc.line != token.loc.line) tokensInLine = 0;
                 tokensInLine++;
@@ -323,7 +324,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             try {
                 if(analysis.response != null && parent != null && parent.hierarchicalStyles.size() > 0) {
                     analysis.response.pattern.traverse(leaf -> {
-                        if(Thread.interrupted()) throw new InterruptedException();
+                        if(parent == null || Thread.interrupted()) throw new InterruptedException();
                         for(EditorModule.HierarchicalStyle style : parent.hierarchicalStyles) {
                             if(style.parts[style.parts.length-1].equalsIgnoreCase(leaf.getName())) {
                                 int i = style.parts.length-2;
@@ -368,7 +369,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             if(analysis.response == null || analysis.response.matched) GuardianWindow.dismissStatus(errorStatus);
 
-            if(Thread.interrupted()) return;
+            if(parent == null || Thread.interrupted()) return;
             worker.setParagraphAttributes(0, sd.getLength(), defaultStyle, false);
 
             if(logHighlighterTimes) Debug.log("Post Highlight time: " + (System.currentTimeMillis() - startTime) + " ms");

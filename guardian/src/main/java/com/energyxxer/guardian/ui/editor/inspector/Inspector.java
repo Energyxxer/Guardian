@@ -54,11 +54,12 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
     }
 
     public void clear() {
-        editor.repaint();
+        if(editor != null) editor.repaint();
     }
 
     @Override
     public void paint(Graphics g, int p0, int p1, Shape graphicBounds, JTextComponent c) {
+        if(editor == null) return;
         try {
             if(inspectionModule != null)
             for (Inspection item : inspectionModule.getInspections()) {
@@ -130,6 +131,7 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        if(editor == null) return;
         int index = editor.viewToModel(e.getPoint());
         if(inspectionModule != null)
         for(Inspection inspection : inspectionModule.getInspections()) {

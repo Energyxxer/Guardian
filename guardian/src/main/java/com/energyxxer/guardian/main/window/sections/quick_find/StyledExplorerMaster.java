@@ -49,6 +49,7 @@ public class StyledExplorerMaster extends ExplorerMaster implements Disposable {
                 styleNumbers.put("checkbox.pressed.border.thickness", Math.max(t.getInteger(1,"Explorer.checkbox.pressed.border.thickness", "Explorer.checkbox.hover.border.thickness", "Explorer.checkbox.border.thickness"),1));
 
                 this.setFont(t.getFont("Explorer.item", "General"));
+                fonts.put("subtitle", t.getFont(getFont(), "Explorer.item.subtitle", "Explorer.item", "General"));
 
                 colors.put("hierarchyGuide.color", t.getColor(Color.GRAY, "Explorer.hierarchyGuide.color"));
 
@@ -114,6 +115,7 @@ public class StyledExplorerMaster extends ExplorerMaster implements Disposable {
                 styleNumbers.put("checkbox.pressed.border.thickness", Math.max(t.getInteger(1,namespace + ".checkbox.pressed.border.thickness", namespace + ".checkbox.hover.border.thickness", namespace + ".checkbox.border.thickness", "Explorer.checkbox.pressed.border.thickness", "Explorer.checkbox.hover.border.thickness", "Explorer.checkbox.border.thickness"),1));
 
                 this.setFont(t.getFont(namespace + ".item", "Explorer.item", "General"));
+                fonts.put("subtitle", t.getFont(getFont(), namespace + ".item.subtitle", namespace + ".item", "Explorer.item.subtitle", "Explorer.item", "General"));
 
                 colors.put("hierarchyGuide.color", t.getColor(Color.GRAY, namespace + ".hierarchyGuide.color", "Explorer.hierarchyGuide.color"));
 

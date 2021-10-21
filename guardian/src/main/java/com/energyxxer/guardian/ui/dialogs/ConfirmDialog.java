@@ -40,8 +40,24 @@ public class ConfirmDialog {
             JPanel content = new JPanel(new BorderLayout());
             content.setOpaque(false);
 
-            StyledLabel label = new StyledLabel(query, "ConfirmDialog", tlm); //tlm
-            content.add(label, BorderLayout.CENTER);
+            JTextPane textPane = new JTextPane();
+            textPane.setEditable(false);
+            textPane.setOpaque(false);
+
+            StyledLabel label = new StyledLabel("", "ConfirmDialog", tlm); //tlm
+
+            textPane.setFont(label.getFont());
+            textPane.setBackground(label.getBackground());
+            textPane.setForeground(label.getForeground());
+
+            textPane.setText(query);
+
+            JPanel labelWrapper = new JPanel(new BorderLayout());
+            labelWrapper.setOpaque(false);
+            labelWrapper.add(new Padding(25), BorderLayout.NORTH);
+            labelWrapper.add(textPane, BorderLayout.CENTER);
+            labelWrapper.add(new Padding(25), BorderLayout.SOUTH);
+            content.add(labelWrapper, BorderLayout.CENTER);
 
             {
                 JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
