@@ -44,23 +44,13 @@ public class OptionDialog {
             JPanel content = new JPanel(new BorderLayout());
             content.setOpaque(false);
 
-            JTextPane textPane = new JTextPane();
-            textPane.setEditable(false);
-            textPane.setOpaque(false);
-
-            StyledLabel label = new StyledLabel("", "ConfirmDialog", tlm); //tlm
+            StyledLabel label = new StyledLabel(query, "OptionDialog", tlm);
             label.setStyle(Font.BOLD);
-
-            textPane.setFont(label.getFont());
-            textPane.setBackground(label.getBackground());
-            textPane.setForeground(label.getForeground());
-
-            textPane.setText(query);
 
             JPanel labelWrapper = new JPanel(new BorderLayout());
             labelWrapper.setOpaque(false);
             labelWrapper.add(new Padding(25), BorderLayout.NORTH);
-            labelWrapper.add(textPane, BorderLayout.CENTER);
+            labelWrapper.add(label, BorderLayout.CENTER);
             labelWrapper.add(new Padding(25), BorderLayout.SOUTH);
             content.add(labelWrapper, BorderLayout.CENTER);
 
