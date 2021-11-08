@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 
 public class GuardianCore {
     protected Class resourceRegistry = GuardianCore.class;
@@ -126,5 +127,8 @@ public class GuardianCore {
 
     public String getTemplateVariable(String s, File destination, File templateRoot) {
         return null;
+    }
+
+    public void setupSettingsSections(HashMap<String, JPanel> sectionPanes) {
     }
 }

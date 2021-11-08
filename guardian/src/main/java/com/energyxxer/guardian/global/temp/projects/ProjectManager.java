@@ -3,6 +3,7 @@ package com.energyxxer.guardian.global.temp.projects;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.util.Disposable;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -22,6 +23,11 @@ public class ProjectManager {
 	public static void loadWorkspace() {
 		if(workspaceDir == null) throw new IllegalStateException("Workspace directory not specified.");
 
+		for(Project project : loadedProjects) {
+			if(project instanceof Disposable) {
+				((Disposable) project).dispose();
+			}
+		}
 		loadedProjects.clear();
 		
 		File workspace = new File(workspaceDir);
@@ -120,6 +126,9 @@ public class ProjectManager {
 	}
 
 	public static void unloadProject(Project project) {
+		if(project instanceof Disposable) {
+			((Disposable) project).dispose();
+		}
 		loadedProjects.remove(project);
 		GuardianWindow.projectExplorer.refresh();
 	}

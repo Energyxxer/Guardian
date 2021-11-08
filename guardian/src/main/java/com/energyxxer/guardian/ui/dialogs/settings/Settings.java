@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.dialogs.settings;
 
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.styledcomponents.StyledButton;
 import com.energyxxer.guardian.ui.styledcomponents.StyledList;
@@ -15,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 public class Settings {
 
@@ -38,7 +41,16 @@ public class Settings {
 		);
 
 		JPanel contentPane = new JPanel(new BorderLayout());
-		HashMap<String, JPanel> sectionPanes = new HashMap<>();
+		HashMap<String, JPanel> sectionPanes = new LinkedHashMap<>();
+
+		SettingsBehavior contentBehavior = new SettingsBehavior();
+		sectionPanes.put("Behavior", contentBehavior);
+		sectionPanes.put("Appearance", new SettingsAppearance());
+		sectionPanes.put("Editor", new SettingsEditor());
+		sectionPanes.put("Snippets", new SettingsSnippets());
+		sectionPanes.put("Keymap", new SettingsKeymap());
+		Guardian.core.setupSettingsSections(sectionPanes);
+		Set<String> keySet = sectionPanes.keySet();
 
 		{
 			JPanel sidebar = new OverlayBorderPanel(new BorderLayout(), new Insets(0, 0, 0, ComponentResizer.DIST));
@@ -48,7 +60,7 @@ public class Settings {
 			sidebar.setMaximumSize(new ScalableDimension(400, 1));
 			sidebarResizer.setResizable(false, false, false, true);
 
-			String[] sections = new String[] { "Behavior", "Appearance", "Editor", "Snippets", "Keymap" };
+			String[] sections = keySet.toArray(new String[0]);
 
 			StyledList<String> navigator = new StyledList<>(sections, "Settings");
 			sidebar.setBackground(navigator.getBackground());
@@ -74,13 +86,6 @@ public class Settings {
 				contentPane.setBackground(t.getColor(new Color(235, 235, 235), "Settings.content.background"))
 		);
 		pane.add(contentPane, BorderLayout.CENTER);
-
-		SettingsBehavior contentBehavior = new SettingsBehavior();
-		sectionPanes.put("Behavior", contentBehavior);
-		sectionPanes.put("Appearance", new SettingsAppearance());
-		sectionPanes.put("Editor", new SettingsEditor());
-		sectionPanes.put("Snippets", new SettingsSnippets());
-		sectionPanes.put("Keymap", new SettingsKeymap());
 
 		contentPane.add(contentBehavior, BorderLayout.CENTER);
 		currentSection = contentBehavior;
@@ -159,12 +164,12 @@ public class Settings {
 		dialog.setVisible(true);
 	}
 
-	static void addOpenEvent(Runnable r) {
+	public static void addOpenEvent(Runnable r) {
 		openEvents.add(r);
 		r.run();
 	}
 
-	static void addApplyEvent(Runnable r) {
+	public static void addApplyEvent(Runnable r) {
 		applyEvents.add(r);
 	}
 
