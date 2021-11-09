@@ -78,9 +78,9 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
 
         editorComponent = new EditorComponent(this);
 
-//        JPanel container = new JPanel(new BorderLayout());
-//        container.add(editorComponent);
-        scrollPane.setViewportView(editorComponent);
+        JPanel container = new JPanel(new BorderLayout());
+        container.add(editorComponent);
+        scrollPane.setViewportView(container);
 
         this.add(scrollPane, BorderLayout.CENTER);
 
