@@ -16,6 +16,7 @@ import com.energyxxer.guardian.util.linepainter.LinePainter;
 import com.energyxxer.util.Disposable;
 import com.energyxxer.util.StringLocation;
 import com.energyxxer.util.StringLocationCache;
+import com.energyxxer.util.StringUtil;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.UnifiedDocumentListener;
@@ -99,6 +100,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     }
 
     public AdvancedEditor(String namespace) {
+        this.setDocument(new CustomDocument(this));
         this.setUI(new AdvancedEditorTextUI());
 
         this.getStyledDocument().addStyle(STRING_STYLE, null);
@@ -181,6 +183,10 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
             this.getStyledDocument().setParagraphAttributes(0, this.getStyledDocument().getLength(), defaultParagraphStyle, false);
         });
+    }
+
+    public CustomDocument getCustomDocument() {
+        return (CustomDocument) super.getDocument();
     }
 
     public void setSelectedLineEnabled(boolean enabled) {
@@ -437,13 +443,28 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 Object rawContents = clipboard.getData(DataFlavor.stringFlavor);
 
                 if(rawContents == null) return;
-                String contents = ((String) rawContents).replace("\r","");
+                String contents = ((String) rawContents).replace("\t", StringUtil.repeat(" ", tabSize)).replace("\r","");
                 contents = validateBeforePaste(contents);
                 if(contents == null) return;
                 transactionManager.insertTransaction(new PasteEdit(contents, this));
             }
         } catch(Exception x) {
             x.printStackTrace();
+        }
+    }
+
+    @Override
+    public void replaceSelection(String content) {
+        if(content == null) content = "";
+        transactionManager.insertTransaction(new InsertionEdit(content, this));
+    }
+
+    protected void processInputMethodEvent(InputMethodEvent e) {
+        getCustomDocument().redirectToTransaction(true);
+        try {
+            super.processInputMethodEvent(e);
+        } finally {
+            getCustomDocument().redirectToTransaction(false);
         }
     }
 
@@ -858,11 +879,6 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     }
 
     @Deprecated
-    public void replaceSelection(String content) {
-        super.replaceSelection(content);
-    }
-
-    @Deprecated
     public void moveCaretPosition(int pos) {
         super.moveCaretPosition(pos);
     }
@@ -934,11 +950,13 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 String styleName = (String) attributes.getAttribute(StyleConstants.CharacterConstants.NameAttribute);
                 Style namedStyle = sd.getStyle(styleName);
                 byte style = 0;
-                if(Boolean.TRUE.equals(namedStyle.getAttribute(StyleConstants.CharacterConstants.Bold))) {
-                    style |= 0b01;
-                }
-                if(Boolean.TRUE.equals(namedStyle.getAttribute(StyleConstants.CharacterConstants.Italic))) {
-                    style |= 0b10;
+                if(namedStyle != null) {
+                    if(Boolean.TRUE.equals(namedStyle.getAttribute(StyleConstants.CharacterConstants.Bold))) {
+                        style |= 0b01;
+                    }
+                    if(Boolean.TRUE.equals(namedStyle.getAttribute(StyleConstants.CharacterConstants.Italic))) {
+                        style |= 0b10;
+                    }
                 }
 
                 styles[i] = style;

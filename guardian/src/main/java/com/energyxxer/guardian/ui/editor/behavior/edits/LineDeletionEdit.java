@@ -2,12 +2,12 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 public class LineDeletionEdit extends Transaction<AdvancedEditor> {
@@ -22,7 +22,7 @@ public class LineDeletionEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean redo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
@@ -66,7 +66,7 @@ public class LineDeletionEdit extends Transaction<AdvancedEditor> {
                         nextProfile.set(j+1,dot);
                     }
                 }
-                doc.remove(lineStart + characterDrift, (lineEnd+characterDrift)-(lineStart+characterDrift));
+                doc.removeTrusted(lineStart + characterDrift, (lineEnd+characterDrift)-(lineStart+characterDrift));
                 characterDrift -= lineEnd-lineStart;
             }
 
@@ -79,13 +79,13 @@ public class LineDeletionEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
             for(int i = 0; i < modificationLines.size(); i+=2) {
                 int lineStart = modificationLines.get(i);
-                doc.insertString(lineStart, previousValues.get(i>>1), null);
+                doc.insertStringTrusted(lineStart, previousValues.get(i>>1), null);
             }
         } catch(BadLocationException x) {
             x.printStackTrace();

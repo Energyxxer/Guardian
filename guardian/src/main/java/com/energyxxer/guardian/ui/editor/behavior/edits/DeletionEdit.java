@@ -2,12 +2,12 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 /**
@@ -44,7 +44,7 @@ public class DeletionEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean redo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         boolean actionPerformed = false;
@@ -128,7 +128,7 @@ public class DeletionEdit extends Transaction<AdvancedEditor> {
                 result = result.substring(0, start) + result.substring(end);
 
                 nextProfile.add(start,start);
-                doc.remove(start, end - start);
+                doc.removeTrusted(start, end - start);
 
                 characterDrift += start - end;
 
@@ -148,7 +148,7 @@ public class DeletionEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         boolean actionPerformed = false;
@@ -166,7 +166,7 @@ public class DeletionEdit extends Transaction<AdvancedEditor> {
 
                 if(previousValue.length() != 0) actionPerformed = true;
 
-                doc.insertString(start, previousValue, null);
+                doc.insertStringTrusted(start, previousValue, null);
 
                 final int fstart = start;
                 final int fplen = previousValue.length();

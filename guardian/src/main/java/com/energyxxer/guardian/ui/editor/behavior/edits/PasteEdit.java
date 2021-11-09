@@ -2,12 +2,11 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 public class PasteEdit extends Transaction<AdvancedEditor> {
@@ -47,7 +46,7 @@ public class PasteEdit extends Transaction<AdvancedEditor> {
     @Override
     public boolean redo(AdvancedEditor target) {
 
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
         try {
             int characterDrift = 0;
@@ -69,7 +68,7 @@ public class PasteEdit extends Transaction<AdvancedEditor> {
 
                 nextProfile.add(start+value.length(),start+value.length());
 
-                ((AbstractDocument) doc).replace(start, end - start, value, null);
+                doc.replaceTrusted(start, end - start, value, null);
 
                 characterDrift += value.length() - (end - start);
 
@@ -98,7 +97,7 @@ public class PasteEdit extends Transaction<AdvancedEditor> {
     @Override
     public boolean undo(AdvancedEditor target) {
 
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
         try {
 
@@ -112,7 +111,7 @@ public class PasteEdit extends Transaction<AdvancedEditor> {
                     //No further use of end
                 }
 
-                ((AbstractDocument) doc).replace(start, value.length(), previousValues.get(i/2), null);
+                doc.replaceTrusted(start, value.length(), previousValues.get(i/2), null);
 
                 final int fstart = start;
                 final int fplen = previousValues.get(i/2).length();

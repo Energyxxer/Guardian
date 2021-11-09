@@ -207,6 +207,10 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         if(!editor.isFocusOwner()) return;
         caretPaintListeners.forEach(Runnable::run);
         try {
+            if(getComponent() == null) {
+                //Thank you IME, very cool
+                return;
+            }
             g.setColor(getComponent().getCaretColor());
             int paintWidth = 2;
 
@@ -347,6 +351,19 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
             return 0;
         }
         return dots.get(Math.min(upperBound, dots.size()-1)).index;
+    }
+
+    @Override
+    public int getMark() {
+        if(dragSelectMode == RECTANGLE) return dots.get(Math.min(rectangleDotCursorIndex, dots.size()-1)).mark;
+        int upperBound = dots.size()-1;
+        if(dragSelectMode == CHAR) upperBound = rectangleDotsStartIndex -1;
+        if(dots.isEmpty()) {
+            if(bufferedDot != null) return bufferedDot.mark;
+//            GuardianWindow.showPopupMessage("Dots were empty, returned 0");
+            return 0;
+        }
+        return dots.get(Math.min(upperBound, dots.size()-1)).mark;
     }
 
     public List<Dot> getDots() {

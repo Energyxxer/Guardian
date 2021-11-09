@@ -4,16 +4,14 @@ import com.energyxxer.enxlex.suggestions.PairSuggestion;
 import com.energyxxer.enxlex.suggestions.Suggestion;
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.util.StringUtil;
 
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.StyledDocument;
 import java.util.ArrayList;
 
 /**
@@ -34,7 +32,7 @@ public class InsertionEdit extends Transaction<AdvancedEditor> {
     @Override
     public boolean redo(AdvancedEditor target) {
 
-        StyledDocument doc = target.getStyledDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
         try {
             String result = doc.getText(0, doc.getLength()); //Result
@@ -118,7 +116,7 @@ public class InsertionEdit extends Transaction<AdvancedEditor> {
 
                 nextProfile.add(start + valueToWrite.length()+caretOffset, start + valueToWrite.length()+caretOffset);
 
-                ((AbstractDocument) doc).replace(start, end - start, valueToWrite, null);
+                doc.replaceTrusted(start, end - start, valueToWrite, null);
 
                 characterDrift += valueToWrite.length() - (end - start);
 
@@ -139,7 +137,7 @@ public class InsertionEdit extends Transaction<AdvancedEditor> {
     @Override
     public boolean undo(AdvancedEditor target) {
 
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
         try {
             int characterDrift = 0;
@@ -149,7 +147,7 @@ public class InsertionEdit extends Transaction<AdvancedEditor> {
 
                 String previousValue = previousValues.get(i);
 
-                ((AbstractDocument) doc).replace(start, resultEnd - start, previousValue, null);
+                doc.replaceTrusted(start, resultEnd - start, previousValue, null);
 
                 final int fstart = start;
                 final int flen = resultEnd - start;

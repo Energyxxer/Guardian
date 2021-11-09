@@ -2,12 +2,12 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.util.StringUtil;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 /**
@@ -24,7 +24,7 @@ public class TabInsertionEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean redo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         boolean actionPerformed = false;
@@ -51,7 +51,7 @@ public class TabInsertionEdit extends Transaction<AdvancedEditor> {
                 spacesToAdd = (spacesToAdd > 0) ? spacesToAdd : 4;
 
                 String str = StringUtil.repeat(" ", spacesToAdd);
-                doc.insertString(selectionStart, str, null);
+                doc.insertStringTrusted(selectionStart, str, null);
                 spacesAdded.add(spacesToAdd);
                 nextProfile.pushFrom(selectionStart, spacesToAdd);
                 actionPerformed = true;
@@ -71,7 +71,7 @@ public class TabInsertionEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
@@ -79,7 +79,7 @@ public class TabInsertionEdit extends Transaction<AdvancedEditor> {
                 int selectionStart = previousProfile.get(i);
                 int spacesToRemove = spacesAdded.get(i/2);
 
-                doc.remove(selectionStart, spacesToRemove);
+                doc.removeTrusted(selectionStart, spacesToRemove);
 
                 target.registerCharacterDrift(o -> (o >= selectionStart) ? o - spacesToRemove : o);
             }

@@ -2,14 +2,13 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.util.logger.Debug;
 
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
 /**
  * Created by User on 1/26/2017.
@@ -27,7 +26,7 @@ public class LineMoveEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean redo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         boolean actionPerformed = false;
@@ -68,18 +67,18 @@ public class LineMoveEdit extends Transaction<AdvancedEditor> {
                 String value = text.substring(start,end-1) + "\n";
 
                 if (end < text.length()) {
-                    doc.remove(start, (end - start));
+                    doc.removeTrusted(start, (end - start));
                 } else {
-                    doc.remove(start - 1, (end - start));
+                    doc.removeTrusted(start - 1, (end - start));
                 }
 
                 //Add value back
 
                 if(shiftTo > doc.getLength()) {
                     value = "\n" + value.substring(0, value.length()-1);
-                    doc.insertString(doc.getLength(),value,null);
+                    doc.insertStringTrusted(doc.getLength(),value,null);
                 } else {
-                    doc.insertString(shiftTo,value,null);
+                    doc.insertStringTrusted(shiftTo,value,null);
                 }
                 actionPerformed = true;
 
@@ -99,13 +98,13 @@ public class LineMoveEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         //Too complicated, just put back the text from before.
 
         try {
-            ((AbstractDocument) doc).replace(0, doc.getLength(), this.previousText, null);
+            doc.replaceTrusted(0, doc.getLength(), this.previousText, null);
         } catch (BadLocationException x) {
             x.printStackTrace();
         }

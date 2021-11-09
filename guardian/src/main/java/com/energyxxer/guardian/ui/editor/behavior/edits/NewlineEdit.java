@@ -2,13 +2,13 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.util.StringUtil;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 /**
@@ -34,7 +34,7 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean redo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         modificationIndices.clear();
@@ -93,8 +93,8 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
                 previousValues.add(text.substring(start - characterDrift, end - characterDrift));
                 nextValues.add(str);
 
-                doc.remove(start, end-start);
-                doc.insertString(start, str, null);
+                doc.removeTrusted(start, end-start);
+                doc.insertStringTrusted(start, str, null);
                 actionPerformed = true;
 
                 if(pushCaret) {
@@ -117,14 +117,14 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
             for(int i = modificationIndices.size()-1; i >= 0; i--) {
                 int start = modificationIndices.get(i);
-                doc.remove(start, nextValues.get(i).length());
-                doc.insertString(start, previousValues.get(i), null);
+                doc.removeTrusted(start, nextValues.get(i).length());
+                doc.insertStringTrusted(start, previousValues.get(i), null);
 
                 final int fnlen = nextValues.get(i).length();
                 final int fplen = previousValues.get(i).length();

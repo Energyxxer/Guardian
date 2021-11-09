@@ -2,12 +2,11 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 public class DragInsertionEdit extends Transaction<AdvancedEditor> {
@@ -23,7 +22,7 @@ public class DragInsertionEdit extends Transaction<AdvancedEditor> {
     @Override
     public boolean redo(AdvancedEditor target) {
 
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
         try {
             String result = doc.getText(0, doc.getLength()); //Result
@@ -46,7 +45,7 @@ public class DragInsertionEdit extends Transaction<AdvancedEditor> {
 
                 nextProfile.add(start,start+value.length());
 
-                ((AbstractDocument) doc).replace(start, end - start, value, null);
+                doc.replaceTrusted(start, end - start, value, null);
 
                 characterDrift += value.length() - (end - start);
 
@@ -67,7 +66,7 @@ public class DragInsertionEdit extends Transaction<AdvancedEditor> {
     @Override
     public boolean undo(AdvancedEditor target) {
 
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
         try {
             String str = doc.getText(0, doc.getLength());
@@ -85,7 +84,7 @@ public class DragInsertionEdit extends Transaction<AdvancedEditor> {
 
                 str = str.substring(0, start) + previousValue + str.substring(resultEnd);
 
-                ((AbstractDocument) doc).replace(start, resultEnd - start, previousValue, null);
+                doc.replaceTrusted(start, resultEnd - start, previousValue, null);
 
                 final int fstart = start;
                 final int flen = value.length();

@@ -6,12 +6,12 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.EditorComponent;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 public class CommentEdit extends Transaction<AdvancedEditor> {
@@ -45,7 +45,7 @@ public class CommentEdit extends Transaction<AdvancedEditor> {
     @Override
     public boolean redo(AdvancedEditor target) {
         if(commentMarker == null) return false;
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
@@ -83,11 +83,11 @@ public class CommentEdit extends Transaction<AdvancedEditor> {
             int characterDrift = 0;
             for(int lineStart : modifications) {
                 if(uncomment) {
-                    doc.remove(lineStart+characterDrift, commentMarker.length());
+                    doc.removeTrusted(lineStart+characterDrift, commentMarker.length());
                     nextProfile.pushFrom(lineStart+characterDrift+commentMarker.length(), -commentMarker.length());
                     characterDrift -= commentMarker.length();
                 } else {
-                    doc.insertString(lineStart+characterDrift, commentMarker, null);
+                    doc.insertStringTrusted(lineStart+characterDrift, commentMarker, null);
                     nextProfile.pushFrom(lineStart+characterDrift, commentMarker.length());
                     characterDrift += commentMarker.length();
                 }
@@ -102,15 +102,15 @@ public class CommentEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
             for(int lineStart : modifications) {
                 if(!uncomment) {
-                    doc.remove(lineStart, commentMarker.length());
+                    doc.removeTrusted(lineStart, commentMarker.length());
                 } else {
-                    doc.insertString(lineStart, commentMarker, null);
+                    doc.insertStringTrusted(lineStart, commentMarker, null);
                 }
             }
         } catch(BadLocationException x) {

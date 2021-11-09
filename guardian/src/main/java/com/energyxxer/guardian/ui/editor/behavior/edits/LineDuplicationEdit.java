@@ -2,11 +2,11 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 public class LineDuplicationEdit extends Transaction<AdvancedEditor> {
@@ -20,7 +20,7 @@ public class LineDuplicationEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean redo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
@@ -50,7 +50,7 @@ public class LineDuplicationEdit extends Transaction<AdvancedEditor> {
                 int lineEnd = copiedLines.get(i+1);
                 String toCopy = text.substring(lineStart, lineEnd);
 
-                doc.insertString(lineEnd+characterDrift, toCopy, null);
+                doc.insertStringTrusted(lineEnd+characterDrift, toCopy, null);
                 characterDrift += lineEnd-lineStart;
             }
 
@@ -63,12 +63,12 @@ public class LineDuplicationEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
             for(int i = 0; i < copiedLines.size(); i+=2) {
-                doc.remove(copiedLines.get(i+1), copiedLines.get(i+1)-copiedLines.get(i));
+                doc.removeTrusted(copiedLines.get(i+1), copiedLines.get(i+1)-copiedLines.get(i));
             }
         } catch(BadLocationException x) {
             x.printStackTrace();

@@ -2,13 +2,13 @@ package com.energyxxer.guardian.ui.editor.behavior.edits;
 
 import com.energyxxer.guardian.ui.common.transactions.Transaction;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
+import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
 import com.energyxxer.guardian.ui.editor.behavior.caret.EditorCaret;
 import com.energyxxer.util.StringUtil;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import java.util.ArrayList;
 
 /**
@@ -36,7 +36,7 @@ public class IndentEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean redo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         boolean actionPerformed = false;
@@ -96,10 +96,10 @@ public class IndentEdit extends Transaction<AdvancedEditor> {
                     int spaces = modifications.get(i+1);
 
                     if(spaces > 0) {
-                        doc.insertString(index, StringUtil.repeat(" ", spaces), null);
+                        doc.insertStringTrusted(index, StringUtil.repeat(" ", spaces), null);
                         nextProfile.pushFrom(index,spaces);
                     } else {
-                        doc.remove(index, -spaces);
+                        doc.removeTrusted(index, -spaces);
                         nextProfile.pushFrom(index,Math.min(0,spaces));
                     }
 
@@ -116,7 +116,7 @@ public class IndentEdit extends Transaction<AdvancedEditor> {
 
     @Override
     public boolean undo(AdvancedEditor target) {
-        Document doc = target.getDocument();
+        CustomDocument doc = target.getCustomDocument();
         EditorCaret caret = target.getCaret();
 
         try {
@@ -125,9 +125,9 @@ public class IndentEdit extends Transaction<AdvancedEditor> {
                 int spaces = modifications.get(i+1);
 
                 if(spaces > 0) {
-                    doc.remove(index, spaces);
+                    doc.removeTrusted(index, spaces);
                 } else {
-                    doc.insertString(index, StringUtil.repeat(" ", -spaces), null);
+                    doc.insertStringTrusted(index, StringUtil.repeat(" ", -spaces), null);
                 }
 
                 target.registerCharacterDrift(o -> (o >= index) ? o - spaces : o);
