@@ -92,6 +92,8 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
     private Style defaultParagraphStyle;
 
+    private int tabSize = 4;
+
     public AdvancedEditor() {
         this(null);
     }
@@ -118,6 +120,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             } catch (BadLocationException ex) {
                 ex.printStackTrace();
             }
+
 
             SwingUtilities.invokeLater(this::updateDefaultSize);
         });
@@ -166,6 +169,15 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             lineOffset = (int) Math.floor((lineSpacing-1) * lineHeight)-1;
 
             StyleConstants.setLineSpacing(defaultParagraphStyle, lineSpacing-1);
+
+            int charWidth = fm.charWidth('m');
+            int tabLength = charWidth * tabSize;
+            TabStop[] tabs = new TabStop[64];
+            for (int i = 0; i < tabs.length; i++) {
+                tabs[i] = new TabStop((i + 1) * tabLength);
+            }
+            TabSet tabSet = new TabSet(tabs);
+            StyleConstants.setTabSet(defaultParagraphStyle, tabSet);
 
             this.getStyledDocument().setParagraphAttributes(0, this.getStyledDocument().getLength(), defaultParagraphStyle, false);
         });
@@ -427,7 +439,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 Object rawContents = clipboard.getData(DataFlavor.stringFlavor);
 
                 if(rawContents == null) return;
-                String contents = ((String) rawContents).replace("\t", "    ").replace("\r","");
+                String contents = ((String) rawContents).replace("\r","");
                 contents = validateBeforePaste(contents);
                 if(contents == null) return;
                 transactionManager.insertTransaction(new PasteEdit(contents, this));
