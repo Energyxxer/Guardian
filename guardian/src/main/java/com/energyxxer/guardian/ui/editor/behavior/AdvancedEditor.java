@@ -48,7 +48,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
     public static final String STRING_STYLE = "__STRING_STYLE";
     public static final String STRING_ESCAPE_STYLE = "__STRING_ESCAPE_STYLE";
-    private static final float BIAS_POINT = 0.4f;
+    private static final float BIAS_POINT = 0.25f;
 
     private static final String WORD_DELIMITERS = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?";
 
@@ -313,14 +313,22 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
     @Override
     public int viewToModel(Point pt) {
+        //NEW FINDING: Apparently if the line the point is on has a tab character, the superResult will always return an index whose view is to the RIGHT of the input point.
+        // Everywhere else, it sometimes returns left, other times right.
+        // Going to assume it doesn't have a tab character.
         int superResult = super.viewToModel(pt);
         if(superResult <= 0) return 0;
         try {
             char ch = this.getDocument().getText(superResult,1).charAt(0);
             if(ch == '\n') return superResult;
+            Rectangle mtvtm = this.modelToView(superResult);
+            if(mtvtm.x <= pt.x) {
+                superResult++;
+            }
+
             Rectangle backward = this.modelToView(superResult-1);
             Rectangle forward = this.modelToView(superResult);
-            if(backward.x > forward.x) return superResult;
+            if(backward.x >= forward.x) return superResult;
 
             float offset = (float) (pt.x - backward.x) / (forward.x - backward.x);
             return (offset >= BIAS_POINT) ? superResult : superResult-1;
