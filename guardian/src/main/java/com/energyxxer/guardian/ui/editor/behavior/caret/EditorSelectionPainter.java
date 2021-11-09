@@ -7,7 +7,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.energyxxer.guardian.ui.editor.behavior.caret.DragSelectMode.CHAR;
@@ -24,43 +23,66 @@ public class EditorSelectionPainter implements Highlighter.HighlightPainter {
         this.caret = caret;
     }
 
-    public static List<Rectangle> getRectanglesForBounds(AdvancedEditor editor, StringBounds bounds) throws BadLocationException {
-        ArrayList<Rectangle> rects = new ArrayList<>();
-        boolean midDrawn = false;
+    private static Rectangle absWidth(Rectangle rect) {
+        if(rect.width < 0) {
+            rect.x += rect.width;
+            rect.width *= -1;
+        }
+        rect.width = Math.abs(rect.width);
 
-        for (int l = bounds.start.line; l <= bounds.end.line; l++) {
-            Rectangle rectangle = null;
-            if (l == bounds.start.line) {
-                rectangle = editor.modelToView(bounds.start.index);
-                if (bounds.start.line == bounds.end.line) {
-                    rectangle.width = editor.modelToView(bounds.end.index).x - rectangle.x;
-                } else {
-                    rectangle.width = editor.getWidth() - rectangle.x;
-                }
-            } else if (l == bounds.end.line) {
-                rectangle = editor.modelToView(bounds.end.index);
-                rectangle.width = rectangle.x - editor.modelToView(0).x;
-                rectangle.x = editor.modelToView(0).x; //0
-            } else if(!midDrawn) {
-                rectangle = editor.modelToView(bounds.start.index);
-                rectangle.x = editor.modelToView(0).x; //0
-                rectangle.y += rectangle.height;
-                rectangle.height = editor.modelToView(bounds.end.index).y - rectangle.y;
-                rectangle.width = editor.getWidth();
-                midDrawn = true;
-                l = bounds.end.line-1;
-            }
+        return rect;
+    }
 
-            if(rectangle != null) {
-                if(rectangle.width < 0) {
-                    rectangle.x += rectangle.width;
-                    rectangle.width *= -1;
-                }
-                rectangle.width = Math.abs(rectangle.width);
-                rects.add(rectangle);
+    private static Rectangle[] tempRectangles = new Rectangle[3];
+
+    public static Rectangle[] getRectanglesForBounds(AdvancedEditor editor, StringBounds bounds) throws BadLocationException {
+        tempRectangles[0] = tempRectangles[1] = tempRectangles[2] = null;
+
+        Rectangle firstRect = editor.modelToView(bounds.start.index);
+        Rectangle midRect = new Rectangle();
+        Rectangle lastRect = editor.modelToView(bounds.end.index);
+
+        if(firstRect.y == lastRect.y) {
+            // one rectangle, just connect the first and last
+            midRect.x = Math.min(firstRect.x, lastRect.x);
+            midRect.width = Math.abs(firstRect.x - lastRect.x);
+            midRect.y = firstRect.y;
+            midRect.height = firstRect.height;
+
+            absWidth(midRect);
+            tempRectangles[0] = midRect;
+        } else {
+            // two or three rectangles
+            // Finish the first line
+            firstRect.width = editor.getWidth() - firstRect.x;
+
+            absWidth(firstRect);
+            tempRectangles[0] = firstRect;
+
+            // Set middle rectangle's top to the bottom of the first pseudo-line
+            midRect.y = firstRect.y + firstRect.height;
+
+            // Finish the last line
+            lastRect.width = lastRect.x - editor.modelToView(0).x;
+            lastRect.x = editor.modelToView(0).x; //0;
+
+            absWidth(lastRect);
+            tempRectangles[1] = lastRect;
+
+            // Set middle rectangle's height to that between the top of the last pseudo-line and the bottom of the first
+            midRect.height = lastRect.y - midRect.y;
+
+            // Set middle rectangle's height to the width of the editor
+            midRect.x = lastRect.x;
+            midRect.width = editor.getWidth() - midRect.x;
+
+            // Add middle rectangle if not empty
+            if(midRect.height != 0) {
+                absWidth(midRect);
+                tempRectangles[2] = midRect;
             }
         }
-        return rects;
+        return tempRectangles;
     }
 
     @Override
@@ -76,40 +98,12 @@ public class EditorSelectionPainter implements Highlighter.HighlightPainter {
             if(shouldPaint) try {
                 StringBounds bounds = dot.getBounds();
 
-                boolean midDrawn = false;
-
-                for (int l = bounds.start.line; l <= bounds.end.line; l++) {
-                    Rectangle rectangle = null;
-                    if (l == bounds.start.line) {
-                        rectangle = editor.modelToView(bounds.start.index);
-                        if (bounds.start.line == bounds.end.line) {
-                            rectangle.width = editor.modelToView(bounds.end.index).x - rectangle.x;
-                        } else {
-                            rectangle.width = editor.getWidth() - rectangle.x;
-                        }
-                    } else if (l == bounds.end.line) {
-                        rectangle = editor.modelToView(bounds.end.index);
-                        rectangle.width = rectangle.x - editor.modelToView(0).x;
-                        rectangle.x = editor.modelToView(0).x; //0
-                    } else if(!midDrawn) {
-                        rectangle = editor.modelToView(bounds.start.index);
-                        rectangle.x = editor.modelToView(0).x; //0
-                        rectangle.y += rectangle.height;
-                        rectangle.height = editor.modelToView(bounds.end.index).y - rectangle.y;
-                        rectangle.width = editor.getWidth();
-                        midDrawn = true;
-                        l = bounds.end.line-1;
-                    }
-
+                for(Rectangle rectangle : getRectanglesForBounds(editor, bounds)) {
                     if(rectangle != null) {
-                        if(rectangle.width < 0) {
-                            rectangle.x += rectangle.width;
-                            rectangle.width *= -1;
-                        }
-                        rectangle.width = Math.abs(rectangle.width);
                         g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
                     }
                 }
+
                 dotIndex++;
             } catch (BadLocationException e) {
                 //Can't render

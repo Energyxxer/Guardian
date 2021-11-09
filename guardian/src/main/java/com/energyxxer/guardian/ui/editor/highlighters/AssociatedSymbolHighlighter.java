@@ -107,7 +107,9 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                     SwingUtilities.invokeLater(() -> {
                         for(StringBounds bounds : boundsToRectangles) {
                             try {
-                                rectangles.addAll(EditorSelectionPainter.getRectanglesForBounds(editor, bounds));
+                                for(Rectangle rect : EditorSelectionPainter.getRectanglesForBounds(editor, bounds)) {
+                                    if(rect != null) rectangles.add(rect);
+                                }
                             } catch (BadLocationException ignore) {}
                         }
                         editor.repaint();
@@ -181,7 +183,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                                     if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getDeclarationPattern() != null) { //If this usage refers to the identifier that's currently selected...
                                         this.selectedSymbol = selectedSymbol;
                                         selectedDeclaration = bounds.start.index == selectedSymbol.getDeclarationPattern().getStringLocation().index;
-                                        hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds()).get(0);
+                                        hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds())[0];
                                         editor.repaint();
                                         break;
                                     }
@@ -190,7 +192,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                                 String documentation = ((EditorComponent) editor).getParentModule().getLanguage().formatDocumentation(selectedSymbol, lastSuccessfulSummary);
 
                                 if(documentation != null) {
-                                    Rectangle highlightedRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, highlightedUsage.pattern.getStringBounds()).get(0);
+                                    Rectangle highlightedRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, highlightedUsage.pattern.getStringBounds())[0];
                                     HintStylizer.style(docHint);
                                     docHint.setText(documentation);
                                     docHint.show(
