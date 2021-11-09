@@ -165,6 +165,15 @@ public class SettingsEditor extends JPanel {
                 content.add(insertTrailingNewline);
             }
 
+            {
+                StyledCheckBox checkbox = new StyledCheckBox("Word Wrap","Settings.content");
+                checkbox.setAlignmentX(Component.LEFT_ALIGNMENT);
+                Settings.addOpenEvent(() -> checkbox.setSelected(EditorModule.WORD_WRAP.get()));
+                Settings.addApplyEvent(() -> EditorModule.WORD_WRAP.set(checkbox.isSelected()));
+
+                content.add(checkbox);
+            }
+
 
             {
                 content.add(new Padding(20));

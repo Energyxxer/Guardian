@@ -47,6 +47,7 @@ import java.util.Locale;
 public class EditorModule extends JPanel implements DisplayModule, UndoableEditListener, MouseListener, ThemeChangeListener, Disposable {
 
     public static Preferences.SettingPref<Boolean> INSERT_TRAILING_NEWLINE = new Preferences.SettingPref<>("settings.editor.insert_trailing_newline", false, Boolean::parseBoolean);
+    public static Preferences.SettingPref<Boolean> WORD_WRAP = new Preferences.SettingPref<>("settings.editor.word_wrap", false, Boolean::parseBoolean);
 
     JScrollPane scrollPane;
 
@@ -76,7 +77,16 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
         this.associatedTab = tab;
         this.scrollPane = new JScrollPane();
 
-        editorComponent = new EditorComponent(this);
+        editorComponent = new EditorComponent(this) {
+            @Override
+            public Dimension getPreferredSize() {
+                if(WORD_WRAP.get()) {
+                    int width = scrollPane.getViewport().getSize().width;
+                    int height = super.getPreferredSize().height;
+                    return new Dimension(width, height);
+                } else return super.getPreferredSize();
+            }
+        };
 
         JPanel container = new JPanel(new BorderLayout());
         container.add(editorComponent);
