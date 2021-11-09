@@ -123,6 +123,7 @@ public class TextLineNumber extends JPanel
 			int maxLength = component.getDocument().getLength();
 			int prevIndex = -1;
 			int y = -(viewport.y % lineHeight) - fontMetrics.getDescent();
+			int prevLine = -1;
 
 			for(int currentIndex = start; currentIndex <= maxLength; currentIndex = Utilities.getPositionBelow(component, currentIndex, 0)) {
 				if(currentIndex == prevIndex) break;
@@ -139,7 +140,8 @@ public class TextLineNumber extends JPanel
 					g.setColor(getForeground());
 				}
 
-				g.drawString(String.valueOf(line), x, y);
+				if(line != prevLine) g.drawString(String.valueOf(line), x, y);
+				prevLine = line;
 
 				prevIndex = currentIndex;
 				if(y >= viewport.height) break;
