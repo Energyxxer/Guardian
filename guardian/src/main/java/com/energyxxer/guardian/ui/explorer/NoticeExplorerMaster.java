@@ -1,10 +1,11 @@
 package com.energyxxer.guardian.ui.explorer;
 
 import com.energyxxer.enxlex.report.Notice;
-import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
+import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class NoticeExplorerMaster extends StyledExplorerMaster {
         map.keySet().forEach(k -> {
             if(k != null) this.addNoticeGroup(k, map.get(k));
         });
+        children.sort(Comparator.comparingInt(a -> (((NoticeGroupElement) a).hasIcon() ? 0 : 1)));
 
         this.repaint();
     }

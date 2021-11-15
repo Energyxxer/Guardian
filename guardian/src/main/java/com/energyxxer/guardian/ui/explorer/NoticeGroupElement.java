@@ -31,8 +31,11 @@ public class NoticeGroupElement extends ExplorerElement {
         this.label = label;
         this.notices = notices;
 
-        if(notices.size() > 0 && notices.get(0).getSource().getRelatedFile() != null) {
-            this.icon = new FileModuleToken(notices.get(0).getSource().getRelatedFile()).getIcon();
+        for(Notice notice : notices) {
+            if(notice.getType() != NoticeType.DEBUG && notice.getSource().getRelatedFile() != null) {
+                this.icon = new FileModuleToken(notice.getSource().getRelatedFile()).getIcon();
+                break;
+            }
         }
 
         this.x = master.getInitialIndent() + (indentation * master.getIndentPerLevel());
@@ -111,7 +114,7 @@ public class NoticeGroupElement extends ExplorerElement {
 
         Font originalFont = g.getFont();
 
-        g.setFont(g.getFont().deriveFont(Font.BOLD));
+        if(hasIcon()) g.setFont(g.getFont().deriveFont(Font.BOLD));
 
         FontMetrics metrics = g.getFontMetrics(g.getFont());
 
@@ -132,6 +135,10 @@ public class NoticeGroupElement extends ExplorerElement {
         for(ExplorerElement i : children) {
             i.render(g);
         }
+    }
+
+    public boolean hasIcon() {
+        return icon != null;
     }
 
     private void expand() {
