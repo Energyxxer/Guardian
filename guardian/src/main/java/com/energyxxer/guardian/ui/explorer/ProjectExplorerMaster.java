@@ -123,6 +123,8 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
 
         });
 
+        setSingleClickInteractAllowed(true);
+
         refresh();
     }
 

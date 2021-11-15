@@ -68,6 +68,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
         this.editor = editor;
 
         this.explorer = new StyledExplorerMaster("EditorSuggestions");
+        explorer.setSingleClickInteractAllowed(true);
 
         JPanel contentPane = new JPanel(new BorderLayout());
         scrollPane = new OverlayScrollPane(tlm, explorer);

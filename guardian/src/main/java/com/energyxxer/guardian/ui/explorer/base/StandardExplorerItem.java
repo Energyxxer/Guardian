@@ -233,7 +233,7 @@ public class StandardExplorerItem extends ExplorerElement {
             if(expanded) collapse();
             else expand(null);
         } else if(token.isModuleSource()) {
-            GuardianWindow.tabManager.openTab(token, ONE_CLICK_OPEN.get() && (e == null || !(e.getClickCount() % 2 == 0)));
+            GuardianWindow.tabManager.openTab(token, master.isSingleClickInteractAllowed() && ONE_CLICK_OPEN.get() && (e == null || !(e.getClickCount() % 2 == 0)));
             SwingUtilities.invokeLater(() -> {
                 SwingUtilities.invokeLater(master::requestFocus);
             });
@@ -263,7 +263,7 @@ public class StandardExplorerItem extends ExplorerElement {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(e.getButton() == MouseEvent.BUTTON1 && !isPlatformControlDown(e) && (ONE_CLICK_OPEN.get() || e.getClickCount() % 2 == 0) && (!token.isExpandable() || e.getX() < x || e.getX() > x + master.getRowHeight())) {
+        if(e.getButton() == MouseEvent.BUTTON1 && !isPlatformControlDown(e) && ((master.isSingleClickInteractAllowed() && ONE_CLICK_OPEN.get()) || e.getClickCount() % 2 == 0) && (!token.isExpandable() || e.getX() < x || e.getX() > x + master.getRowHeight())) {
             this.interact(e);
         }
         dispatchMouseEvent(e);

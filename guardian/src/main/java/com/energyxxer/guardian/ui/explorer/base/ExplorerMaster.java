@@ -52,10 +52,10 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
     protected String selectionStyle = "FULL";
     protected int selectionLineThickness = 2;
 
-
     private int indentation;
 
     private boolean multipleSelectionsEnabled = true;
+    private boolean singleClickInteractAllowed = false;
 
     public ExplorerMaster() {
         this.addMouseListener(this);
@@ -445,5 +445,13 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
 
     public void setMultipleSelectionsEnabled(boolean multipleSelectionsEnabled) {
         this.multipleSelectionsEnabled = multipleSelectionsEnabled;
+    }
+
+    public boolean isSingleClickInteractAllowed() {
+        return singleClickInteractAllowed;
+    }
+
+    public void setSingleClickInteractAllowed(boolean singleClickInteractAllowed) {
+        this.singleClickInteractAllowed = singleClickInteractAllowed;
     }
 }
