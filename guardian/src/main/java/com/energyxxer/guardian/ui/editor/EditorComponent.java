@@ -42,7 +42,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
     public static boolean logHighlighterTimes = false;
 
-    private static final int MAX_HIGHLIGHTED_TOKENS_PER_LINE = 150;
+    private static final int MAX_HIGHLIGHTED_TOKENS_PER_LINE = Integer.MAX_VALUE;
     private EditorModule parent;
 
     private StyledDocument sd;
