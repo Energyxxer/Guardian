@@ -10,7 +10,10 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
@@ -125,7 +128,7 @@ public class TextLineNumber extends JPanel
 			int y = -(viewport.y % lineHeight) - fontMetrics.getDescent();
 			int prevLine = -1;
 
-			for(int currentIndex = start; currentIndex <= maxLength; currentIndex = Utilities.getPositionBelow(component, currentIndex, 0)) {
+			for(int currentIndex = start; currentIndex <= maxLength; currentIndex = component.viewToModel(new Point(0, viewport.y + y + lineHeight))) {
 				if(currentIndex == prevIndex) break;
 
 				int line = getLineNumberFor(currentIndex);
