@@ -36,7 +36,7 @@ public class NoticeExplorerMaster extends StyledExplorerMaster {
         map.keySet().forEach(k -> {
             if(k != null) this.addNoticeGroup(k, map.get(k));
         });
-        children.sort(Comparator.comparingInt(a -> (((NoticeGroupElement) a).hasIcon() ? 0 : 1)));
+        children.sort(Comparator.comparingInt(a -> (!(a instanceof NoticeGroupElement) ? -1 : ((NoticeGroupElement) a).hasIcon() ? 0 : 1)));
 
         this.repaint();
     }
