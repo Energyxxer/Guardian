@@ -10,14 +10,11 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
-import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
-import java.util.HashMap;
 
 public class TextLineNumber extends JPanel
 		implements CaretListener, DocumentListener, AdjustmentListener, Disposable
@@ -36,8 +33,6 @@ public class TextLineNumber extends JPanel
 	private float digitAlignment;
 	private int minimumDigits;
 	private int padding;
-
-	private HashMap<String, FontMetrics> fonts;
 
 	private int lastDigits = 0;
 	private int lastHeight = 0;
@@ -170,59 +165,6 @@ public class TextLineNumber extends JPanel
 	private int getOffsetX(int availableWidth, int stringWidth)
 	{
 		return (int)((availableWidth - stringWidth) * digitAlignment);
-	}
-
-	/*
-	 *  Determine the Y offset for the current row
-	 */
-	private int getOffsetY(int rowStartOffset, FontMetrics fontMetrics)
-			throws BadLocationException
-	{
-		//  Get the bounding rectangle of the row
-
-		Rectangle r = component.modelToView( rowStartOffset );
-		int lineHeight = fontMetrics.getHeight();
-		int y = r.y + r.height;
-		int descent = 0;
-
-		//  The text needs to be positioned above the bottom of the bounding
-		//  rectangle based on the descent of the font(s) contained on the row.
-
-		if (r.height == lineHeight)  // default font is being used
-		{
-			descent = fontMetrics.getDescent();
-		}
-		else  // We need to check all the attributes for font changes
-		{
-			if (fonts == null)
-				fonts = new HashMap<String, FontMetrics>();
-
-			Element root = component.getDocument().getDefaultRootElement();
-			int index = root.getElementIndex( rowStartOffset );
-			Element line = root.getElement( index );
-
-			for (int i = 0; i < line.getElementCount(); i++)
-			{
-				Element child = line.getElement(i);
-				AttributeSet as = child.getAttributes();
-				String fontFamily = (String)as.getAttribute(StyleConstants.FontFamily);
-				Integer fontSize = (Integer)as.getAttribute(StyleConstants.FontSize);
-				String key = fontFamily + fontSize;
-
-				FontMetrics fm = fonts.get( key );
-
-				if (fm == null)
-				{
-					Font font = new Font(fontFamily, Font.PLAIN, fontSize);
-					fm = component.getFontMetrics( font );
-					fonts.put(key, fm);
-				}
-
-				descent = Math.max(descent, fm.getDescent());
-			}
-		}
-
-		return y - descent;
 	}
 
 	@Override

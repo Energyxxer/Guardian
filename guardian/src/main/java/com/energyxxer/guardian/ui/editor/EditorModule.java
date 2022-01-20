@@ -48,6 +48,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
 
     public static Preferences.SettingPref<Boolean> INSERT_TRAILING_NEWLINE = new Preferences.SettingPref<>("settings.editor.insert_trailing_newline", false, Boolean::parseBoolean);
     public static Preferences.SettingPref<Boolean> WORD_WRAP = new Preferences.SettingPref<>("settings.editor.word_wrap", false, Boolean::parseBoolean);
+    public static Preferences.SettingPref<Integer> MAX_FILESIZE_MB = new Preferences.SettingPref<>("settings.editor.max_file_size_mb", 2, Integer::parseInt);
 
     JScrollPane scrollPane;
 
@@ -226,6 +227,11 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
         byte[] encoded;
         try {
             encoded = Files.readAllBytes(file.toPath());
+            if(encoded.length > MAX_FILESIZE_MB.get() * 1024 * 1024) {
+                TextFileTooLargeException exception = new TextFileTooLargeException(file, associatedTab, encoded);
+                dispose();
+                throw exception;
+            }
             String s = new String(encoded, Guardian.DEFAULT_CHARSET);
             setText(s);
             editorComponent.setCaretPosition(0);
@@ -377,7 +383,6 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     public void themeChanged(Theme t) {
         tln.setBackground(t.getColor(new Color(235, 235, 235), "Editor.lineNumber.background"));
         tln.setForeground(t.getColor(new Color(150, 150, 150), "Editor.lineNumber.foreground"));
-        //tln current line background
         tln.setCurrentLineForeground(t.getColor(tln.getForeground(), "Editor.lineNumber.currentLine.foreground"));
         tln.setBorder(
                 BorderFactory.createCompoundBorder(

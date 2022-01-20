@@ -7,12 +7,15 @@ import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.main.window.sections.tools.find.*;
+import com.energyxxer.guardian.ui.TextFileTooLargeModule;
 import com.energyxxer.guardian.ui.editor.EditorModule;
+import com.energyxxer.guardian.ui.editor.TextFileTooLargeException;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.Padding;
 import com.energyxxer.guardian.ui.styledcomponents.*;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.util.Disposable;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.*;
 
@@ -53,6 +56,7 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
     private JPanel previewPanel;
     private JLabel previewLabel;
     private EditorModule editorModule;
+    private Component previewModule;
     private FixedHighlighter highlighter;
 
     private ThemeListenerManager tlmHighlighter;
@@ -362,35 +366,45 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
     }
 
     public void showEditor(File file, int start, int length) {
-        if(editorModule != null) {
-            previewPanel.remove(editorModule);
+        if(previewModule != null) {
+            previewPanel.remove(previewModule);
             if(tlmHighlighter != null) tlmHighlighter.dispose();
-            editorModule.dispose();
+            if(previewModule instanceof Disposable) ((Disposable) previewModule).dispose();
             editorModule = null;
+            previewModule = null;
             contentPanel.revalidate();
         }
-        editorModule = new EditorModule(null, file);
-        editorModule.setEditable(false);
-        editorModule.setPreferredSize(new ScalableDimension(1, 300));
-        highlighter = new FixedHighlighter(editorModule.editorComponent);
-        tlmHighlighter = new ThemeListenerManager();
-        tlm.addThemeChangeListener(t -> {
-            this.highlighter.setHighlightColor(t.getColor(Color.GREEN, "FindInPath.highlight", "Editor.find.highlight"));
-            this.highlighter.setHighlightBorderColor(t.getColor(Color.YELLOW, "FindInPath.highlight.border", "Editor.find.highlight.border"));
-        });
-        highlighter.addRegion(start, start+length);
         try {
-            editorModule.editorComponent.getHighlighter().addHighlight(0, 0, highlighter);
-            editorModule.editorComponent.getCaret().setProfile(new CaretProfile(start, start+length));
-        } catch (BadLocationException x) {
-            x.printStackTrace(); //wtf exception
-        }
+            editorModule = new EditorModule(null, file);
+            editorModule.setEditable(false);
+            editorModule.setPreferredSize(new ScalableDimension(1, 300));
+            highlighter = new FixedHighlighter(editorModule.editorComponent);
+            tlmHighlighter = new ThemeListenerManager();
+            tlm.addThemeChangeListener(t -> {
+                this.highlighter.setHighlightColor(t.getColor(Color.GREEN, "FindInPath.highlight", "Editor.find.highlight"));
+                this.highlighter.setHighlightBorderColor(t.getColor(Color.YELLOW, "FindInPath.highlight.border", "Editor.find.highlight.border"));
+            });
+            highlighter.addRegion(start, start + length);
+            try {
+                editorModule.editorComponent.getHighlighter().addHighlight(0, 0, highlighter);
+                editorModule.editorComponent.getCaret().setProfile(new CaretProfile(start, start + length));
+            } catch (BadLocationException x) {
+                x.printStackTrace(); //wtf exception
+            }
 
-        previewPanel.add(editorModule, BorderLayout.CENTER);
-        previewLabel.setText("    " + file.getPath());
-        footerPanel.add(previewPanel, BorderLayout.NORTH);
-        revalidate();
-        repaint();
-        editorModule.scrollToCenter(start);
+            previewPanel.add(editorModule, BorderLayout.CENTER);
+            previewLabel.setText("    " + file.getPath());
+            footerPanel.add(previewPanel, BorderLayout.NORTH);
+            revalidate();
+            repaint();
+            editorModule.scrollToCenter(start);
+        } catch (TextFileTooLargeException x) {
+            previewModule = new TextFileTooLargeModule(x);
+            previewPanel.add(previewModule, BorderLayout.CENTER);
+            previewLabel.setText("    " + file.getPath());
+            footerPanel.add(previewPanel, BorderLayout.NORTH);
+            revalidate();
+            repaint();
+        }
     }
 }

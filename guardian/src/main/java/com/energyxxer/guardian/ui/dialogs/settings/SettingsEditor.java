@@ -217,6 +217,38 @@ public class SettingsEditor extends JPanel {
 
                 content.add(smartKeysQuotes);
             }
+
+
+            {
+                content.add(new Padding(20));
+            }
+
+
+            {
+                StyledLabel label = new StyledLabel("Maximum file size (MB):","Settings.content", tlm);
+                label.setStyle(Font.BOLD);
+                content.add(label);
+            }
+            {
+                StyledLabel label = new StyledLabel("<html>Files above this size will ask for confirmation before<br>opening a lightweight text editor with limited functionality</html>","Settings.content", tlm);
+                label.setStyle(Font.ITALIC);
+                content.add(label);
+            }
+            {
+                StyledTextField maxFilesizeField = new StyledTextField("","Settings.content", tlm);
+                maxFilesizeField.setMaximumSize(new ScalableDimension(300,25));
+                maxFilesizeField.setAlignmentX(Component.LEFT_ALIGNMENT);
+                Settings.addOpenEvent(() -> maxFilesizeField.setText("" + EditorModule.MAX_FILESIZE_MB.get()));
+                Settings.addApplyEvent(() -> {
+                    try {
+                        int mb = Integer.parseInt(maxFilesizeField.getText());
+                        if(mb >= 0) {
+                            EditorModule.MAX_FILESIZE_MB.set(mb);
+                        }
+                    } catch(NumberFormatException ignore) {}
+                });
+                content.add(maxFilesizeField);
+            }
         }
     }
 

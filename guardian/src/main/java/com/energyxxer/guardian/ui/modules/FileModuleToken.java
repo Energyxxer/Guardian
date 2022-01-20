@@ -9,10 +9,12 @@ import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
+import com.energyxxer.guardian.ui.TextFileTooLargeModule;
 import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.dialogs.PromptDialog;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.editor.EditorModule;
+import com.energyxxer.guardian.ui.editor.TextFileTooLargeException;
 import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
@@ -245,7 +247,11 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
                     return result;
                 }
             }
-            return new EditorModule(tab, file);
+            try {
+                return new EditorModule(tab, file);
+            } catch (TextFileTooLargeException x) {
+                return new TextFileTooLargeModule(x);
+            }
         }
         return null;
     }
