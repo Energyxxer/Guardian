@@ -35,7 +35,7 @@ public class TextFileTooLargeModule extends JPanel implements DisplayModule, Dis
         box.add(label);
 
         if(tab != null) {
-            StyledButton button = new StyledButton("Open plain text editor", tlm);
+            StyledButton button = new StyledButton("Open anyway", tlm);
             button.setAlignmentX(0.5f);
             box.add(button);
             button.addActionListener(a -> openPlainText());
