@@ -314,7 +314,8 @@ public class ActionManager {
                         KeyMap.requestMapping("open_documentation", KeyMap.identifierToStrokes("" + KeyEvent.VK_F1)),
                         () -> {
                             try {
-                                Desktop.getDesktop().browse(new URI("https://docs.google.com/document/d/1w_3ILt8-8s1VG-qv7cLLdIrTJTtbQvj2klh2xTnxQVw/edit?usp=sharing"));
+                                URI uri = Guardian.core.getDocumentationURI();
+                                if(uri != null) Desktop.getDesktop().browse(uri);
                             } catch (IOException | URISyntaxException ex) {
                                 ex.printStackTrace();
                             }

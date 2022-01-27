@@ -4,6 +4,7 @@ import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.guardian.main.window.actions.ActionManager;
 import com.energyxxer.guardian.ui.ToolbarButton;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
 import com.energyxxer.guardian.ui.dialogs.settings.Settings;
@@ -12,9 +13,6 @@ import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 
 public class WelcomePane extends JPanel {
@@ -92,11 +90,7 @@ public class WelcomePane extends JPanel {
             button.setText("Documentation");
             button.setHintText("Read the language docs");
             button.addActionListener(e -> {
-                try {
-                    Desktop.getDesktop().browse(new URI("https://docs.google.com/document/d/1w_3ILt8-8s1VG-qv7cLLdIrTJTtbQvj2klh2xTnxQVw/edit?usp=sharing"));
-                } catch (IOException | URISyntaxException ex) {
-                    ex.printStackTrace();
-                }
+                ActionManager.getAction("DOCUMENTATION").perform();
             });
             JPanel wrapper = new JPanel(new FlowLayout(getNextButtonAlignment()));
             wrapper.setOpaque(false);

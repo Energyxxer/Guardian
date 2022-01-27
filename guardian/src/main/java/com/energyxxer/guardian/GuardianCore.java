@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -130,5 +132,9 @@ public class GuardianCore {
     }
 
     public void setupSettingsSections(HashMap<String, JPanel> sectionPanes) {
+    }
+
+    public URI getDocumentationURI() throws URISyntaxException {
+        return null;
     }
 }
