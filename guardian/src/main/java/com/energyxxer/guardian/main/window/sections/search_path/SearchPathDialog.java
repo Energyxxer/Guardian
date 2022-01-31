@@ -376,6 +376,7 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
         }
         try {
             editorModule = new EditorModule(null, file);
+            previewModule = editorModule;
             editorModule.setEditable(false);
             editorModule.setPreferredSize(new ScalableDimension(1, 300));
             highlighter = new FixedHighlighter(editorModule.editorComponent);
