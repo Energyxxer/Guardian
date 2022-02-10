@@ -16,6 +16,7 @@ import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.util.LineReader;
 import com.energyxxer.util.ImageManager;
 import com.energyxxer.util.logger.Debug;
+import com.energyxxer.util.out.ConsoleOutputStream;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,7 +72,11 @@ public class Guardian {
 		window = new GuardianWindow();
 	}
 
+	private static ByteArrayOutputStream preConsoleDebug;
+
 	public static void main(String[] args) {
+		preConsoleDebug = new ByteArrayOutputStream();
+		Debug.addStream(preConsoleDebug);
 		Debug.addStream(System.out);
 
 		loadCore();
@@ -87,6 +92,18 @@ public class Guardian {
 		loadBindings();
 		Resources.load();
 		SwingUtilities.invokeLater(Guardian::start);
+	}
+
+	public static void consoleLoaded(ConsoleOutputStream outputStream) {
+		Debug.removeStream(preConsoleDebug);
+		byte[] bytes = preConsoleDebug.toByteArray();
+		try {
+			outputStream.print(new String(bytes));
+			preConsoleDebug.close();
+		} catch (IOException x) {
+			x.printStackTrace();
+		}
+		preConsoleDebug = null;
 	}
 
 	private static void loadCore() {

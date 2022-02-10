@@ -86,9 +86,9 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
         Shape originalBounds = g.getClipBounds();
         g.setClip(rect);
 
-        g.setColor(Color.WHITE);
+        g.setColor(new Color(0x999999));
         g.fillRect(rect.x, rect.y, rect.width, rect.height);
-        g.setColor(Color.GRAY);
+        g.setColor(new Color(0x666666));
 
         for(int x = rect.x > 0 ? rect.x : (rect.x-CHECK_PATTERN_SIZE) % (CHECK_PATTERN_SIZE*2); x < rect.x + rect.width; x += CHECK_PATTERN_SIZE * 2) {
             for(int y = rect.y > 0 ? rect.y : (rect.y-CHECK_PATTERN_SIZE) % (CHECK_PATTERN_SIZE*2); y < rect.y + rect.height && y < this.getHeight(); y += CHECK_PATTERN_SIZE * 2) {

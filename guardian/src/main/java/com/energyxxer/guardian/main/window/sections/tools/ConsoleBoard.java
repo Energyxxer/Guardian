@@ -2,6 +2,7 @@ package com.energyxxer.guardian.main.window.sections.tools;
 
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.ProcessManager;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
@@ -109,7 +110,9 @@ public class ConsoleBoard extends ToolBoard {
 
         //tlm.addThemeChangeListener(t -> textConsoleOut.update());
 
-        Debug.addStream(new ConsoleOutputStream(console));
+        ConsoleOutputStream outputStream = new ConsoleOutputStream(console);
+        Guardian.consoleLoaded(outputStream);
+        Debug.addStream(outputStream);
         /*Console.addInfoStream(new ConsoleOutputStream(console));
         Console.addWarnStream(new ConsoleOutputStream(console,"warning"));
         Console.addErrStream(new ConsoleOutputStream(console,"error"));

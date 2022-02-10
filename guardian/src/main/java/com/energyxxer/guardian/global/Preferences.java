@@ -270,6 +270,7 @@ public class Preferences {
         ProjectManager.setWorkspaceDir(workspace.toString());
         ProjectManager.loadWorkspace();
         GuardianWindow.projectExplorer.refresh();
+        GuardianWindow.sidebar.updateLabel();
     }
 
     private static void saveWorkspaceHistory() {

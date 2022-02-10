@@ -25,6 +25,7 @@ import java.awt.*;
  */
 public class Sidebar extends OverlayBorderPanel {
 
+    public final StyledLabel explorerLabel;
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
     private JPanel expanded = new JPanel(new BorderLayout());
@@ -49,16 +50,16 @@ public class Sidebar extends OverlayBorderPanel {
 
         JPanel header = new JPanel(new BorderLayout());
 
-        StyledLabel label = new StyledLabel("Project Explorer", "Explorer.header", tlm);
-        label.setFontSize(14);
-        label.setPreferredSize(new ScalableDimension(500, 25));
+        explorerLabel = new StyledLabel("EXPLORER", "Explorer.header", tlm);
+        explorerLabel.setFontSize(14);
+        explorerLabel.setPreferredSize(new ScalableDimension(500, 25));
         header.add(new Padding(15, tlm, "Explorer.header.indent"), BorderLayout.WEST);
-        header.add(label, BorderLayout.CENTER);
+        header.add(explorerLabel, BorderLayout.CENTER);
 
         tlm.addThemeChangeListener(t -> {
             header.setBackground(t.getColor(this.getBackground(), "Explorer.header.background"));
             header.setPreferredSize(new ScalableDimension(500, t.getInteger(25, "Explorer.header.height")));
-            label.setPreferredSize(new ScalableDimension(500, t.getInteger(25, "Explorer.header.height")));
+            explorerLabel.setPreferredSize(new ScalableDimension(500, t.getInteger(25, "Explorer.header.height")));
         });
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -204,9 +205,15 @@ public class Sidebar extends OverlayBorderPanel {
         this.revalidate();
         this.repaint();
 
+        updateLabel();
+
         if(GuardianWindow.welcomePane != null) {
             GuardianWindow.welcomePane.revalidate();
             GuardianWindow.welcomePane.repaint();
         }
+    }
+
+    public void updateLabel() {
+        explorerLabel.setText("EXPLORER: " + Preferences.getWorkspace().getName());
     }
 }
