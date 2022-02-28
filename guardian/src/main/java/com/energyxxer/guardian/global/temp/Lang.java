@@ -52,7 +52,7 @@ public class Lang {
     public static final Lang JSON = new Lang("JSON", "JSON",
             false,
             JSONLexerProfile::new,
-            "json", "mcmeta", ProjectManager.WORKSPACE_CONFIG_FILE_NAME.substring(1)
+            "json", "mcmeta", ProjectManager.WORKSPACE_CONFIG_FILE_NAME.substring(1), "build"
     ) {
         {
             setIconName("json");

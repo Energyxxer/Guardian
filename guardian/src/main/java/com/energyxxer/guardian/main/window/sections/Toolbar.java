@@ -1,6 +1,8 @@
 package com.energyxxer.guardian.main.window.sections;
 
+import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.TabManager;
+import com.energyxxer.guardian.global.temp.projects.BuildConfiguration;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.langinterface.ProjectType;
@@ -10,9 +12,11 @@ import com.energyxxer.guardian.main.window.actions.ProgramAction;
 import com.energyxxer.guardian.main.window.sections.toolbar.PathViewToken;
 import com.energyxxer.guardian.ui.ToolbarButton;
 import com.energyxxer.guardian.ui.ToolbarSeparator;
+import com.energyxxer.guardian.ui.styledcomponents.StyledDropdownMenu;
 import com.energyxxer.guardian.ui.tablist.TabListMaster;
 import com.energyxxer.guardian.ui.tablist.TabSeparator;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.Padding;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.hints.TextHint;
@@ -21,6 +25,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -34,10 +39,12 @@ public class Toolbar extends JPanel {
     public ThemeListenerManager tlm;
 
     private File lastActiveFile = null;
+    private Path lastActiveProjectRoot = null;
 
     public void updateActiveFile() {
         File activeFile = lastActiveFile;
         lastActiveFile = null;
+        lastActiveProjectRoot = null;
         setActiveFile(activeFile);
     }
 
@@ -48,23 +55,25 @@ public class Toolbar extends JPanel {
         lastActiveFile = file;
         pathIndicatorTabManager.closeAllTabs(true);
         pathIndicatorTabManager.getTabList().removeAllTabs();
+        Path projectRoot = null;
+        Project<?> associatedProject = null;
         if(file != null) {
-            Project associatedProject = ProjectManager.getAssociatedProject(file);
+            associatedProject = ProjectManager.getAssociatedProject(file);
 
-            Path root = associatedProject != null ? associatedProject.getRootDirectory().toPath() : null;
+            projectRoot = associatedProject != null ? associatedProject.getRootDirectory().toPath() : null;
 
             Path shownPath = file.toPath();
 
-            if(root != null) {
-                shownPath = root.relativize(shownPath);
+            if(projectRoot != null) {
+                shownPath = projectRoot.relativize(shownPath);
             }
             for(int i = 0; i <= shownPath.getNameCount(); i++) {
                 File fileToShow;
                 if(i == 0) {
-                    if(root != null) fileToShow = root.toFile();
+                    if(projectRoot != null) fileToShow = projectRoot.toFile();
                     else fileToShow = shownPath.getRoot().toFile();
                 } else {
-                    if(root != null) fileToShow = root.resolve(shownPath.subpath(0, i)).toFile();
+                    if(projectRoot != null) fileToShow = projectRoot.resolve(shownPath.subpath(0, i)).toFile();
                     else fileToShow = shownPath.getRoot().resolve(shownPath.subpath(0, i)).toFile();
                 }
                 pathIndicatorTabManager.openTab(new PathViewToken(fileToShow));
@@ -73,9 +82,14 @@ public class Toolbar extends JPanel {
                 }
             }
         }
+        if(associatedProject == null || !Objects.equals(lastActiveProjectRoot, projectRoot)) {
+            lastActiveProjectRoot = projectRoot;
+            updateBuildConfigs(associatedProject);
+        }
     }
 
     private final TabManager pathIndicatorTabManager;
+    private final StyledDropdownMenu<BuildConfigDropdownItem> buildConfigDropdown;
     
     {
         this.tlm = new ThemeListenerManager();
@@ -106,16 +120,14 @@ public class Toolbar extends JPanel {
 
 
         JPanel buttonBar = new JPanel(new GridBagLayout());
-        tlm.addThemeChangeListener(t -> {
-            this.setBackground(t.getColor(new Color(235, 235, 235), "Toolbar.background"));
-            this.setBorder(BorderFactory.createMatteBorder(0, 0, Math.max(t.getInteger(1,"Toolbar.border.thickness"),0), 0, t.getColor(new Color(200, 200, 200), "Toolbar.border.color")));
-
-            int height = t.getInteger(29, "Toolbar.height");
-
-            this.setPreferredSize(new ScalableDimension(1, height));
-        });
         buttonBar.setOpaque(false);
         this.add(buttonBar, BorderLayout.EAST);
+
+        {
+            buttonBar.add(buildConfigDropdown = new StyledDropdownMenu<>("Toolbar"));
+            buildConfigDropdown.addChoiceListener(this::updateBuildConfig);
+            buttonBar.add(new Padding(10));
+        }
 
         {
             buttonBar.add(createButtonForAction("COMPILE"));
@@ -150,6 +162,78 @@ public class Toolbar extends JPanel {
         }
 
         buttonBar.add(new Padding(10));
+
+        tlm.addThemeChangeListener(t -> {
+            this.setBackground(t.getColor(new Color(235, 235, 235), "Toolbar.background"));
+            this.setBorder(BorderFactory.createMatteBorder(0, 0, Math.max(t.getInteger(1,"Toolbar.border.thickness"),0), 0, t.getColor(new Color(200, 200, 200), "Toolbar.border.color")));
+
+            int height = t.getInteger(29, "Toolbar.height");
+
+            this.setPreferredSize(new ScalableDimension(1, height));
+        });
+    }
+
+    private void updateBuildConfigs(Project<?> associatedProject) {
+        if(associatedProject != null) {
+            ArrayList<? extends BuildConfiguration<?>> allConfigs = associatedProject.getAllBuildConfigs();
+
+            BuildConfigDropdownItem[] options = new BuildConfigDropdownItem[allConfigs.size()+1];
+            options[0] = new BuildConfigDropdownItem(); //Edit Configurations
+
+            for(int i = 0; i < allConfigs.size(); i++) {
+                BuildConfigDropdownItem configItem = new BuildConfigDropdownItem(allConfigs.get(i));
+                options[i+1] = configItem;
+            }
+            buildConfigDropdown.setOptions(options);
+
+            //Set cog icons
+            for(int i = 1; i < options.length; i++) {
+                buildConfigDropdown.setIcon(i, Commons.getIcon("cog"));
+            }
+
+        } else {
+            buildConfigDropdown.setOptions(new BuildConfigDropdownItem[] {new BuildConfigDropdownItem()});
+        }
+        buildConfigDropdown.setFallbackIcon(Commons.getIcon("cog_dropdown"));
+
+        updateBuildConfigSelected(associatedProject);
+    }
+
+    private void updateBuildConfigSelected(Project project) {
+        if(project != null) {
+            BuildConfiguration<?> activeConfig = project.getBuildConfig();
+            ArrayList<BuildConfigDropdownItem> options = buildConfigDropdown.getOptions();
+            boolean anyConfigs = false;
+            if(!activeConfig.isFallback()) {
+                for(BuildConfigDropdownItem option : options) {
+                    if(option.config != null) anyConfigs = true;
+                    if(option.config == activeConfig) {
+                        buildConfigDropdown.setValue(option);
+                        break;
+                    }
+                }
+            }
+            if(!anyConfigs) {
+                buildConfigDropdown.setText("[ No Configurations ]");
+            }
+        } else {
+            buildConfigDropdown.setText("[ No Project Selected ]");
+        }
+    }
+
+    private void updateBuildConfig(BuildConfigDropdownItem buildConfiguration) {
+        if(buildConfiguration.config == null) {
+            Debug.log("EDIT");
+            updateBuildConfigSelected(ProjectManager.getAssociatedProject(lastActiveProjectRoot.toFile()));
+            return;
+        }
+        if(lastActiveProjectRoot != null) {
+            Project project = ProjectManager.getAssociatedProject(lastActiveProjectRoot.toFile());
+            if(project != null) {
+                //noinspection unchecked
+                project.setActiveBuildConfig(buildConfiguration.config);
+            }
+        }
     }
 
     private ToolbarButton createButtonForAction(String actionKey) {
@@ -164,5 +248,20 @@ public class Toolbar extends JPanel {
         return button;
     }
 
+    private static class BuildConfigDropdownItem {
+        public BuildConfiguration<?> config;
 
+        public BuildConfigDropdownItem() {
+
+        }
+
+        public BuildConfigDropdownItem(BuildConfiguration<?> config) {
+            this.config = config;
+        }
+
+        @Override
+        public String toString() {
+            return config != null ? config.name : "Edit Configurations...";
+        }
+    }
 }

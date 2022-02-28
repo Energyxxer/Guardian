@@ -154,7 +154,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
             Image iconFromProject = associatedProject.getIconForFile(file);
             if(iconFromProject != null) return iconFromProject;
         }
-        Lang associatedLang = Lang.getLangForFile(file.getPath());
+        Lang associatedLang = file.isFile() ? Lang.getLangForFile(file.getPath()) : null;
         if(associatedLang != null) {
             Image iconFromLang = associatedLang.getIconForFile(file);
             if(iconFromLang != null) return iconFromLang;

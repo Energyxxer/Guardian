@@ -12,6 +12,7 @@ public class XDropdownMenu<T> extends XButton {
 
     private final ArrayList<T> options = new ArrayList<>();
     private final ArrayList<ImageIcon> icons = new ArrayList<>();
+    private ImageIcon fallbackIcon;
 
     protected int selected = -1;
 
@@ -56,13 +57,14 @@ public class XDropdownMenu<T> extends XButton {
     }
 
     private void updateOptions() {
+        if(fallbackIcon != null) this.setIcon(fallbackIcon);
         if(selected == -1 && options.size() > 0) {
             selected = 0;
             this.setText(options.get(0).toString());
-            this.setIcon(icons.get(0));
+            if(fallbackIcon == null) this.setIcon(icons.get(0));
         } else {
             this.setText(options.get(selected).toString());
-            this.setIcon(icons.get(selected));
+            if(fallbackIcon == null) this.setIcon(icons.get(selected));
         }
     }
 
@@ -105,8 +107,13 @@ public class XDropdownMenu<T> extends XButton {
     }
 
     public void setIcon(int index, Image img) {
-        this.icons.set(index, new ImageIcon(img.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+        this.icons.set(index, img != null ? new ImageIcon(img.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) : null);
         updateOptions();
+    }
+
+    public void setFallbackIcon(Image img) {
+        fallbackIcon = img != null ? new ImageIcon(img.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) : null;
+        this.setIcon(fallbackIcon);
     }
 
     public void clear() {

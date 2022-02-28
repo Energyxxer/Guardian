@@ -185,13 +185,19 @@ public class Commons {
         compile(Commons.getActiveProject());
     }
 
-    public static void compile(Project project) {
+    public static void compile(Project<?> project) {
         if(project == null) {
             GuardianWindow.showPopupMessage("No project selected");
             return;
         }
-        AbstractProcess process = project.createProjectCompiler();
-        process.addStartListener(p -> GuardianWindow.consoleBoard.batchSubmitCommand(project.getPreActions()));
+        AbstractProcess process;
+        try {
+            process = project.createProjectCompiler();
+        } catch(IllegalStateException x) {
+            GuardianWindow.showPopupMessage(x.getMessage());
+            return;
+        }
+        process.addStartListener(p -> GuardianWindow.consoleBoard.batchSubmitCommand(project.getBuildConfig().preActions));
         Report report = ((Reported) process).getReport();
         process.addCompletionListener((p, success) -> {
             GuardianWindow.noticeExplorer.setNotices(report.group());
@@ -201,11 +207,11 @@ public class Commons {
         });
         process.addCompletionListener((p, success) -> {
             SwingUtilities.invokeLater(() -> {
-                GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostActions());
+                GuardianWindow.consoleBoard.batchSubmitCommand(project.getBuildConfig().postActions);
                 if(success) {
-                    GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostSuccessActions());
+                    GuardianWindow.consoleBoard.batchSubmitCommand(project.getBuildConfig().postSuccessActions);
                 } else {
-                    GuardianWindow.consoleBoard.batchSubmitCommand(project.getPostFailureActions());
+                    GuardianWindow.consoleBoard.batchSubmitCommand(project.getBuildConfig().postFailureActions);
                 }
             });
         });
@@ -251,7 +257,7 @@ public class Commons {
         Project associatedProject = ProjectManager.getAssociatedProject(file);
         if(associatedProject == null) return false;
         if(associatedProject.getProjectType().isProjectIdentity(file)) return true;
-        return associatedProject.getProjectType().isProjectRoot(file.getParentFile()) && file.isDirectory() && file.getName().equals(".tdnui");
+        return associatedProject.getProjectType().isProjectRoot(file.getParentFile()) && file.isDirectory() && (file.getName().equals(".tdnui") || file.getName().equals(".build"));
     }
 
     private static HashMap<ScaledIconInstance, Image> SCALED_IMAGE_CACHE = new HashMap<>();

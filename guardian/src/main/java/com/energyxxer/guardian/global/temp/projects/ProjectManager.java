@@ -36,6 +36,7 @@ public class ProjectManager {
 		loadProjectsInDir(Guardian.core.getGlobalLibrariesDir());
 
 		GuardianWindow.projectExplorer.refresh();
+		GuardianWindow.toolbar.updateActiveFile();
 
 		JsonObject workspaceConfigObj = null;
 

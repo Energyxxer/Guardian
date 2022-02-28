@@ -3,7 +3,7 @@ package com.energyxxer.guardian.ui.styledcomponents;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.xswing.XDropdownMenu;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Created by User on 2/11/2017.
@@ -15,22 +15,26 @@ public class StyledDropdownMenu<T> extends XDropdownMenu<T> {
     private ThemeListenerManager tlm = new ThemeListenerManager();
 
     public StyledDropdownMenu() {
+        setup();
     }
 
     public StyledDropdownMenu(String namespace) {
         this.namespace = namespace;
+        setup();
     }
 
     public StyledDropdownMenu(T[] options) {
         super(options);
+        setup();
     }
 
     public StyledDropdownMenu(T[] options, String namespace) {
         super(options);
         this.namespace = namespace;
+        setup();
     }
 
-    {
+    private void setup() {
         this.setPopupFactory(StyledPopupMenu::new);
         this.setPopupItemFactory(StyledMenuItem::new);
 
