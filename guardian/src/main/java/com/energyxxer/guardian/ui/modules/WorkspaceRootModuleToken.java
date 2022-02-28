@@ -18,7 +18,7 @@ public class WorkspaceRootModuleToken implements ModuleToken {
 
     @Override
     public String getTitle(TokenContext context) {
-        return "Workspace";
+        return Preferences.getWorkspace().getName();
     }
 
     @Override

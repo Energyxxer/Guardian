@@ -427,7 +427,9 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
 
     @Override
     public void displayCaretInfo() {
-        editorComponent.displayCaretInfo();
+        if(isMainEditor()) {
+            editorComponent.displayCaretInfo();
+        }
     }
 
     @Override
@@ -519,6 +521,10 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
         if(file != null) return file;
         if(forcedLang != null) return new File(Preferences.get("workspace_dir"));
         return null;
+    }
+
+    public boolean isMainEditor() {
+        return associatedTab != null;
     }
 
     @Override

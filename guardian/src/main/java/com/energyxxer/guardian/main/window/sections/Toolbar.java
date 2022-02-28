@@ -35,6 +35,12 @@ public class Toolbar extends JPanel {
 
     private File lastActiveFile = null;
 
+    public void updateActiveFile() {
+        File activeFile = lastActiveFile;
+        lastActiveFile = null;
+        setActiveFile(activeFile);
+    }
+
     public void setActiveFile(File file) {
         if(Objects.equals(lastActiveFile, file)) {
             return;

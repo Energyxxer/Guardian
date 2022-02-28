@@ -18,7 +18,7 @@ public class LibrariesRootModuleToken implements ModuleToken {
 
     @Override
     public String getTitle(TokenContext context) {
-        return "Workspace";
+        return "Libraries";
     }
 
     @Override

@@ -47,4 +47,6 @@ public abstract class OrderListElement implements MouseListener, MouseMotionList
 
     public void onReorder() {
     }
+
+    public abstract int getPreferredOrder(OrderListElement swappingElement);
 }

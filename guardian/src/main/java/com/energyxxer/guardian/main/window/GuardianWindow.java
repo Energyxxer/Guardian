@@ -171,6 +171,7 @@ public class GuardianWindow {
 		jframe.getContentPane().add(statusBar = new StatusBar(), BorderLayout.SOUTH);
 
 		ActionManager.setup();
+		Guardian.core.setupActions();
 		jframe.getContentPane().add(toolbar = new Toolbar(), BorderLayout.NORTH);
 		jframe.setJMenuBar(menuBar = new MenuBar());
 

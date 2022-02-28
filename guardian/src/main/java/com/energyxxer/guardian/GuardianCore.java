@@ -137,4 +137,7 @@ public class GuardianCore {
     public URI getDocumentationURI() throws URISyntaxException {
         return null;
     }
+
+    public void setupActions() {
+    }
 }

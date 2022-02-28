@@ -110,13 +110,12 @@ public class ConsoleBoard extends ToolBoard {
 
         //tlm.addThemeChangeListener(t -> textConsoleOut.update());
 
-        ConsoleOutputStream outputStream = new ConsoleOutputStream(console);
-        Guardian.consoleLoaded(outputStream);
-        Debug.addStream(outputStream);
-        /*Console.addInfoStream(new ConsoleOutputStream(console));
-        Console.addWarnStream(new ConsoleOutputStream(console,"warning"));
-        Console.addErrStream(new ConsoleOutputStream(console,"error"));
-        Console.addDebugStream(new ConsoleOutputStream(console,"debug"));*/
+        Guardian.consoleLoaded(new ConsoleOutputStream(console));
+//        Debug.addStream(outputStream);
+        Debug.addStream(new ConsoleOutputStream(console), Debug.MessageType.INFO);
+        Debug.addStream(new ConsoleOutputStream(console,"warning"), Debug.MessageType.WARN);
+        Debug.addStream(new ConsoleOutputStream(console,"error"), Debug.MessageType.ERROR);
+        Debug.addStream(new ConsoleOutputStream(console,"error"), Debug.MessageType.PLAIN);
 
         //consoleOut = new PrintStream(textConsoleOut);
         //System.setOut(new PrintStream(new MultiOutputStream(consoleOut, System.out)));

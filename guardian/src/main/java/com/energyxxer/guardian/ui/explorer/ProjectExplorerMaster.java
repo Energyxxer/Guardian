@@ -141,13 +141,12 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         this.getExpandedElements().clear();
 
         for(ModuleToken source : tokenSources) {
-            boolean any = false;
-            for(ModuleToken token : source.getSubTokens()) {
-                any = true;
-                this.children.add(new StandardExplorerItem(token, this, toOpen));
+            Collection<? extends ModuleToken> subTokens = source.getSubTokens();
+            if(!subTokens.isEmpty() || source instanceof WorkspaceRootModuleToken) {
+                this.children.add(new ExplorerSeparator(source.getTitle(), this));
             }
-            if(any) {
-                this.children.add(new ExplorerSeparator(this));
+            for(ModuleToken token : subTokens) {
+                this.children.add(new StandardExplorerItem(token, this, toOpen));
             }
         }
 

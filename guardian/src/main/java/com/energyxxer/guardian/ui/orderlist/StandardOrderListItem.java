@@ -61,10 +61,18 @@ public class StandardOrderListItem extends OrderListElement implements ItemActio
         toolTipLocation.y = (int) (height * 0.8);
 
         int offsetY = y;
-        if(master.draggedElement == this) offsetY = (int) (master.dragPoint.y - (h * master.dragPivot));
+        if(master.draggedElement == this && master.dragLockDir == 0) {
+            offsetY = (int) (master.dragPoint.y - (h * master.dragPivot));
+        }
 
         g.setColor((this.rollover || this.selected) ? master.getColors().get("item.rollover.background") : master.getColors().get("item.background"));
         g.fillRect(0, offsetY, w, h);
+
+        if(master.draggedElement == this && master.dragLockDir != 0) {
+            g.setColor(master.getColors().get("item.restricted"));
+            g.fillRect(0, offsetY + (master.dragLockDir == 1 ? h - 2 : 0), w, 2);
+        }
+
         if(this.selected) {
             g.setColor(master.getColors().get("item.selected.background"));
 
@@ -207,6 +215,18 @@ public class StandardOrderListItem extends OrderListElement implements ItemActio
         }
 
         return -1;
+    }
+
+    @Override
+    public int getPreferredOrder(OrderListElement swappingElement) {
+        if(!(swappingElement instanceof StandardOrderListItem)) return 0;
+        if(!(token instanceof OrderRestrictedToken)) return 0;
+        StandardOrderListItem other = (StandardOrderListItem) swappingElement;
+        if(!(other.token instanceof OrderRestrictedToken)) return 0;
+        int diff = ((OrderRestrictedToken) this.token).compare((OrderRestrictedToken) other.token);
+        if(diff < 0) diff = -1;
+        if(diff > 0) diff = 1;
+        return diff;
     }
 
     @Override

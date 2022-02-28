@@ -14,6 +14,7 @@ import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetManager;
 import com.energyxxer.guardian.ui.imageviewer.ImageViewer;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.util.LineReader;
+import com.energyxxer.prismarine.PrismarineCompiler;
 import com.energyxxer.util.ImageManager;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.util.out.ConsoleOutputStream;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 public class Guardian {
 	public static final String LICENSE = "MIT License\n" +
 			"\n" +
-			"Copyright (c) 2021 Daniel Cepeda (Energyxxer)\n" +
+			"Copyright (c) 2022 Daniel Cepeda (Energyxxer)\n" +
 			"\n" +
 			"Permission is hereby granted, free of charge, to any person obtaining a copy\n" +
 			"of this software and associated documentation files (the \"Software\"), to deal\n" +
@@ -72,8 +73,6 @@ public class Guardian {
 		window = new GuardianWindow();
 	}
 
-	private static ByteArrayOutputStream preConsoleDebug;
-
 	public static void main(String[] args) {
 		preConsoleDebug = new ByteArrayOutputStream();
 		Debug.addStream(preConsoleDebug);
@@ -91,8 +90,11 @@ public class Guardian {
 		SwingUtilities.invokeLater(Guardian::showSplash);
 		loadBindings();
 		Resources.load();
+		PrismarineCompiler.putFileVariable("LIBRARIES",Guardian.core.getGlobalLibrariesDir().toPath());
 		SwingUtilities.invokeLater(Guardian::start);
 	}
+
+	private static ByteArrayOutputStream preConsoleDebug;
 
 	public static void consoleLoaded(ConsoleOutputStream outputStream) {
 		Debug.removeStream(preConsoleDebug);

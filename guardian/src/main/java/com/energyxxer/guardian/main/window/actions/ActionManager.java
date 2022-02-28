@@ -437,6 +437,10 @@ public class ActionManager {
         });
     }
 
+    public static void putAction(String key, ProgramAction action) {
+        actions.put(key, action);
+    }
+
     public static Map<String, ProgramAction> getAllActions() {
         return actions;
     }

@@ -128,7 +128,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
     @Override
     public void caretUpdate(CaretEvent e) {
         super.caretUpdate(e);
-        displayCaretInfo();
+        parent.displayCaretInfo();
         parent.ensureVisible(getCaret().getDot());
     }
 

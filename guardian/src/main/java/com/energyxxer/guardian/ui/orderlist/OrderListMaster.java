@@ -32,6 +32,7 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
     Point dragPoint = null;
     float dragPivot = -1;
     OrderListElement draggedElement = null;
+    int dragLockDir = 0;
 
     private TextHint hint = GuardianWindow.hintManager.createTextHint("a");
 
@@ -48,6 +49,7 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
             colors.put("item.selected.foreground", t.getColor(Color.BLACK, "OrderList.item.selected.foreground", "OrderList.item.hover.foreground", "OrderList.item.foreground", "General.foreground"));
             colors.put("item.rollover.background", t.getColor(new Color(0, 0, 0, 0), "OrderList.item.hover.background", "OrderList.item.background"));
             colors.put("item.rollover.foreground", t.getColor(Color.BLACK, "OrderList.item.hover.foreground", "OrderList.item.foreground", "General.foreground"));
+            colors.put("item.restricted", t.getColor(Color.RED, "OrderList.item.restricted.color", "General.foreground"));
 
             rowHeight = Math.max(t.getInteger(20, "OrderList.item.height"), 1);
 
@@ -138,6 +140,10 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
 
     public void preAddItem(OrderListElement item) {
         this.children.add(0, item);
+    }
+
+    public void insertItem(int index, OrderListElement item) {
+        this.children.add(index, item);
     }
 
     int getOffsetY() {
@@ -249,20 +255,21 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
             for (int i = 0; i < children.size(); i++) {
                 OrderListElement element = children.get(i);
                 int h = element.getHeight();
-                int center = (int) (e.getY() + (0.5 - dragPivot * h));
+                int center = (int) (e.getY() + ((0.5 - dragPivot) * h));
                 if (center >= y && center < y + h) {
-                    if (center <= y + h / 2) {
-                        if(element != draggedElement) {
-                            children.remove(draggedElement);
-                            children.add(i, draggedElement);
-                            draggedElement.onReorder();
+                    if(element == draggedElement) {
+                        dragLockDir = 0;
+                        if(center <= y + h / 2) {
+                            if(i-1 >= 0) {
+                                if(draggedElement.getPreferredOrder(children.get(i-1)) == 1) dragLockDir = -1;
+                            }
+                        } else {
+                            if(i+1 < children.size()) {
+                                if(draggedElement.getPreferredOrder(children.get(i+1)) == -1) dragLockDir = 1;
+                            }
                         }
                     } else {
-                        if(dragIndex != Math.min(i + 1, children.size()-1)) {
-                            children.remove(draggedElement);
-                            children.add(Math.min(i + 1, children.size()), draggedElement);
-                            draggedElement.onReorder();
-                        }
+                        reorderDraggedByStep(dragIndex, i);
                     }
                     break;
                 }
@@ -270,6 +277,39 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
             }
         }
         repaint();
+    }
+
+    private void reorderDraggedByStep(int from, int to) {
+        to = Math.max(0, Math.min(to, children.size()-1));
+        if(from == to) return;
+        if(to > from) {
+            while(from+1 <= to) {
+                if(!reorderDragged(from, from+1)) return;
+                from++;
+            }
+        } else {
+            while(to <= from-1) {
+                if(!reorderDragged(from, from-1)) return;
+                from--;
+            }
+        }
+    }
+
+    private boolean reorderDragged(int from, int to) {
+        OrderListElement swappingElement = children.get(to);
+        int realOrder = to - from < 0 ? -1 : 1;
+        int preferredOrder = draggedElement.getPreferredOrder(swappingElement);
+        if(preferredOrder != 0) {
+            if(preferredOrder != realOrder) {
+                dragLockDir = realOrder;
+                return false;
+            }
+        }
+        dragLockDir = 0;
+        children.remove(draggedElement);
+        children.add(to, draggedElement);
+        draggedElement.onReorder();
+        return true;
     }
 
     @Override
@@ -304,6 +344,15 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
 
     public void removeElement(OrderListElement element) {
         children.remove(element);
+        if(selectedElement == element) selectedElement = null;
+        if(rolloverElement == element) rolloverElement = null;
+        element.onReorder();
+        repaint();
+    }
+
+    public void removeElement(int index) {
+        OrderListElement element = children.get(index);
+        children.remove(index);
         if(selectedElement == element) selectedElement = null;
         if(rolloverElement == element) rolloverElement = null;
         element.onReorder();

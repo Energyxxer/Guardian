@@ -205,15 +205,9 @@ public class Sidebar extends OverlayBorderPanel {
         this.revalidate();
         this.repaint();
 
-        updateLabel();
-
         if(GuardianWindow.welcomePane != null) {
             GuardianWindow.welcomePane.revalidate();
             GuardianWindow.welcomePane.repaint();
         }
-    }
-
-    public void updateLabel() {
-        explorerLabel.setText("EXPLORER: " + Preferences.getWorkspace().getName());
     }
 }
