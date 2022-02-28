@@ -14,9 +14,11 @@ import java.util.Collection;
 
 public class PathViewToken implements ModuleToken {
     private FileModuleToken fileToken;
+    private boolean isActiveProject;
 
-    public PathViewToken(File file) {
+    public PathViewToken(File file, boolean isActiveProject) {
         this.fileToken = new FileModuleToken(file);
+        this.isActiveProject = isActiveProject;
         fileToken.setHideFolderIcon(true);
     }
 
@@ -78,5 +80,10 @@ public class PathViewToken implements ModuleToken {
     @Override
     public boolean isTabCloseable() {
         return false;
+    }
+
+    @Override
+    public float getAlpha() {
+        return isActiveProject ? 1.0f : 0.75f;
     }
 }

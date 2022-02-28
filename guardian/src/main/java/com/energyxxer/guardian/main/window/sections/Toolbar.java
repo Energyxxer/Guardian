@@ -49,18 +49,18 @@ public class Toolbar extends JPanel {
     }
 
     public void setActiveFile(File file) {
-        if(Objects.equals(lastActiveFile, file)) {
+        Project activeProject = Commons.getActiveProject();
+        Path activeProjectRoot = activeProject != null ? activeProject.getRootDirectory().toPath() : null;
+        if(Objects.equals(lastActiveFile, file) && Objects.equals(lastActiveProjectRoot, activeProjectRoot)) {
             return;
         }
         lastActiveFile = file;
         pathIndicatorTabManager.closeAllTabs(true);
         pathIndicatorTabManager.getTabList().removeAllTabs();
-        Path projectRoot = null;
-        Project<?> associatedProject = null;
         if(file != null) {
-            associatedProject = ProjectManager.getAssociatedProject(file);
+            Project<?> associatedProject = ProjectManager.getAssociatedProject(file);
 
-            projectRoot = associatedProject != null ? associatedProject.getRootDirectory().toPath() : null;
+            Path projectRoot = associatedProject != null ? associatedProject.getRootDirectory().toPath() : null;
 
             Path shownPath = file.toPath();
 
@@ -76,15 +76,18 @@ public class Toolbar extends JPanel {
                     if(projectRoot != null) fileToShow = projectRoot.resolve(shownPath.subpath(0, i)).toFile();
                     else fileToShow = shownPath.getRoot().resolve(shownPath.subpath(0, i)).toFile();
                 }
-                pathIndicatorTabManager.openTab(new PathViewToken(fileToShow));
+                pathIndicatorTabManager.openTab(new PathViewToken(fileToShow, associatedProject == activeProject));
                 if(i != shownPath.getNameCount()) {
                     pathIndicatorTabManager.getTabList().addTab(sharedSeparator);
                 }
             }
         }
-        if(associatedProject == null || !Objects.equals(lastActiveProjectRoot, projectRoot)) {
-            lastActiveProjectRoot = projectRoot;
-            updateBuildConfigs(associatedProject);
+        {
+            Path projectRoot = null;
+            if(activeProject == null || !Objects.equals(lastActiveProjectRoot, projectRoot = activeProject.getRootDirectory().toPath())) {
+                lastActiveProjectRoot = projectRoot;
+                updateBuildConfigs(activeProject);
+            }
         }
     }
 

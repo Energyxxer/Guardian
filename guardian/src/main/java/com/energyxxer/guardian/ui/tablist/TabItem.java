@@ -124,6 +124,13 @@ public class TabItem extends TabListElement {
             }
         }
 
+        Graphics2D g2d = (Graphics2D) g;
+
+        float alpha = token.getAlpha();
+        if(alpha != 1) {
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+        }
+
         if(icon != null) g.drawImage(icon, offsetX + (iconOnly ? h/2 : 16) - 16/2, (h-16)/2 + 8 - 16/2, 16, 16, null);
         if(iconOnly) {
             offsetX += 24;
