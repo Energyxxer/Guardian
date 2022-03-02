@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.dialogs.build_configs;
 
+import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.prismarine.util.JsonTraverser;
 import com.energyxxer.util.logger.Debug;
 import com.google.gson.*;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class BuildConfigTabParser {
-    public static void parseUserBuildConfigTabs(File file, ArrayList<BuildConfigTab> tabs) {
+    public static void parseUserBuildConfigTabs(File file, ArrayList<BuildConfigTab> tabs, Project project) {
         if(file.exists() && file.isFile()) {
             try(FileReader fr = new FileReader(file)) {
                 JsonObject root = new Gson().fromJson(fr, JsonObject.class);
@@ -22,7 +23,7 @@ public class BuildConfigTabParser {
                     JsonObject rawTabObj = traverser.reset(rawTabEntry.getValue()).asJsonObject();
                     if(rawTabObj == null) continue;
                     traverser.reset(rawTabObj);
-                    tabs.add(parseTab(traverser, rawTabEntry.getKey(), rawTabObj));
+                    tabs.add(parseTab(traverser, rawTabEntry.getKey(), rawTabObj, project));
                 }
 
             } catch (IOException | JsonSyntaxException e) {
@@ -30,8 +31,8 @@ public class BuildConfigTabParser {
             }
         }
     }
-    private static BuildConfigTab parseTab(JsonTraverser traverser, String title, JsonObject rawTabObj) {
-        BuildConfigTab tab = new BuildConfigTab(title);
+    private static BuildConfigTab parseTab(JsonTraverser traverser, String title, JsonObject rawTabObj, Project project) {
+        BuildConfigTab tab = new BuildConfigTab(title, project);
         for(JsonElement rawEntry : traverser.reset(rawTabObj).get("fields").iterateAsArray()) {
             parseEntry(traverser, rawEntry, tab);
         }

@@ -1,8 +1,10 @@
 package com.energyxxer.guardian.ui.dialogs.build_configs;
 
 import com.energyxxer.commodore.versioning.ThreeNumberVersion;
+import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.ui.styledcomponents.*;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.prismarine.PrismarineCompiler;
 import com.energyxxer.prismarine.util.JsonTraverser;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
@@ -11,13 +13,12 @@ import com.google.gson.JsonArray;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public interface BuildConfigTabDisplayModuleEntry<T> {
 
-    void create(ThemeListenerManager tlm, JComponent parent, FieldHost<T> fieldHost);
+    void create(ThemeListenerManager tlm, JComponent parent, FieldHost<T> fieldHost, Project project);
 
     static void nameDescription(ThemeListenerManager tlm, JComponent parent, String name, String description) {
         if(name != null) {
@@ -47,7 +48,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost fieldHost, Project project) {
             create(text, style, tlm, parent);
         }
 
@@ -77,7 +78,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost fieldHost, Project project) {
             Padding component = new Padding(size);
             component.setAlignmentX(Component.LEFT_ALIGNMENT);
             parent.add(component);
@@ -105,7 +106,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
             BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
@@ -126,10 +127,10 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
             parent.add(component);
 
             fieldHost.addOpenEvent(s -> {
-                component.setFile(new File(property.get(s)));
+                component.setFile(PrismarineCompiler.newFileObject(property.get(s), project.getRootDirectory()));
             });
             fieldHost.addApplyEvent(s -> {
-                property.set(s, component.getFile().getAbsolutePath());
+                property.set(s, PrismarineCompiler.fileObjectToString(component.getFile(), project.getRootDirectory()));
             });
         }
     }
@@ -150,7 +151,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
             BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
@@ -184,7 +185,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
             BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
@@ -220,7 +221,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
             BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
@@ -258,7 +259,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
             BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
@@ -314,7 +315,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
 
         @Override
-        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
             StyledCheckBox checkbox = new StyledCheckBox(name,"BuildConfigs.content");
             checkbox.setAlignmentX(Component.LEFT_ALIGNMENT);
             parent.add(checkbox);

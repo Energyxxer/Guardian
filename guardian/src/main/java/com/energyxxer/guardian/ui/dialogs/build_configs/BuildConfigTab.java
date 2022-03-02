@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.dialogs.build_configs;
 
+import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
@@ -12,10 +13,12 @@ import java.util.Collection;
 
 public class BuildConfigTab implements ModuleToken {
     private String title;
+    private Project project;
     private ArrayList<BuildConfigTabDisplayModuleEntry> entries = new ArrayList<>();
 
-    public BuildConfigTab(String title) {
+    public BuildConfigTab(String title, Project project) {
         this.title = title;
+        this.project = project;
     }
 
     public void addEntry(BuildConfigTabDisplayModuleEntry entry) {
@@ -58,7 +61,7 @@ public class BuildConfigTab implements ModuleToken {
 
     @Override
     public DisplayModule createModule(Tab tab) {
-        return new BuildConfigTabDisplayModule(this);
+        return new BuildConfigTabDisplayModule(this, project);
     }
 
     @Override

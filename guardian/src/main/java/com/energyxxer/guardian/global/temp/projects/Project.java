@@ -105,7 +105,7 @@ public interface Project<T> {
 
     default void parseUserBuildConfigTabs(ArrayList<BuildConfigTab> tabs) {
 	    File file = getRootDirectory().toPath().resolve(".guardian").resolve("build_config_fields.json").toFile();
-        BuildConfigTabParser.parseUserBuildConfigTabs(file, tabs);
+        BuildConfigTabParser.parseUserBuildConfigTabs(file, tabs, this);
     }
 
 	default void buildConfigUpdated(BuildConfiguration<T> config) {}

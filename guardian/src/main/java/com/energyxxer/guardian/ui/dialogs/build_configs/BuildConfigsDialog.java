@@ -7,7 +7,6 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.ToolbarButton;
 import com.energyxxer.guardian.ui.dialogs.PromptDialog;
-import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.orderlist.OrderListElement;
 import com.energyxxer.guardian.ui.orderlist.OrderListMaster;
 import com.energyxxer.guardian.ui.orderlist.StandardOrderListItem;
@@ -289,9 +288,6 @@ public class BuildConfigsDialog {
             switcher.add(tabSP, BorderLayout.NORTH);
             currentView = new JPanel();
             switcher.add(currentView);
-
-            tabManager.openTab(new FileModuleToken(new File("C:\\Users\\PC\\IdeaProjects\\Guardian\\guardian\\src\\main\\java\\com\\energyxxer\\guardian\\ui\\dialogs\\build_configs\\BuildConfigsDialog.java")));
-            tabManager.openTab(new FileModuleToken(new File("C:\\Users\\PC\\IdeaProjects\\Guardian\\guardian\\src\\main\\java\\com\\energyxxer\\guardian\\ui\\dialogs\\build_configs\\BuildConfigToken.java")));
         }
         dialog.setContentPane(pane);
         dialog.pack();
@@ -341,6 +337,8 @@ public class BuildConfigsDialog {
         if(tabManager.openTabs.size() > 0) tabManager.setSelectedTab(tabManager.openTabs.get(0));
 
         if(startSelected != null) configList.selectElement(startSelected);
+
+        //list templates
 
         dialog.setTitle("Build Configurations for project \"" + project.getName() + "\"");
         switcher.revalidate();

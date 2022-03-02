@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.dialogs.build_configs;
 
+import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
@@ -18,7 +19,7 @@ public class BuildConfigTabDisplayModule extends JPanel implements DisplayModule
     private ArrayList<Consumer<JsonTraverser>> openEvents = new ArrayList<>();
     private ArrayList<Consumer<JsonTraverser>> applyEvents = new ArrayList<>();
 
-    public BuildConfigTabDisplayModule(BuildConfigTab buildConfigTab) {
+    public BuildConfigTabDisplayModule(BuildConfigTab buildConfigTab, Project project) {
         this.setOpaque(false);
         this.setLayout(new BorderLayout());
 
@@ -39,7 +40,7 @@ public class BuildConfigTabDisplayModule extends JPanel implements DisplayModule
         this.add(scrollPane, BorderLayout.CENTER);
 
         for(BuildConfigTabDisplayModuleEntry entry : buildConfigTab.getEntries()) {
-            entry.create(tlm, content, this);
+            entry.create(tlm, content, this, project);
         }
     }
 
@@ -97,9 +98,9 @@ public class BuildConfigTabDisplayModule extends JPanel implements DisplayModule
         }
     }
 
-    public void open(JsonTraverser traverser) {
+    public void open(JsonTraverser config) {
         for(Consumer<JsonTraverser> event : openEvents) {
-            event.accept(traverser);
+            event.accept(config);
         }
     }
 }
