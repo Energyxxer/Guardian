@@ -1,14 +1,19 @@
 package com.energyxxer.guardian.ui.dialogs.build_configs;
 
+import com.energyxxer.commodore.versioning.ThreeNumberVersion;
 import com.energyxxer.guardian.ui.styledcomponents.*;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.prismarine.util.JsonTraverser;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
 import com.energyxxer.xswing.XFileField;
+import com.google.gson.JsonArray;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public interface BuildConfigTabDisplayModuleEntry<T> {
 
@@ -35,6 +40,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
 
     class Label implements BuildConfigTabDisplayModuleEntry {
         public String text;
+        public int style = Font.PLAIN;
 
         public Label(String text) {
             this.text = text;
@@ -42,7 +48,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
 
         @Override
         public void create(ThemeListenerManager tlm, JComponent parent, FieldHost fieldHost) {
-            create(text, Font.PLAIN, tlm, parent);
+            create(text, style, tlm, parent);
         }
 
         public static void create(String text, int style, ThemeListenerManager tlm, JComponent parent) {
@@ -132,6 +138,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
 
         public String name;
         public String description;
+        public int width = 200;
 
         public TextField() {
 
@@ -148,8 +155,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
             BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
             StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
-            component.setPreferredSize(new ScalableDimension(300,25));
-            component.setMaximumSize(new ScalableDimension(200,25));
+            component.setMaximumSize(new ScalableDimension(width,25));
             component.setAlignmentX(Component.LEFT_ALIGNMENT);
             parent.add(component);
 
@@ -158,6 +164,137 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
             });
             fieldHost.addApplyEvent(s -> {
                 property.set(s, component.getText());
+            });
+        }
+    }
+
+    class IntField<S> extends FieldForProperty<Integer, S> {
+
+        public String name;
+        public String description;
+        public int width = 200;
+
+        public IntField() {
+
+        }
+
+        public IntField(String name, String description) {
+            this.name = name;
+            this.description = description;
+        }
+
+        @Override
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+
+            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+
+            StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
+            component.setMaximumSize(new ScalableDimension(width,25));
+            component.setAlignmentX(Component.LEFT_ALIGNMENT);
+            parent.add(component);
+
+            fieldHost.addOpenEvent(s -> {
+                component.setText(Integer.toString(property.get(s)));
+            });
+            fieldHost.addApplyEvent(s -> {
+                try {
+                    property.set(s, Integer.parseInt(component.getText()));
+                } catch(NumberFormatException ignore) {}
+            });
+        }
+    }
+
+    class DoubleField<S> extends FieldForProperty<Double, S> {
+
+        public String name;
+        public String description;
+        public int width = 200;
+
+        public DoubleField() {
+
+        }
+
+        public DoubleField(String name, String description) {
+            this.name = name;
+            this.description = description;
+        }
+
+        @Override
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+
+            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+
+            StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
+            component.setMaximumSize(new ScalableDimension(width,25));
+            component.setAlignmentX(Component.LEFT_ALIGNMENT);
+            parent.add(component);
+
+            fieldHost.addOpenEvent(s -> {
+                component.setText(Double.toString(property.get(s)));
+            });
+            fieldHost.addApplyEvent(s -> {
+                try {
+                    property.set(s, Double.parseDouble(component.getText()));
+                } catch(NumberFormatException ignore) {}
+            });
+        }
+    }
+
+    class VersionField<S> extends FieldForProperty<JsonArray, S> {
+
+        public String name;
+        public String description;
+        public int width = 200;
+
+        private static final Pattern VERSION_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)(?:\\.(\\d+))");
+
+        public VersionField() {
+
+        }
+
+        public VersionField(String name, String description) {
+            this.name = name;
+            this.description = description;
+        }
+
+        @Override
+        public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost) {
+
+            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+
+            StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
+            component.setMaximumSize(new ScalableDimension(width,25));
+            component.setAlignmentX(Component.LEFT_ALIGNMENT);
+            parent.add(component);
+
+            fieldHost.addOpenEvent(s -> {
+                JsonArray arr = property.get(s);
+                ThreeNumberVersion version;
+                if(arr != null) {
+                    version = new ThreeNumberVersion(
+                            JsonTraverser.getThreadInstance().reset(arr).get(0).asInt(),
+                            JsonTraverser.getThreadInstance().reset(arr).get(1).asInt(),
+                            JsonTraverser.getThreadInstance().reset(arr).get(2).asInt()
+                    );
+                } else {
+                    version = new ThreeNumberVersion(1, 0, 0);
+                }
+                component.setText(version.getVersionString());
+            });
+            fieldHost.addApplyEvent(s -> {
+                Matcher matcher = VERSION_PATTERN.matcher(component.getText());
+                try {
+                    if(matcher.matches()) {
+                        int major = Integer.parseInt(matcher.group(1));
+                        int minor = Integer.parseInt(matcher.group(2));
+                        int patch = matcher.groupCount() >= 3 ? Integer.parseInt(matcher.group(3)) : 0;
+                        JsonArray arr = new JsonArray(3);
+                        arr.add(major);
+                        arr.add(minor);
+                        arr.add(patch);
+                        property.set(s, arr);
+                    }
+                } catch(NumberFormatException ignore) {}
             });
         }
     }

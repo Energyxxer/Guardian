@@ -4,6 +4,7 @@ import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.HintStylizer;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
 import com.energyxxer.xswing.hints.TextHint;
 
@@ -59,6 +60,8 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
                 selectionStyle = t.getString(namespace+".tab.selectionStyle","TabList.tab.selectionStyle","default:FULL");
                 selectionLineThickness = Math.max(t.getInteger(2,namespace+".tab.selectionLineThickness","TabList.tab.selectionLineThickness"), 0);
                 height = Math.max(t.getInteger(5,namespace+".height","TabList.height"),5);
+                this.setMinimumSize(new ScalableDimension(1, height));
+                this.setPreferredSize(new ScalableDimension(1, height));
 
                 this.setFont(t.getFont(namespace+".tab","TabList.tab","General"));
 
@@ -79,6 +82,8 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
                 selectionStyle = t.getString("TabList.tab.selectionStyle","default:FULL");
                 selectionLineThickness = Math.max(t.getInteger(2,"TabList.tab.selectionLineThickness"), 0);
                 height = Math.max(t.getInteger(5,"TabList.height"),5);
+                this.setMinimumSize(new ScalableDimension(1, height));
+                this.setPreferredSize(new ScalableDimension(1, height));
 
                 this.setFont(t.getFont("TabList.tab","General"));
 

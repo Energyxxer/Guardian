@@ -6,6 +6,7 @@ import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummary;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.ui.dialogs.build_configs.BuildConfigTab;
+import com.energyxxer.guardian.ui.dialogs.build_configs.BuildConfigTabParser;
 import com.energyxxer.prismarine.PrismarineCompiler;
 import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.google.gson.JsonObject;
@@ -93,7 +94,23 @@ public interface Project<T> {
 
 	Iterable<? extends BuildConfigTab> getBuildConfigTabs();
 
+    default void parseUserBuildConfigTabs(ArrayList<BuildConfigTab> tabs, boolean recursively) {
+        parseUserBuildConfigTabs(tabs);
+        if(recursively) {
+        	for(Project dependency : getLoadedDependencies(new ArrayList<>(), true)) {
+        		dependency.parseUserBuildConfigTabs(tabs);
+			}
+		}
+    }
+
+    default void parseUserBuildConfigTabs(ArrayList<BuildConfigTab> tabs) {
+	    File file = getRootDirectory().toPath().resolve(".guardian").resolve("build_config_fields.json").toFile();
+        BuildConfigTabParser.parseUserBuildConfigTabs(file, tabs);
+    }
+
 	default void buildConfigUpdated(BuildConfiguration<T> config) {}
+
+    ArrayList<Project> getLoadedDependencies(ArrayList<Project> list, boolean recursively);
 
 	void refreshBuildConfigs();
 }

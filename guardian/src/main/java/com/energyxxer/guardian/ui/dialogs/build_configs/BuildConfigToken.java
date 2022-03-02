@@ -67,11 +67,6 @@ public class BuildConfigToken implements CompoundActionModuleToken {
         return this == other;
     }
 
-    @Override
-    public void onInteract() {
-        BuildConfigsDialog.setSelected(this);
-    }
-
     public void writeToFile(Gson gson) {
         traverser.reset().createOnTraversal().get("guardian").get("name").set(name);
 

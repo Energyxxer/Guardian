@@ -11,6 +11,7 @@ import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.orderlist.OrderListElement;
 import com.energyxxer.guardian.ui.orderlist.OrderListMaster;
 import com.energyxxer.guardian.ui.orderlist.StandardOrderListItem;
+import com.energyxxer.guardian.ui.scrollbar.InvisibleScrollPaneLayout;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.StyledButton;
 import com.energyxxer.guardian.ui.tablist.TabListMaster;
@@ -278,7 +279,14 @@ public class BuildConfigsDialog {
                 switcher.revalidate();
                 switcher.repaint();
             });
-            switcher.add(tabList, BorderLayout.NORTH);
+
+
+            JScrollPane tabSP = new JScrollPane(tabList);
+            tabSP.setBorder(BorderFactory.createEmptyBorder());
+            tabSP.setLayout(new InvisibleScrollPaneLayout(tabSP));
+            tabSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+            switcher.add(tabSP, BorderLayout.NORTH);
             currentView = new JPanel();
             switcher.add(currentView);
 
@@ -313,8 +321,14 @@ public class BuildConfigsDialog {
         filesToDelete.clear();
         applied = false;
 
+        StandardOrderListItem startSelected = null;
+        BuildConfiguration<?> activeBuildConfig = project.getBuildConfig();
+
         for(BuildConfiguration<?> config : project.getAllBuildConfigs()) {
             StandardOrderListItem element = new StandardOrderListItem(configList, new BuildConfigToken(config));
+            if(config == activeBuildConfig) {
+                startSelected = element;
+            }
             configList.addItem(element);
             filesToDelete.add(config.file);
         }
@@ -326,7 +340,10 @@ public class BuildConfigsDialog {
         }
         if(tabManager.openTabs.size() > 0) tabManager.setSelectedTab(tabManager.openTabs.get(0));
 
+        if(startSelected != null) configList.selectElement(startSelected);
+
         dialog.setTitle("Build Configurations for project \"" + project.getName() + "\"");
+        switcher.revalidate();
         dialog.setVisible(true);
     }
 

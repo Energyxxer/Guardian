@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.ui.dialogs.build_configs;
 
 import com.energyxxer.prismarine.util.JsonTraverser;
+import com.google.gson.JsonArray;
 
 public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
     private String[] pathParts;
@@ -74,6 +75,42 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
 
         @Override
         public void set(JsonTraverser subject, Integer value) {
+            traverseSet(subject).set(value);
+        }
+    }
+
+    public static class JsonDoubleProperty extends JsonProperty<Double> {
+
+        public JsonDoubleProperty(String path, double defaultValue) {
+            super(path, defaultValue);
+        }
+
+        @Override
+        public Double get(JsonTraverser subject) {
+            return traverseGet(subject).asDouble(defaultValue);
+        }
+
+        @Override
+        public void set(JsonTraverser subject, Double value) {
+            traverseSet(subject).set(value);
+        }
+    }
+
+    public static class JsonArrayProperty extends JsonProperty<JsonArray> {
+
+        public JsonArrayProperty(String path, JsonArray defaultValue) {
+            super(path, defaultValue);
+        }
+
+        @Override
+        public JsonArray get(JsonTraverser subject) {
+            JsonArray value = traverseGet(subject).asJsonArray();
+            if(value == null) value = defaultValue;
+            return value;
+        }
+
+        @Override
+        public void set(JsonTraverser subject, JsonArray value) {
             traverseSet(subject).set(value);
         }
     }
