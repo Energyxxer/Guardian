@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.main.window;
 
+import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.Resources;
 import com.energyxxer.guardian.global.Status;
@@ -171,7 +172,9 @@ public class GuardianWindow {
 		jframe.getContentPane().add(statusBar = new StatusBar(), BorderLayout.SOUTH);
 
 		ActionManager.setup();
-		Guardian.core.setupActions();
+		for(GuardianBinding binding : Guardian.bindings) {
+			binding.setupActions();
+		}
 		jframe.getContentPane().add(toolbar = new Toolbar(), BorderLayout.NORTH);
 		jframe.setJMenuBar(menuBar = new MenuBar());
 

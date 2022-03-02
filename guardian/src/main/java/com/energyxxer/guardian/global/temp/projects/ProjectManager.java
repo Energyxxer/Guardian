@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.global.temp.projects;
 
+import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
@@ -50,7 +51,9 @@ public class ProjectManager {
 			}
 		}
 
-		Guardian.core.workspaceLoaded(workspaceConfigObj);
+		for(GuardianBinding binding : Guardian.bindings) {
+			binding.workspaceLoaded(workspaceConfigObj);
+		}
 	}
 
 	private static void loadProjectsInDir(File dir) {

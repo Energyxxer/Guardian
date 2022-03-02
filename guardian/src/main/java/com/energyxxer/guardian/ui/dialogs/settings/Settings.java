@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.dialogs.settings;
 
+import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.styledcomponents.StyledButton;
@@ -49,7 +50,9 @@ public class Settings {
 		sectionPanes.put("Editor", new SettingsEditor());
 		sectionPanes.put("Snippets", new SettingsSnippets());
 		sectionPanes.put("Keymap", new SettingsKeymap());
-		Guardian.core.setupSettingsSections(sectionPanes);
+		for(GuardianBinding binding : Guardian.bindings) {
+			binding.setupSettingsSections(sectionPanes);
+		}
 		Set<String> keySet = sectionPanes.keySet();
 
 		{

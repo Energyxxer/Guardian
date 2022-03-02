@@ -50,7 +50,7 @@ public class DefinitionUpdateProcess extends AbstractProcess {
     }
 
     public void checkForUpdates() {
-        if(!Guardian.core.usesJavaEditionDefinitions() && !Guardian.core.usesBedrockEditionDefinitions()) {
+        if(!Guardian.usesJavaEditionDefinitions() && !Guardian.usesBedrockEditionDefinitions()) {
             this.finalizeProcess(true);
             return; //Doesn't use any definitions
         }
@@ -141,8 +141,8 @@ public class DefinitionUpdateProcess extends AbstractProcess {
                 String filename = file.getAsJsonObject().get("filename").getAsString();
 
                 if(filename.startsWith(expectedPrefix) && filename.endsWith(expectedSuffix) &&
-                        (filename.startsWith(expectedPrefix + "j_") && Guardian.core.usesJavaEditionDefinitions())
-                        || (filename.startsWith(expectedPrefix + "b_") && Guardian.core.usesBedrockEditionDefinitions())
+                        (filename.startsWith(expectedPrefix + "j_") && Guardian.usesJavaEditionDefinitions())
+                        || (filename.startsWith(expectedPrefix + "b_") && Guardian.usesBedrockEditionDefinitions())
                 ) {
                     Debug.log("CHANGED:" + filename);
                     filename = filename.substring(expectedPrefix.length(), filename.length() - expectedSuffix.length());
@@ -154,8 +154,8 @@ public class DefinitionUpdateProcess extends AbstractProcess {
                     String previousFilename = file.getAsJsonObject().get("previous_filename").getAsString();
 
                     if(previousFilename.startsWith(expectedPrefix) && previousFilename.startsWith(expectedSuffix) &&
-                            (filename.startsWith(expectedPrefix + "j_") && Guardian.core.usesJavaEditionDefinitions())
-                            || (filename.startsWith(expectedPrefix + "b_") && Guardian.core.usesBedrockEditionDefinitions())
+                            (filename.startsWith(expectedPrefix + "j_") && Guardian.usesJavaEditionDefinitions())
+                            || (filename.startsWith(expectedPrefix + "b_") && Guardian.usesBedrockEditionDefinitions())
                     ) {
                         previousFilename = previousFilename.substring(expectedPrefix.length(), previousFilename.length() - expectedSuffix.length());
                         changeSet.add(previousFilename);

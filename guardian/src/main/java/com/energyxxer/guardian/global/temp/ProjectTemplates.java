@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.global.temp;
 
 import com.energyxxer.commodore.CommandUtils;
+import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.Guardian;
@@ -72,7 +73,10 @@ public class ProjectTemplates {
                     break;
                 }
                 default: {
-                    result = Guardian.core.getTemplateVariable(s.toUpperCase(Locale.ENGLISH), destination, templateRoot);
+                    for(GuardianBinding binding : Guardian.bindings) {
+                        result = binding.getTemplateVariable(s.toUpperCase(Locale.ENGLISH), destination, templateRoot);
+                        if(result != null) break;
+                    }
                 }
             }
 

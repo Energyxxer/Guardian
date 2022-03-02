@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.main;
 
 import com.energyxxer.commodore.versioning.ThreeNumberVersion;
+import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.GuardianCore;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.Resources;
@@ -54,6 +55,7 @@ public class Guardian {
 	public static ThreeNumberVersion VERSION = new ThreeNumberVersion(1, 0, 0);
 	public static Guardian guardian;
 	public static GuardianCore core;
+	public static final ArrayList<GuardianBinding> bindings = new ArrayList<>();
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	public static File RUNNING_PATH;
@@ -146,9 +148,11 @@ public class Guardian {
 			for(String className : lr) {
 				Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
 				//noinspection unchecked
-				cls.getMethod("setup").invoke(null);
+				GuardianBinding binding = (GuardianBinding) cls.getConstructor().newInstance(new Object[0]);
+				bindings.add(binding);
+				binding.setup();
 			}
-		} catch (IOException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+		} catch (IOException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
@@ -234,7 +238,9 @@ public class Guardian {
 		GuardianWindow.projectExplorer.openExplorerTree();
 		SnippetManager.load();
 
-		Guardian.core.startupComplete();
+		for(GuardianBinding binding : bindings) {
+			binding.startupComplete();
+		}
 
 		if(ProgramUpdateProcess.CHECK_FOR_PROGRAM_UPDATES_STARTUP.get()) ProgramUpdateProcess.tryUpdate();
 		if(DefinitionUpdateProcess.CHECK_FOR_DEF_UPDATES_STARTUP.get()) DefinitionUpdateProcess.tryUpdate();
@@ -293,6 +299,34 @@ public class Guardian {
 
 		Debug.log("java path: " + System.getProperty("java.home")
 				+ File.separator + "bin" + File.separator + "java");
+	}
+
+	private static Boolean usesJavaEditionDefinitions = null;
+	public static boolean usesJavaEditionDefinitions() {
+		if(usesJavaEditionDefinitions == null) {
+			usesJavaEditionDefinitions = false;
+			for(GuardianBinding binding : Guardian.bindings) {
+				if(binding.usesJavaEditionDefinitions()) {
+					usesJavaEditionDefinitions = true;
+					break;
+				}
+			}
+		}
+		return usesJavaEditionDefinitions;
+	}
+
+	private static Boolean usesBedrockEditionDefinitions = null;
+	public static boolean usesBedrockEditionDefinitions() {
+		if(usesBedrockEditionDefinitions == null) {
+			usesBedrockEditionDefinitions = false;
+			for(GuardianBinding binding : Guardian.bindings) {
+				if(binding.usesBedrockEditionDefinitions()) {
+					usesBedrockEditionDefinitions = true;
+					break;
+				}
+			}
+		}
+		return usesBedrockEditionDefinitions;
 	}
 
 }

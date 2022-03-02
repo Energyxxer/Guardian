@@ -5,7 +5,6 @@ import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.ui.common.ProgramUpdateProcess;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.google.gson.JsonObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +16,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 
 public class GuardianCore {
     protected Class resourceRegistry = GuardianCore.class;
@@ -54,16 +52,6 @@ public class GuardianCore {
 
     public Path getThemeDir() {
         return mainDirectory.resolve("resources").resolve("themes");
-    }
-
-    public void startupComplete() {
-    }
-
-    public boolean usesJavaEditionDefinitions() {
-        return false;
-    }
-    public boolean usesBedrockEditionDefinitions() {
-        return false;
     }
 
     public ProgramUpdateProcess.ProgramVersionInfo checkForUpdates() throws IOException {
@@ -115,29 +103,11 @@ public class GuardianCore {
         return getMainDirectory().resolve("libraries").toFile();
     }
 
-    public void populateResources() {
-
-    }
-
     public Point getSplashVersionCoords() {
         return new Point(512, 320);
     }
 
-    public void workspaceLoaded(JsonObject config) {
-
-    }
-
-    public String getTemplateVariable(String s, File destination, File templateRoot) {
-        return null;
-    }
-
-    public void setupSettingsSections(HashMap<String, JPanel> sectionPanes) {
-    }
-
     public URI getDocumentationURI() throws URISyntaxException {
         return null;
-    }
-
-    public void setupActions() {
     }
 }

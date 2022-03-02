@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.global;
 
+import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.files.FileDefaults;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.ui.commodoreresources.DefinitionPacks;
@@ -58,7 +59,9 @@ public class Resources {
         ThemeManager.registerSyntaxThemeFromJar("MCFunction Syntax Dark");
         ThemeManager.registerSyntaxThemeFromJar("Prismarine Meta Syntax Dark");
 
-        Guardian.core.populateResources();
+        for(GuardianBinding binding : Guardian.bindings) {
+            binding.populateResources();
+        }
 
         tips.clear();
         try {
