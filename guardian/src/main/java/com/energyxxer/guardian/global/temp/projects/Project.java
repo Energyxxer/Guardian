@@ -5,6 +5,7 @@ import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummarizer;
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummary;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.guardian.langinterface.ProjectType;
+import com.energyxxer.guardian.ui.dialogs.build_configs.BuildConfigTab;
 import com.energyxxer.prismarine.PrismarineCompiler;
 import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.google.gson.JsonObject;
@@ -90,5 +91,9 @@ public interface Project<T> {
 		buildConfigUpdated(config);
 	}
 
+	Iterable<? extends BuildConfigTab> getBuildConfigTabs();
+
 	default void buildConfigUpdated(BuildConfiguration<T> config) {}
+
+	void refreshBuildConfigs();
 }

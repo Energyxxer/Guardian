@@ -12,11 +12,11 @@ import com.energyxxer.guardian.main.window.actions.ProgramAction;
 import com.energyxxer.guardian.main.window.sections.toolbar.PathViewToken;
 import com.energyxxer.guardian.ui.ToolbarButton;
 import com.energyxxer.guardian.ui.ToolbarSeparator;
+import com.energyxxer.guardian.ui.dialogs.build_configs.BuildConfigsDialog;
 import com.energyxxer.guardian.ui.styledcomponents.StyledDropdownMenu;
 import com.energyxxer.guardian.ui.tablist.TabListMaster;
 import com.energyxxer.guardian.ui.tablist.TabSeparator;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.Padding;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.hints.TextHint;
@@ -226,8 +226,14 @@ public class Toolbar extends JPanel {
 
     private void updateBuildConfig(BuildConfigDropdownItem buildConfiguration) {
         if(buildConfiguration.config == null) {
-            Debug.log("EDIT");
-            updateBuildConfigSelected(ProjectManager.getAssociatedProject(lastActiveProjectRoot.toFile()));
+            Project<?> project = ProjectManager.getAssociatedProject(lastActiveProjectRoot.toFile());
+
+            updateBuildConfigSelected(project);
+
+            BuildConfigsDialog.show(project);
+
+            updateBuildConfigs(project);
+
             return;
         }
         if(lastActiveProjectRoot != null) {

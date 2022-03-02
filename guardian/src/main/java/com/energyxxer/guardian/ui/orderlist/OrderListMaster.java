@@ -22,6 +22,7 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
 
     private OrderListElement rolloverElement = null;
     private OrderListElement selectedElement = null;
+    private ArrayList<SelectionListener> selectionListeners;
 
     private HashMap<String, Integer> styleNumbers = new HashMap<>();
     private HashMap<String, Color> colors = new HashMap<>();
@@ -344,7 +345,10 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
 
     public void removeElement(OrderListElement element) {
         children.remove(element);
-        if(selectedElement == element) selectedElement = null;
+        if(selectedElement == element) {
+            if(selectedElement != null) invokeSelectionListeners(selectedElement, null);
+            selectedElement = null;
+        }
         if(rolloverElement == element) rolloverElement = null;
         element.onReorder();
         repaint();
@@ -353,7 +357,10 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
     public void removeElement(int index) {
         OrderListElement element = children.get(index);
         children.remove(index);
-        if(selectedElement == element) selectedElement = null;
+        if(selectedElement == element) {
+            if(selectedElement != null) invokeSelectionListeners(selectedElement, null);
+            selectedElement = null;
+        }
         if(rolloverElement == element) rolloverElement = null;
         element.onReorder();
         repaint();
@@ -361,12 +368,15 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
 
     public void removeAllElements() {
         children.clear();
+        if(selectedElement != null) invokeSelectionListeners(selectedElement, null);
         selectedElement = null;
         rolloverElement = null;
         repaint();
     }
 
     public void selectElement(OrderListElement element) {
+        if(selectedElement == element) return;
+        invokeSelectionListeners(selectedElement, element);
         if(selectedElement != null) {
             selectedElement.setSelected(false);
         }
@@ -402,5 +412,22 @@ public class OrderListMaster extends JComponent implements MouseListener, MouseM
 
     public List<OrderListElement> getAllElements() {
         return children;
+    }
+
+    public void addSelectionListener(SelectionListener l) {
+        if(selectionListeners == null) selectionListeners = new ArrayList<>();
+        selectionListeners.add(l);
+    }
+
+    private void invokeSelectionListeners(OrderListElement oldSelected, OrderListElement newSelected) {
+        if(selectionListeners != null) {
+            for(SelectionListener l : selectionListeners) {
+                l.changed(oldSelected, newSelected);
+            }
+        }
+    }
+
+    public interface SelectionListener {
+        void changed(OrderListElement oldSelected, OrderListElement newSelected);
     }
 }

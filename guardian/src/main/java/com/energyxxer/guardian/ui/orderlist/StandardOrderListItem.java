@@ -37,12 +37,12 @@ public class StandardOrderListItem extends OrderListElement implements ItemActio
         this.actions = token.getActions();
     }
 
-    private void updateName() {
+    public void updateName() {
         this.name = token.getTitle();
         if(this.name != null) this.name = StringUtil.ellipsis(this.name,100);
     }
 
-    private void updateIcon() {
+    public void updateIcon() {
         this.icon = token.getIcon();
     }
 

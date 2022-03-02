@@ -23,6 +23,7 @@ import com.energyxxer.guardian.ui.commodoreresources.DefinitionUpdateProcess;
 import com.energyxxer.guardian.ui.commodoreresources.Plugins;
 import com.energyxxer.guardian.ui.common.ProgramUpdateProcess;
 import com.energyxxer.guardian.ui.dialogs.KeyStrokeDialog;
+import com.energyxxer.guardian.ui.dialogs.build_configs.BuildConfigsDialog;
 import com.energyxxer.guardian.ui.dialogs.file_dialogs.ProjectDialog;
 import com.energyxxer.guardian.ui.dialogs.settings.Settings;
 import com.energyxxer.guardian.ui.tablist.TabItem;
@@ -186,6 +187,21 @@ public class ActionManager {
                             GuardianWindow.showPopupMessage("No project selected");
                         }
                     }
+                ).setIconKey("project_properties")
+        );
+        actions.put("EDIT_BUILD_CONFIGURATIONS",
+                new ProgramAction(
+                        "Edit Build Configurations", "Edit the current project's build configurations",
+                        KeyMap.requestMapping("edit_build_configurations", KeyMap.identifierToStrokes("as+C")).setGroupName("Windows"),
+                        () -> {
+                            Project selectedProject = Commons.getActiveProject();
+                            if(selectedProject != null) {
+                                BuildConfigsDialog.show(selectedProject);
+                                GuardianWindow.toolbar.updateActiveFile();
+                            } else {
+                                GuardianWindow.showPopupMessage("No project selected");
+                            }
+                        }
                 ).setIconKey("project_properties")
         );
         actions.put("CHECK_FOR_UPDATES",

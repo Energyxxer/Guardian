@@ -84,6 +84,6 @@ public class PathViewToken implements ModuleToken {
 
     @Override
     public float getAlpha() {
-        return isActiveProject ? 1.0f : 0.75f;
+        return isActiveProject ? 1.0f : 0.5f;
     }
 }
