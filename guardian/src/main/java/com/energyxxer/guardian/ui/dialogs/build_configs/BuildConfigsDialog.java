@@ -13,6 +13,8 @@ import com.energyxxer.guardian.ui.orderlist.StandardOrderListItem;
 import com.energyxxer.guardian.ui.scrollbar.InvisibleScrollPaneLayout;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.StyledButton;
+import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
+import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.ui.tablist.TabListMaster;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.ImageManager;
@@ -27,7 +29,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class BuildConfigsDialog {
 
@@ -46,6 +50,8 @@ public class BuildConfigsDialog {
 
     private static ArrayList<File> filesToDelete = new ArrayList<>();
     private static Project<?> project;
+
+    private static ArrayList<BuildConfigToken> templates = new ArrayList<>();
 
     private static boolean applied = false;
 
@@ -79,13 +85,37 @@ public class BuildConfigsDialog {
                 ToolbarButton btn = new ToolbarButton("add", tlm);
                 btn.setHintText("Add a build configuration");
                 btn.addActionListener(a -> {
-                    String newName = new PromptDialog("Add build configuration", "Enter a name for the new build configuration", "Unnamed Configuration").result;
-                    if(newName != null) {
-                        if(newName.isEmpty()) newName = "Unnamed Configuration";
-                        StandardOrderListItem element = new StandardOrderListItem(configList, new BuildConfigToken(newName, project.getBuildDirectory(), new JsonObject()));
-                        configList.addItem(element);
-                        configList.selectElement(element);
+                    StyledPopupMenu menu = new StyledPopupMenu("-");
+
+                    {
+                        StyledMenuItem item = new StyledMenuItem("New Configuration");
+
+                        item.addActionListener(aa -> {
+                            String newName = new PromptDialog("Add build configuration", "Enter a name for the new build configuration", "Unnamed Configuration").result;
+                            if(newName != null) {
+                                if(newName.isEmpty()) newName = "Unnamed Configuration";
+                                StandardOrderListItem element = new StandardOrderListItem(configList, new BuildConfigToken(newName, project.getBuildDirectory(), new JsonObject()));
+                                configList.addItem(element);
+                                configList.selectElement(element);
+                            }
+                        });
+
+                        menu.add(item);
                     }
+
+                    for(BuildConfigToken template : templates) {
+                        StyledMenuItem item = new StyledMenuItem(template.getTitle(), "package");
+
+                        item.addActionListener(aa -> {
+                            StandardOrderListItem element = new StandardOrderListItem(configList, new BuildConfigToken(template.name, project.getBuildDirectory(), template.root.deepCopy()));
+                            configList.addItem(element);
+                            configList.selectElement(element);
+                        });
+
+                        menu.add(item);
+                    }
+
+                    menu.show(btn, 0, btn.getHeight());
                 });
                 buttons.add(btn);
             }
@@ -339,10 +369,34 @@ public class BuildConfigsDialog {
         if(startSelected != null) configList.selectElement(startSelected);
 
         //list templates
+        templates.clear();
+        findTemplates(project);
+        for(Project<?> dependency : project.getLoadedDependencies(new ArrayList<>(), true)) {
+            findTemplates(dependency);
+        }
+        templates.sort(Comparator.comparingInt(c -> c.originalSortIndex));
 
         dialog.setTitle("Build Configurations for project \"" + project.getName() + "\"");
         switcher.revalidate();
         dialog.setVisible(true);
+    }
+
+    private static void findTemplates(Project<?> project) {
+        File dir = project.getBuildTemplateDirectory();
+        if(dir.exists() && dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    if(file.isFile() && (file.getName().endsWith(".build") || file.getName().endsWith(".build.guardiantemplate"))) {
+                        try {
+                            templates.add(new BuildConfigToken(file, project.getRootDirectory(), BuildConfigsDialog.project.getRootDirectory()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static void apply() {
@@ -382,6 +436,7 @@ public class BuildConfigsDialog {
         selectedConfig = null;
         mainContent.remove(switcher);
         configList.removeAllElements();
+        templates.clear();
         filesToDelete.clear();
         tabManager.closeAllTabs(true);
         if(applied) project.refreshBuildConfigs();

@@ -23,9 +23,12 @@ public interface Project<T> {
 	TokenPatternMatch getFileStructure();
 	PrismarineProjectSummary getSummary();
 	File getRootDirectory();
-	default File getBuildDirectory() {
-		return getRootDirectory().toPath().resolve(".build").toFile();
-	}
+    default File getBuildDirectory() {
+        return getRootDirectory().toPath().resolve(".build").toFile();
+    }
+    default File getBuildTemplateDirectory() {
+        return getRootDirectory().toPath().resolve(".guardian").resolve("build_config_templates").toFile();
+    }
 	String getName();
 	File getServerDataRoot();
 	File getClientDataRoot();

@@ -19,12 +19,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ProjectTemplates {
-    public static void create(File templateRoot, String name) {
-        File destination = Preferences.getWorkspace().toPath().resolve(name).toFile();
-        destination.mkdirs();
-        FileCommons.copyFiles(templateRoot.listFiles(), destination);
-
-        scanForTemplateFiles(destination, s -> {
+    public static Function<String, String> getVariableProvider(File templateRoot, File destinationRoot) {
+        String name = destinationRoot.getName();
+        return s -> {
             int flagsIndex = s.indexOf(".");
             String flags = "";
             if(flagsIndex >= 0) {
@@ -43,7 +40,7 @@ public class ProjectTemplates {
                 }
 
                 case "PROJECT_ROOT": {
-                    result = destination.getAbsolutePath();
+                    result = destinationRoot.getAbsolutePath();
                     break;
                 }
                 case "GLOBAL_LIBRARIES_ROOT": {
@@ -74,7 +71,7 @@ public class ProjectTemplates {
                 }
                 default: {
                     for(GuardianBinding binding : Guardian.bindings) {
-                        result = binding.getTemplateVariable(s.toUpperCase(Locale.ENGLISH), destination, templateRoot);
+                        result = binding.getTemplateVariable(s.toUpperCase(Locale.ENGLISH), destinationRoot, templateRoot);
                         if(result != null) break;
                     }
                 }
@@ -96,7 +93,14 @@ public class ProjectTemplates {
             }
 
             return result;
-        });
+        };
+    }
+
+    public static void create(File templateRoot, File destination) {
+        destination.mkdirs();
+        FileCommons.copyFiles(templateRoot.listFiles(), destination);
+
+        scanForTemplateFiles(destination, getVariableProvider(templateRoot, destination));
 
         ProjectManager.loadWorkspace();
     }
@@ -117,31 +121,34 @@ public class ProjectTemplates {
                     }
                 } else if(file.getName().endsWith(".guardiantemplate")) {
                     // Replace template
-                    StringBuffer newContent = new StringBuffer();
-                    Matcher matcher = null;
-                    for(String line : Files.readAllLines(file.toPath())) {
-                        if(matcher == null) {
-                            matcher = TEMPLATE_VARIABLE_PATTERN.matcher(line);
-                        } else {
-                            matcher.reset(line);
-                        }
-                        while(matcher.find()) {
-                            String replacement = variableProvider.apply(matcher.group(1));
-                            if(replacement == null) replacement = matcher.group(0);
-                            matcher.appendReplacement(newContent, Matcher.quoteReplacement(replacement));
-                        }
-                        matcher.appendTail(newContent);
-                        newContent.append('\n');
-                    }
-                    if(newContent.length() > 0) {
-                        newContent.setLength(newContent.length()-1);
-                    }
-                    FileCommons.writeFile(file.toPath().getParent().resolve(file.getName().substring(0, file.getName().length()-".guardiantemplate".length())), newContent.toString());
+                    String newContent = replaceVariables(file, variableProvider);
+                    FileCommons.writeFile(file.toPath().getParent().resolve(file.getName().substring(0, file.getName().length()-".guardiantemplate".length())), newContent);
                     file.delete();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static String replaceVariables(File file, Function<String, String> variableProvider) throws IOException {
+        return replaceVariables(new String(Files.readAllBytes(file.toPath()), Guardian.DEFAULT_CHARSET), variableProvider);
+    }
+
+    public static String replaceVariables(String text, Function<String, String> variableProvider) {
+        StringBuffer newContent = new StringBuffer();
+        Matcher matcher = TEMPLATE_VARIABLE_PATTERN.matcher(text);
+        while(matcher.find()) {
+            String replacement = variableProvider.apply(matcher.group(1));
+            if(replacement == null) replacement = matcher.group(0);
+            matcher.appendReplacement(newContent, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(newContent);
+        newContent.append('\n');
+        if(newContent.length() > 0) {
+            newContent.setLength(newContent.length()-1);
+        }
+
+        return newContent.toString();
     }
 }

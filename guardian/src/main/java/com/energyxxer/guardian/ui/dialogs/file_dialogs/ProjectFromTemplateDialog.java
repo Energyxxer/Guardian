@@ -186,7 +186,7 @@ public class ProjectFromTemplateDialog {
         if(!valid) return;
         String name = nameField.getText().trim();
 
-        ProjectTemplates.create(templateRootsUsed[templateField.getValueIndex()-1], name);
+        ProjectTemplates.create(templateRootsUsed[templateField.getValueIndex()-1], Preferences.getWorkspace().toPath().resolve(name).toFile());
 
         GuardianWindow.projectExplorer.refresh();
 

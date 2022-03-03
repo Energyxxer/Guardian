@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.ui.dialogs.build_configs;
 
 import com.energyxxer.guardian.global.Commons;
+import com.energyxxer.guardian.global.temp.ProjectTemplates;
 import com.energyxxer.guardian.global.temp.projects.BuildConfiguration;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
@@ -13,10 +14,7 @@ import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -27,12 +25,30 @@ public class BuildConfigToken implements CompoundActionModuleToken {
     public File file;
     public JsonObject root;
     public JsonTraverser traverser;
+    public int originalSortIndex;
+
+    public BuildConfigToken(File templateFile, File templateRoot, File destinationRoot) throws IOException {
+        if(templateFile.getName().endsWith(".guardiantemplate")) {
+            this.root = new Gson().fromJson(ProjectTemplates.replaceVariables(templateFile, ProjectTemplates.getVariableProvider(templateRoot, destinationRoot)), JsonObject.class);
+        } else {
+            try(FileReader fr = new FileReader(templateFile)) {
+                this.root = new Gson().fromJson(fr, JsonObject.class);
+            }
+        }
+        BuildConfiguration<?> config = new BuildConfiguration<>(templateFile, this.root);
+
+        this.name = config.name;
+        this.file = config.file;
+        this.traverser = new JsonTraverser(root);
+        this.originalSortIndex = config.sortIndex;
+    }
 
     public BuildConfigToken(BuildConfiguration<?> config) {
         this.name = config.name;
         this.file = config.file;
         this.root = config.root.deepCopy();
         this.traverser = new JsonTraverser(root);
+        this.originalSortIndex = config.sortIndex;
     }
 
     public BuildConfigToken(String name, File directory, JsonObject root) {
