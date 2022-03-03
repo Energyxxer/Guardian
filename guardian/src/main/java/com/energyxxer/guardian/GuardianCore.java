@@ -91,7 +91,7 @@ public class GuardianCore {
             Collections.addAll(templateRootsReturn, mainTemplatesDir.listFiles());
         }
         for(Project project : ProjectManager.getLoadedProjects()) {
-            File subTemplatesDir = project.getRootDirectory().toPath().resolve("project_templates").toFile();
+            File subTemplatesDir = project.getRootDirectory().toPath().resolve(".guardian").resolve("project_templates").toFile();
             if(subTemplatesDir.exists() && subTemplatesDir.isDirectory()) {
                 Collections.addAll(templateRootsReturn, subTemplatesDir.listFiles());
             }
