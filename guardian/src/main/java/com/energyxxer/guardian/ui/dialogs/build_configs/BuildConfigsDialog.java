@@ -22,6 +22,7 @@ import com.energyxxer.xswing.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -390,7 +391,7 @@ public class BuildConfigsDialog {
                     if(file.isFile() && (file.getName().endsWith(".build") || file.getName().endsWith(".build.guardiantemplate"))) {
                         try {
                             templates.add(new BuildConfigToken(file, project.getRootDirectory(), BuildConfigsDialog.project.getRootDirectory()));
-                        } catch (IOException e) {
+                        } catch (IOException | JsonSyntaxException e) {
                             e.printStackTrace();
                         }
                     }
