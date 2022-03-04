@@ -138,4 +138,9 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
         caret.setProfile(previousProfile);
         return true;
     }
+
+    @Override
+    public boolean canMerge(Transaction<AdvancedEditor> other) {
+        return false;
+    }
 }

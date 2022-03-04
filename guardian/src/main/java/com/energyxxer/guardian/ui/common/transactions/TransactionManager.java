@@ -27,7 +27,7 @@ public class TransactionManager<T> {
                 Transaction<T> transaction = transactions.get(--currentTransaction);
                 transaction.undo(target);
                 undone(transactions.get(currentTransaction));
-                if(currentTransaction > 0 && Math.abs(transactions.get(currentTransaction).time - transactions.get(currentTransaction -1).time) <= chainDelay) {
+                if(currentTransaction > 0 && Math.abs(transactions.get(currentTransaction).time - transactions.get(currentTransaction -1).time) <= chainDelay && transactions.get(currentTransaction-1).canMerge(transactions.get(currentTransaction))) {
                     undo();
                 }
             }
@@ -40,7 +40,7 @@ public class TransactionManager<T> {
                 Transaction<T> transaction = transactions.get(currentTransaction++);
                 transaction.redo(target);
                 redone(transaction);
-                if(currentTransaction < transactions.size() && Math.abs(transactions.get(currentTransaction -1).time - transactions.get(currentTransaction).time) <= chainDelay) {
+                if(currentTransaction < transactions.size() && Math.abs(transactions.get(currentTransaction -1).time - transactions.get(currentTransaction).time) <= chainDelay && transactions.get(currentTransaction).canMerge(transactions.get(currentTransaction-1))) {
                     redo();
                 }
             }

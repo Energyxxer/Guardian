@@ -11,6 +11,10 @@ public abstract class Transaction<T> {
     public abstract boolean redo(T target);
     public abstract boolean undo(T target);
 
+    public boolean canMerge(Transaction<T> other) {
+        return true;
+    }
+
     public boolean redoOnInsert(T target) {
         return redo(target);
     }

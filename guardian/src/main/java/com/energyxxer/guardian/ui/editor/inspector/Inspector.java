@@ -1,8 +1,6 @@
 package com.energyxxer.guardian.ui.editor.inspector;
 
-import com.energyxxer.enxlex.lexical_analysis.inspections.Inspection;
-import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionModule;
-import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionSeverity;
+import com.energyxxer.enxlex.lexical_analysis.inspections.*;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.HintStylizer;
@@ -187,11 +185,16 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
     }
 
     public void registerCharacterDrift(Function<Integer, Integer> h) {
-//        for(InspectionItem item : legacyItems) {
-//            item.bounds.start = editor.getLocationForOffset(h.apply(item.bounds.start.index));
-//            item.bounds.end = editor.getLocationForOffset(h.apply(item.bounds.end.index));
-//        }
-        //TODO apply drift to inspection module
+        for(Inspection inspection : inspectionModule.getInspections()) {
+            inspection.setStartIndex(h.apply(inspection.getStartIndex()));
+            inspection.setEndIndex(h.apply(inspection.getEndIndex()));
+            for(CodeAction action : inspection.getActions()) {
+                if(action instanceof CodeReplacementAction) {
+                    ((CodeReplacementAction) action).setReplacementStartIndex(h.apply(((CodeReplacementAction) action).getReplacementStartIndex()));
+                    ((CodeReplacementAction) action).setReplacementEndIndex(h.apply(((CodeReplacementAction) action).getReplacementEndIndex()));
+                }
+            }
+        }
     }
 
     public void setInspectionModule(InspectionModule inspectionModule) {
