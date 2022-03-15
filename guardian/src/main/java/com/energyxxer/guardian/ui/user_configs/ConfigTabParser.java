@@ -1,6 +1,7 @@
-package com.energyxxer.guardian.ui.dialogs.build_configs;
+package com.energyxxer.guardian.ui.user_configs;
 
 import com.energyxxer.guardian.global.temp.projects.Project;
+import com.energyxxer.guardian.ui.dialogs.build_configs.JsonProperty;
 import com.energyxxer.prismarine.util.JsonTraverser;
 import com.energyxxer.util.logger.Debug;
 import com.google.gson.*;
@@ -12,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class BuildConfigTabParser {
-    public static void parseUserBuildConfigTabs(File file, ArrayList<BuildConfigTab> tabs, Project project) {
+public class ConfigTabParser {
+    public static void parseUserConfigTabs(File file, ArrayList<ConfigTab> tabs, Project project) {
         if(file.exists() && file.isFile()) {
             try(FileReader fr = new FileReader(file)) {
                 JsonObject root = new Gson().fromJson(fr, JsonObject.class);
@@ -31,15 +32,15 @@ public class BuildConfigTabParser {
             }
         }
     }
-    private static BuildConfigTab parseTab(JsonTraverser traverser, String title, JsonObject rawTabObj, Project project) {
-        BuildConfigTab tab = new BuildConfigTab(title, project);
+    private static ConfigTab parseTab(JsonTraverser traverser, String title, JsonObject rawTabObj, Project project) {
+        ConfigTab tab = new ConfigTab(title, project);
         for(JsonElement rawEntry : traverser.reset(rawTabObj).get("fields").iterateAsArray()) {
             parseEntry(traverser, rawEntry, tab);
         }
         return tab;
     }
 
-    private static void parseEntry(JsonTraverser traverser, JsonElement rawEntry, BuildConfigTab tab) {
+    private static void parseEntry(JsonTraverser traverser, JsonElement rawEntry, ConfigTab tab) {
         if(rawEntry.isJsonObject()) {
             String type = traverser.reset(rawEntry).get("type").asString();
             if(type != null) {
@@ -57,24 +58,24 @@ public class BuildConfigTabParser {
         } else if(rawEntry.isJsonPrimitive()) {
             JsonPrimitive rawPrimitive = rawEntry.getAsJsonPrimitive();
             if(rawPrimitive.isNumber()) {
-                tab.addEntry(new BuildConfigTabDisplayModuleEntry.Spacing(rawPrimitive.getAsInt()));
+                tab.addEntry(new ConfigTabDisplayModuleEntry.Spacing(rawPrimitive.getAsInt()));
             } else if(rawPrimitive.isString()) {
-                tab.addEntry(new BuildConfigTabDisplayModuleEntry.Label(rawPrimitive.getAsString()));
+                tab.addEntry(new ConfigTabDisplayModuleEntry.Label(rawPrimitive.getAsString()));
             }
         }
     }
 
-    private static void parseLabel(JsonTraverser traverser, JsonObject entryObj, BuildConfigTab tab) {
+    private static void parseLabel(JsonTraverser traverser, JsonObject entryObj, ConfigTab tab) {
         String text = traverser.reset(entryObj).get("text").asString();
         if(text == null) return;
-        BuildConfigTabDisplayModuleEntry.Label label = new BuildConfigTabDisplayModuleEntry.Label(text);
+        ConfigTabDisplayModuleEntry.Label label = new ConfigTabDisplayModuleEntry.Label(text);
         if(traverser.reset(entryObj).get("bold").asBoolean(false)) label.style |= Font.BOLD;
         if(traverser.reset(entryObj).get("italic").asBoolean(false)) label.style |= Font.ITALIC;
 
         tab.addEntry(label);
     }
 
-    private static void parseField(JsonTraverser traverser, JsonObject entryObj, String type, BuildConfigTab tab) {
+    private static void parseField(JsonTraverser traverser, JsonObject entryObj, String type, ConfigTab tab) {
         String path = traverser.reset(entryObj).get("path").asString();
         if(path == null) return;
 
@@ -88,7 +89,7 @@ public class BuildConfigTabParser {
                         traverser.reset(entryObj).get("default-value").asBoolean(false)
                 );
 
-                BuildConfigTabDisplayModuleEntry.CheckboxField<JsonTraverser> field = new BuildConfigTabDisplayModuleEntry.CheckboxField<>(name, description);
+                ConfigTabDisplayModuleEntry.CheckboxField<JsonTraverser> field = new ConfigTabDisplayModuleEntry.CheckboxField<>(name, description);
                 field.setProperty(property);
 
                 tab.addEntry(field);
@@ -101,7 +102,7 @@ public class BuildConfigTabParser {
                         traverser.reset(entryObj).get("default-value").asString()
                 );
 
-                BuildConfigTabDisplayModuleEntry.TextField<JsonTraverser> field = new BuildConfigTabDisplayModuleEntry.TextField<>(name, description);
+                ConfigTabDisplayModuleEntry.TextField<JsonTraverser> field = new ConfigTabDisplayModuleEntry.TextField<>(name, description);
                 field.setProperty(property);
                 field.width = traverser.reset(entryObj).get("width").asInt(field.width);
 
@@ -115,7 +116,7 @@ public class BuildConfigTabParser {
                         traverser.reset(entryObj).get("default-value").asInt(0)
                 );
 
-                BuildConfigTabDisplayModuleEntry.IntField<JsonTraverser> field = new BuildConfigTabDisplayModuleEntry.IntField<>(name, description);
+                ConfigTabDisplayModuleEntry.IntField<JsonTraverser> field = new ConfigTabDisplayModuleEntry.IntField<>(name, description);
                 field.setProperty(property);
                 field.width = traverser.reset(entryObj).get("width").asInt(field.width);
 
@@ -129,7 +130,7 @@ public class BuildConfigTabParser {
                         traverser.reset(entryObj).get("default-value").asDouble(0)
                 );
 
-                BuildConfigTabDisplayModuleEntry.DoubleField<JsonTraverser> field = new BuildConfigTabDisplayModuleEntry.DoubleField<>(name, description);
+                ConfigTabDisplayModuleEntry.DoubleField<JsonTraverser> field = new ConfigTabDisplayModuleEntry.DoubleField<>(name, description);
                 field.setProperty(property);
                 field.width = traverser.reset(entryObj).get("width").asInt(field.width);
 
@@ -143,7 +144,7 @@ public class BuildConfigTabParser {
                         traverser.reset(entryObj).get("default-value").asJsonArray()
                 );
 
-                BuildConfigTabDisplayModuleEntry.VersionField<JsonTraverser> field = new BuildConfigTabDisplayModuleEntry.VersionField<>(name, description);
+                ConfigTabDisplayModuleEntry.VersionField<JsonTraverser> field = new ConfigTabDisplayModuleEntry.VersionField<>(name, description);
                 field.setProperty(property);
                 field.width = traverser.reset(entryObj).get("width").asInt(field.width);
 
@@ -157,7 +158,7 @@ public class BuildConfigTabParser {
                         traverser.reset(entryObj).get("default-value").asString()
                 );
 
-                BuildConfigTabDisplayModuleEntry.FileField<JsonTraverser> field = new BuildConfigTabDisplayModuleEntry.FileField<>(
+                ConfigTabDisplayModuleEntry.FileField<JsonTraverser> field = new ConfigTabDisplayModuleEntry.FileField<>(
                         name,
                         description,
                         traverser.reset(entryObj).get("dialog-title").asNonEmptyString()

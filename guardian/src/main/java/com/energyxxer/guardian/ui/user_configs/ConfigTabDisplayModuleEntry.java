@@ -1,7 +1,9 @@
-package com.energyxxer.guardian.ui.dialogs.build_configs;
+package com.energyxxer.guardian.ui.user_configs;
 
 import com.energyxxer.commodore.versioning.ThreeNumberVersion;
 import com.energyxxer.guardian.global.temp.projects.Project;
+import com.energyxxer.guardian.ui.dialogs.build_configs.FieldHost;
+import com.energyxxer.guardian.ui.dialogs.build_configs.Property;
 import com.energyxxer.guardian.ui.styledcomponents.*;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.prismarine.PrismarineCompiler;
@@ -16,7 +18,7 @@ import java.awt.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public interface BuildConfigTabDisplayModuleEntry<T> {
+public interface ConfigTabDisplayModuleEntry<T> {
 
     void create(ThemeListenerManager tlm, JComponent parent, FieldHost<T> fieldHost, Project project);
 
@@ -30,7 +32,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
     }
 
-    abstract class FieldForProperty<T, S> implements BuildConfigTabDisplayModuleEntry<S> {
+    abstract class FieldForProperty<T, S> implements ConfigTabDisplayModuleEntry<S> {
         protected Property<T, S> property;
 
         public FieldForProperty<T, S> setProperty(Property<T, S> property) {
@@ -39,7 +41,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
     }
 
-    class Label implements BuildConfigTabDisplayModuleEntry {
+    class Label implements ConfigTabDisplayModuleEntry {
         public String text;
         public int style = Font.PLAIN;
 
@@ -70,7 +72,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         }
     }
 
-    class Spacing implements BuildConfigTabDisplayModuleEntry {
+    class Spacing implements ConfigTabDisplayModuleEntry {
         public int size;
 
         public Spacing(int size) {
@@ -108,7 +110,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         @Override
         public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
-            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+            ConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
             StyledFileField component = new StyledFileField(null, "BuildConfigs.content") {
                 @Override
@@ -153,7 +155,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         @Override
         public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
-            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+            ConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
             StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
             component.setMaximumSize(new ScalableDimension(width,25));
@@ -187,7 +189,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         @Override
         public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
-            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+            ConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
             StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
             component.setMaximumSize(new ScalableDimension(width,25));
@@ -223,7 +225,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         @Override
         public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
-            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+            ConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
             StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
             component.setMaximumSize(new ScalableDimension(width,25));
@@ -261,7 +263,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
         @Override
         public void create(ThemeListenerManager tlm, JComponent parent, FieldHost<S> fieldHost, Project project) {
 
-            BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
+            ConfigTabDisplayModuleEntry.nameDescription(tlm, parent, name, description);
 
             StyledTextField component = new StyledTextField("", "BuildConfigs.content", tlm);
             component.setMaximumSize(new ScalableDimension(width,25));
@@ -320,7 +322,7 @@ public interface BuildConfigTabDisplayModuleEntry<T> {
             checkbox.setAlignmentX(Component.LEFT_ALIGNMENT);
             parent.add(checkbox);
             if(description != null) {
-                BuildConfigTabDisplayModuleEntry.nameDescription(tlm, parent, null, description);
+                ConfigTabDisplayModuleEntry.nameDescription(tlm, parent, null, description);
             }
 
             fieldHost.addOpenEvent(s -> {

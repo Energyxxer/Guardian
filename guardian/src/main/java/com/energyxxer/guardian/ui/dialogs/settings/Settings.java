@@ -3,6 +3,7 @@ package com.energyxxer.guardian.ui.dialogs.settings;
 import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
+import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.StyledButton;
 import com.energyxxer.guardian.ui.styledcomponents.StyledList;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
@@ -67,11 +68,7 @@ public class Settings {
 
 			StyledList<String> navigator = new StyledList<>(sections, "Settings");
 			sidebar.setBackground(navigator.getBackground());
-			tlm.addThemeChangeListener(t ->
-					sidebar.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(0, 0, 0, ComponentResizer.DIST), BorderFactory.createMatteBorder(0, 0, 0, Math.max(t.getInteger(1,"Settings.content.border.thickness"),0), t.getColor(new Color(200, 200, 200), "Settings.content.border.color"))))
-			);
 			sidebar.setOpaque(false);
-			navigator.setPreferredSize(new ScalableDimension(200,500));
 
 			navigator.addListSelectionListener(o -> {
 				contentPane.remove(currentSection);
@@ -80,9 +77,17 @@ public class Settings {
 				contentPane.repaint();
 			});
 
-			sidebar.add(navigator, BorderLayout.CENTER);
+			OverlayScrollPane scrollPane = new OverlayScrollPane(tlm, navigator);
+			sidebar.add(scrollPane, BorderLayout.CENTER);
 
 			pane.add(sidebar, BorderLayout.WEST);
+
+			tlm.addThemeChangeListener(t -> {
+				sidebar.setMinimumSize(new ScalableDimension(25, 1));
+				sidebar.setMaximumSize(new ScalableDimension(400, 1));
+				sidebar.setPreferredSize(new ScalableDimension(200,500));
+				sidebar.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(0, 0, 0, ComponentResizer.DIST), BorderFactory.createMatteBorder(0, 0, 0, Math.max(t.getInteger(1,"Settings.content.border.thickness"),0), t.getColor(new Color(200, 200, 200), "Settings.content.border.color"))));
+			});
 		}
 
 		tlm.addThemeChangeListener(t ->

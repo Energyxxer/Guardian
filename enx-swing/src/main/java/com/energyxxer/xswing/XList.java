@@ -68,12 +68,18 @@ public class XList<T> extends JPanel {
 				c.setMaximumSize(new ScalableDimension(width,c.getPreferredSize().height));
 			}
 			revalidate();
+			lastPaintedWidth = width;
 		}
 	}
 	
 	public void setForeground(Color c) {
 		super.setForeground(c);
 		setCellForeground(c);
+	}
+
+	public void setSelectedOptionIndex(int index) {
+		selected = index;
+		updateStyle();
 	}
 	
 	private void updateStyle() {

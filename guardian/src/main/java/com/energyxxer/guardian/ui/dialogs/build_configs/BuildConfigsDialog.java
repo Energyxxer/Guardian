@@ -17,6 +17,8 @@ import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.ui.tablist.TabListMaster;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.guardian.ui.user_configs.ConfigTab;
+import com.energyxxer.guardian.ui.user_configs.ConfigTabDisplayModule;
 import com.energyxxer.util.ImageManager;
 import com.energyxxer.xswing.*;
 import com.google.gson.Gson;
@@ -362,7 +364,7 @@ public class BuildConfigsDialog {
 
         tabManager.closeAllTabs(true);
 
-        for(BuildConfigTab tab : project.getBuildConfigTabs()) {
+        for(ConfigTab tab : project.getBuildConfigTabs()) {
             tabManager.openTab(tab);
         }
         if(tabManager.openTabs.size() > 0) tabManager.setSelectedTab(tabManager.openTabs.get(0));
@@ -403,8 +405,8 @@ public class BuildConfigsDialog {
     private static void apply() {
         if(selectedConfig != null) {
             for(Tab tab : tabManager.openTabs) {
-                ((BuildConfigTabDisplayModule) tab.module).apply(selectedConfig.traverser);
-                ((BuildConfigTabDisplayModule) tab.module).open(selectedConfig.traverser);
+                ((ConfigTabDisplayModule) tab.module).apply(selectedConfig.traverser);
+                ((ConfigTabDisplayModule) tab.module).open(selectedConfig.traverser);
             }
         }
 
@@ -448,7 +450,7 @@ public class BuildConfigsDialog {
     public static void setSelected(BuildConfigToken newSelectedConfig) {
         if(selectedConfig != null) {
             for(Tab tab : tabManager.openTabs) {
-                ((BuildConfigTabDisplayModule) tab.module).apply(selectedConfig.traverser);
+                ((ConfigTabDisplayModule) tab.module).apply(selectedConfig.traverser);
             }
             if(newSelectedConfig == null) {
                 mainContent.remove(switcher);
@@ -463,7 +465,7 @@ public class BuildConfigsDialog {
                 dialog.getContentPane().repaint();
             }
             for(Tab tab : tabManager.openTabs) {
-                ((BuildConfigTabDisplayModule) tab.module).open(newSelectedConfig.traverser);
+                ((ConfigTabDisplayModule) tab.module).open(newSelectedConfig.traverser);
             }
         }
         selectedConfig = newSelectedConfig;

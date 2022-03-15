@@ -1,6 +1,7 @@
-package com.energyxxer.guardian.ui.dialogs.build_configs;
+package com.energyxxer.guardian.ui.user_configs;
 
 import com.energyxxer.guardian.global.temp.projects.Project;
+import com.energyxxer.guardian.ui.dialogs.build_configs.FieldHost;
 import com.energyxxer.guardian.ui.display.DisplayModule;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
@@ -14,12 +15,12 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class BuildConfigTabDisplayModule extends JPanel implements DisplayModule, Disposable, FieldHost<JsonTraverser> {
+public class ConfigTabDisplayModule extends JPanel implements DisplayModule, Disposable, FieldHost<JsonTraverser> {
     private ThemeListenerManager tlm = new ThemeListenerManager();
     private ArrayList<Consumer<JsonTraverser>> openEvents = new ArrayList<>();
     private ArrayList<Consumer<JsonTraverser>> applyEvents = new ArrayList<>();
 
-    public BuildConfigTabDisplayModule(BuildConfigTab buildConfigTab, Project project) {
+    public ConfigTabDisplayModule(ConfigTab configTab, Project project) {
         this.setOpaque(false);
         this.setLayout(new BorderLayout());
 
@@ -39,7 +40,7 @@ public class BuildConfigTabDisplayModule extends JPanel implements DisplayModule
         OverlayScrollPane scrollPane = new OverlayScrollPane(tlm, margin);
         this.add(scrollPane, BorderLayout.CENTER);
 
-        for(BuildConfigTabDisplayModuleEntry entry : buildConfigTab.getEntries()) {
+        for(ConfigTabDisplayModuleEntry entry : configTab.getEntries()) {
             entry.create(tlm, content, this, project);
         }
     }
