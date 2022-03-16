@@ -185,6 +185,7 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
     }
 
     public void registerCharacterDrift(Function<Integer, Integer> h) {
+        if(inspectionModule != null)
         for(Inspection inspection : inspectionModule.getInspections()) {
             inspection.setStartIndex(h.apply(inspection.getStartIndex()));
             inspection.setEndIndex(h.apply(inspection.getEndIndex()));
