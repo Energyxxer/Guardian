@@ -16,9 +16,7 @@ import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.enxlex.suggestions.ComplexSuggestion;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
 import com.energyxxer.guardian.global.Commons;
-import com.energyxxer.guardian.global.temp.lang_defaults.parsing.MCFunctionProductions;
 import com.energyxxer.guardian.global.temp.lang_defaults.presets.JSONLexerProfile;
-import com.energyxxer.guardian.global.temp.lang_defaults.presets.MCFunctionLexerProfile;
 import com.energyxxer.guardian.global.temp.lang_defaults.presets.PropertiesLexerProfile;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
@@ -75,8 +73,8 @@ public class Lang {
     ) {{this.putProperty("line_comment_marker","#");}};
     public static final Lang MCFUNCTION = new Lang("MCFUNCTION", "Minecraft Function",
             true,
-            MCFunctionLexerProfile::new,
-            () -> MCFunctionProductions.FILE,
+            null,
+            () -> null,
             "mcfunction"
     ) {
         {
