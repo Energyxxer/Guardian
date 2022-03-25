@@ -44,6 +44,7 @@ public class FileCommons {
                         }
                     } else {
                         Files.move(file.toPath(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+                        destinationFile.toFile().setLastModified(System.currentTimeMillis());
                     }
                 } else {
                     allMoved = false;
@@ -69,6 +70,7 @@ public class FileCommons {
                 copiedTo.add(destinationFile.toFile());
 
                 Files.copy(file.toPath(), destinationFile);
+                destinationFile.toFile().setLastModified(System.currentTimeMillis());
 
                 if(file.isDirectory()) {
                     copyFiles(file.listFiles(), destinationFile.toFile(), copiedTo);
