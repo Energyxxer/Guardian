@@ -294,6 +294,7 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
     private static final ArrayList<String> commonTextFileEndings = new ArrayList<>();
     static {
         commonTextFileEndings.add(".mcfunction");
+        commonTextFileEndings.add(".guardiantemplate");
         commonTextFileEndings.add(".txt");
         commonTextFileEndings.add(".md");
         commonTextFileEndings.add(".gitignore");
