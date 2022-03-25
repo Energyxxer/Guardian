@@ -193,7 +193,6 @@ public class Lang {
             response = ((LazyLexer) lexer).getMatchResponse();
         } else {
             if(patternMatch != null) {
-                lexer.getStream().tokens.removeIf(token -> !token.type.isSignificant());
 
                 try {
                     response = patternMatch.match(0, lexer);

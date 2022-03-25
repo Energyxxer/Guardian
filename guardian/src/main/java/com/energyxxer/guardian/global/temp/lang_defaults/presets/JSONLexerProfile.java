@@ -24,7 +24,8 @@ public class JSONLexerProfile extends LexerProfile {
             COLON = new TokenType("COLON"), // :
             NUMBER = new TokenType("NUMBER"), // 0.1
             STRING_LITERAL = new TokenType("STRING_LITERAL"), // "STRING LITERAL"
-            BOOLEAN = new TokenType("BOOLEAN"); // true, false
+            BOOLEAN = new TokenType("BOOLEAN"), // true, false
+            COMMENT = new TokenType("COMMENT", false); // true, false
 
     public static final LexerContext STRING_LEXER_CONTEXT = new StringLiteralLexerContext("\"'", STRING_LITERAL);
 
@@ -46,6 +47,19 @@ public class JSONLexerProfile extends LexerProfile {
         contexts.add(braceContext);
         contexts.add(miscellaneousContext);
         contexts.add(numberContext);
+
+        contexts.add(new CommentLexerContext("//", COMMENT) {
+            @Override
+            public ContextCondition getCondition() {
+                return ContextCondition.NONE;
+            }
+        });
+        contexts.add(new CommentLexerContext("/*", "*/", COMMENT) {
+            @Override
+            public ContextCondition getCondition() {
+                return ContextCondition.NONE;
+            }
+        });
     }
 
     @Override
