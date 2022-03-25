@@ -74,6 +74,7 @@ public class Settings {
 				contentPane.remove(currentSection);
 				currentSection = sectionPanes.get(sections[o.getFirstIndex()]);
 				contentPane.add(currentSection, BorderLayout.CENTER);
+				contentPane.revalidate();
 				contentPane.repaint();
 			});
 
