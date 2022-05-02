@@ -87,7 +87,7 @@ public class Guardian {
 		} catch(FileNotFoundException x) {
 			Debug.log("Unable to open log file '" + core.getLogFile() + "', will not log to it until restarted");
 		}
-		Debug.log("Running on Java " + System.getProperty("java.version"));
+		jinfo();
 
 		SwingUtilities.invokeLater(Guardian::showSplash);
 		loadBindings();
@@ -296,9 +296,33 @@ public class Guardian {
 				System.gc();
 			}
 		});
+		ConsoleBoard.registerCommandHandler("jinfo", new ConsoleBoard.CommandHandler() {
+			@Override
+			public String getDescription() {
+				return "Prints information about the Java Runtime";
+			}
 
-		Debug.log("java path: " + System.getProperty("java.home")
+			@Override
+			public void printHelp() {
+				Debug.log();
+				Debug.log("JINFO: Prints information about the Java Runtime");
+			}
+
+			@Override
+			public void handle(String[] args, String rawArgs) {
+				jinfo();
+			}
+		});
+	}
+
+	public static void jinfo() {
+		Debug.log("Running on Java " + System.getProperty("java.version"));
+		Debug.log("Java Path: " + System.getProperty("java.home")
 				+ File.separator + "bin" + File.separator + "java");
+		Debug.log("Total Memory: " + Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB");
+		Debug.log("Free Memory: " + Runtime.getRuntime().freeMemory() / 1024 / 1024 + " MB");
+		Debug.log("Max Memory: " + Runtime.getRuntime().maxMemory() / 1024 / 1024 + " MB");
+		Debug.log("Available Processors: " + Runtime.getRuntime().availableProcessors());
 	}
 
 	private static Boolean usesJavaEditionDefinitions = null;

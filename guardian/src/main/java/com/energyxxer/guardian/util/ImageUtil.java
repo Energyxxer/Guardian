@@ -6,6 +6,7 @@ public class ImageUtil {
 
     public static Image fitToSize(Image img, int maxWidth, int maxHeight) {
         Dimension size = new Dimension(img.getWidth(null), img.getHeight(null));
+        if(size.width == maxWidth && size.height == maxHeight) return img;
         if(size.width < size.height) {
             size.width = Math.max(1,(int) Math.round(maxWidth * (double) size.width / size.height));
             size.height = maxHeight;

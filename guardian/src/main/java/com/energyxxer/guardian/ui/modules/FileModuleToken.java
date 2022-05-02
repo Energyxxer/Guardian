@@ -19,11 +19,10 @@ import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
 import com.energyxxer.guardian.ui.styledcomponents.StyledMenuItem;
 import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.util.FileCommons;
+import com.energyxxer.guardian.util.ImageCache;
 import com.energyxxer.util.Lazy;
-import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.NotNull;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -177,12 +176,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
                 extension = file.getName().substring(file.getName().lastIndexOf("."));
             }
             if(extension.equals(".png") && LOAD_PNGS.get()) {
-                try {
-                    return ImageIO.read(file);
-                } catch(IOException x) {
-                    Debug.log("Couldn't load image from file '" + file + "'");
-                    return Commons.getIcon("warn");
-                }
+                return ImageCache.get(file);
             }
             switch(extension) {
                 case ".wav":
