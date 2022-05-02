@@ -83,6 +83,12 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
 
         g = new ScalableGraphics2D(g);
 
+        if(this.getParent() instanceof JViewport) {
+//            Debug.log(((JViewport) this.getParent()).getViewRect());
+            Rectangle viewRect = ((JViewport) this.getParent()).getViewRect();
+            g.clipRect(viewRect.x, viewRect.y, viewRect.width, viewRect.height);
+        }
+
         renderingChildren.clear();
         renderingChildren.addAll(children);
 

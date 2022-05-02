@@ -103,112 +103,116 @@ public class StandardExplorerItem extends ExplorerElement {
 
         int x = this.x;
 
-        g.setColor((this.rollover || this.selected) ? master.getColors().get("item.rollover.background") : master.getColors().get("item.background"));
-        g.fillRect(0, master.getOffsetY(), w, master.getRowHeight());
-        if(this.selected) {
-            g.setColor(master.getColors().get("item.selected.background"));
+        boolean visible = g.hitClip(x, y, w, getHeight());
 
-            switch(master.getSelectionStyle()) {
-                case "FULL": {
-                    g.fillRect(0, master.getOffsetY(), w, master.getRowHeight());
-                    break;
-                }
-                case "LINE_LEFT": {
-                    g.fillRect(0, master.getOffsetY(), master.getSelectionLineThickness(), master.getRowHeight());
-                    break;
-                }
-                case "LINE_RIGHT": {
-                    g.fillRect(w - master.getSelectionLineThickness(), master.getOffsetY(), master.getSelectionLineThickness(), master.getRowHeight());
-                    break;
-                }
-                case "LINE_TOP": {
-                    g.fillRect(0, master.getOffsetY(), w, master.getSelectionLineThickness());
-                    break;
-                }
-                case "LINE_BOTTOM": {
-                    g.fillRect(0, master.getOffsetY() + master.getRowHeight() - master.getSelectionLineThickness(), w, master.getSelectionLineThickness());
-                    break;
+        if(visible) {
+            g.setColor((this.rollover || this.selected) ? master.getColors().get("item.rollover.background") : master.getColors().get("item.background"));
+            g.fillRect(0, master.getOffsetY(), w, master.getRowHeight());
+            if(this.selected) {
+                g.setColor(master.getColors().get("item.selected.background"));
+
+                switch(master.getSelectionStyle()) {
+                    case "FULL": {
+                        g.fillRect(0, master.getOffsetY(), w, master.getRowHeight());
+                        break;
+                    }
+                    case "LINE_LEFT": {
+                        g.fillRect(0, master.getOffsetY(), master.getSelectionLineThickness(), master.getRowHeight());
+                        break;
+                    }
+                    case "LINE_RIGHT": {
+                        g.fillRect(w - master.getSelectionLineThickness(), master.getOffsetY(), master.getSelectionLineThickness(), master.getRowHeight());
+                        break;
+                    }
+                    case "LINE_TOP": {
+                        g.fillRect(0, master.getOffsetY(), w, master.getSelectionLineThickness());
+                        break;
+                    }
+                    case "LINE_BOTTOM": {
+                        g.fillRect(0, master.getOffsetY() + master.getRowHeight() - master.getSelectionLineThickness(), w, master.getSelectionLineThickness());
+                        break;
+                    }
                 }
             }
-        }
 
-        x += token.getDefaultXOffset();
+            x += token.getDefaultXOffset();
 
-        int margin = ((master.getRowHeight() - 16) / 2);
-        //Expand/Collapse button
-        if (token.isExpandable()) {
-            if (expanded) {
-                g.drawImage(master.getAssetMap().get("collapse"), x, y + margin, 16, 16, null);
+            int margin = ((master.getRowHeight() - 16) / 2);
+            //Expand/Collapse button
+            if (token.isExpandable()) {
+                if (expanded) {
+                    g.drawImage(master.getAssetMap().get("collapse"), x, y + margin, 16, 16, null);
+                } else {
+                    g.drawImage(master.getAssetMap().get("expand"), x, y + margin, 16, 16, null);
+                }
+            }
+
+            //File Icon
+            if (icon != null) {
+                x += 23;
+                g.drawImage(this.icon, x + 8 - 16 / 2, y + margin + 8 - 16 / 2, 16, 16, null);
+            }
+
+            //File Name
+
+            if(this.selected) {
+                g.setColor(master.getColors().get("item.selected.foreground"));
+            } else if(this.rollover) {
+                g.setColor(master.getColors().get("item.rollover.foreground"));
             } else {
-                g.drawImage(master.getAssetMap().get("expand"), x, y + margin, 16, 16, null);
+                g.setColor(master.getColors().get("item.foreground"));
             }
-        }
+            FontMetrics metrics = g.getFontMetrics(g.getFont());
 
-        //File Icon
-        if (icon != null) {
-            x += 23;
-            g.drawImage(this.icon, x + 8 - 16 / 2, y + margin + 8 - 16 / 2, 16, 16, null);
-        }
+            Graphics2D g2d = (Graphics2D) g;
+            Composite oldComposite = g2d.getComposite();
 
-        //File Name
-
-        if(this.selected) {
-            g.setColor(master.getColors().get("item.selected.foreground"));
-        } else if(this.rollover) {
-            g.setColor(master.getColors().get("item.rollover.foreground"));
-        } else {
-            g.setColor(master.getColors().get("item.foreground"));
-        }
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-
-        Graphics2D g2d = (Graphics2D) g;
-        Composite oldComposite = g2d.getComposite();
-
-        float alpha = token.getAlpha();
-        if(alpha != 1) {
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-        }
-
-        if(token.getTitle() != null) {
-            x += 25;
-            g.drawString(token.getTitle(), x, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
-            x += metrics.stringWidth(token.getTitle());
-        }
-
-        if(detailed) {
-            Project project = token.getAssociatedProject();
-            if(project != null) {
-                String projectName = project.getName();
-                int projectNameX = w - metrics.stringWidth(projectName) - 24;
-                g.drawImage(project.getProjectType().getIconForRoot(token.getAssociatedProjectRoot()), projectNameX - 16 - 8, y + margin + 8 - 8, 16, 16, null);
-                g.drawString(projectName, projectNameX, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
+            float alpha = token.getAlpha();
+            if(alpha != 1) {
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
             }
 
-            String subTitle = token.getSubTitle();
-            if(subTitle != null) {
-                g.setFont(master.fonts.get("subtitle"));
-                g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), (int)(g.getColor().getAlpha() * 0.75)));
-                x += 16;
-                g.drawString(subTitle, x, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
-                x += metrics.stringWidth(subTitle);
-                g.setFont(master.getFont());
+            if(token.getTitle() != null) {
+                x += 25;
+                g.drawString(token.getTitle(), x, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
+                x += metrics.stringWidth(token.getTitle());
             }
-        }
 
-        g2d.setComposite(oldComposite);
+            if(detailed) {
+                Project project = token.getAssociatedProject();
+                if(project != null) {
+                    String projectName = project.getName();
+                    int projectNameX = w - metrics.stringWidth(projectName) - 24;
+                    g.drawImage(project.getProjectType().getIconForRoot(token.getAssociatedProjectRoot()), projectNameX - 16 - 8, y + margin + 8 - 8, 16, 16, null);
+                    g.drawString(projectName, projectNameX, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
+                }
 
-        if(parent != null && (rollover || selected)) {
-            int thickness = master.getStyleNumbers().get("hierarchyGuide.thickness");
-            g.setColor(master.getColors().get("hierarchyGuide.color"));
-            g.fillRect(this.x - master.getIndentPerLevel() + 8 - thickness/2, y + getHeight()/2 - thickness/2, master.getIndentPerLevel()/2 + thickness/2, thickness);
-            g.fillRect(this.x - master.getIndentPerLevel() + 8 - thickness/2, parent.getLastRecordedOffset() + parent.getHeight(), thickness, (y + getHeight()/2 - thickness/2) - (parent.getLastRecordedOffset() + parent.getHeight()));
-        }
+                String subTitle = token.getSubTitle();
+                if(subTitle != null) {
+                    g.setFont(master.fonts.get("subtitle"));
+                    g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), (int)(g.getColor().getAlpha() * 0.75)));
+                    x += 16;
+                    g.drawString(subTitle, x, master.getOffsetY() + metrics.getAscent() + metrics.getLeading() + ((master.getRowHeight() - metrics.getHeight())/2));
+                    x += metrics.stringWidth(subTitle);
+                    g.setFont(master.getFont());
+                }
+            }
 
-        if(master.getFlag(ExplorerFlag.DEBUG_WIDTH)) {
-            g.setColor(Color.YELLOW);
-            g.fillRect(master.getContentWidth()-2, master.getOffsetY(), 2, master.getRowHeight());
-            g.setColor(Color.GREEN);
-            g.fillRect(x-2, master.getOffsetY(), 2, master.getRowHeight());
+            g2d.setComposite(oldComposite);
+
+            if(parent != null && (rollover || selected)) {
+                int thickness = master.getStyleNumbers().get("hierarchyGuide.thickness");
+                g.setColor(master.getColors().get("hierarchyGuide.color"));
+                g.fillRect(this.x - master.getIndentPerLevel() + 8 - thickness/2, y + getHeight()/2 - thickness/2, master.getIndentPerLevel()/2 + thickness/2, thickness);
+                g.fillRect(this.x - master.getIndentPerLevel() + 8 - thickness/2, parent.getLastRecordedOffset() + parent.getHeight(), thickness, (y + getHeight()/2 - thickness/2) - (parent.getLastRecordedOffset() + parent.getHeight()));
+            }
+
+            if(master.getFlag(ExplorerFlag.DEBUG_WIDTH)) {
+                g.setColor(Color.YELLOW);
+                g.fillRect(master.getContentWidth()-2, master.getOffsetY(), 2, master.getRowHeight());
+                g.setColor(Color.GREEN);
+                g.fillRect(x-2, master.getOffsetY(), 2, master.getRowHeight());
+            }
         }
 
         master.setContentWidth(Math.max(master.getContentWidth(), x));

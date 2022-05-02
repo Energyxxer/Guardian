@@ -317,19 +317,11 @@ public class ScalableGraphics2D extends Graphics2D {
 
     @Override
     public void clipRect(int x, int y, int width, int height) {
-        x = (int) Math.round(x * SCALE_FACTOR);
-        y = (int) Math.round(y * SCALE_FACTOR);
-        width = (int) Math.round(width * SCALE_FACTOR);
-        height = (int) Math.round(height * SCALE_FACTOR);
         g.clipRect(x, y, width, height);
     }
 
     @Override
     public void setClip(int x, int y, int width, int height) {
-        x = (int) Math.round(x * SCALE_FACTOR);
-        y = (int) Math.round(y * SCALE_FACTOR);
-        width = (int) Math.round(width * SCALE_FACTOR);
-        height = (int) Math.round(height * SCALE_FACTOR);
         g.setClip(x, y, width, height);
     }
 
