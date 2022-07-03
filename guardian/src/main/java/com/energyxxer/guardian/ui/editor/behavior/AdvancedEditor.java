@@ -1133,7 +1133,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 }
 
 //                if(!isPaintingForPrint()) {
-//                    int previewWindow = 500;
+//                    int previewWindow = 800;
 //                    int previewWidth = 150;
 //
 //                    if(previewBuffer == null || previewBuffer.getWidth() != previewWindow || previewBuffer.getHeight() != getHeight()) {
@@ -1149,7 +1149,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 //                    previewGraphics.setComposite(oldComposite);
 //                    printAll(previewGraphics);
 //
-//                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+//                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 //                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
 //                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 //

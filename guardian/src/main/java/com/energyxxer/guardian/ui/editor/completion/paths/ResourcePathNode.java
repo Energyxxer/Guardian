@@ -152,7 +152,7 @@ public class ResourcePathNode extends ExpandableSuggestionToken {
                 }
                 String part = this.pathParts.get(i);
                 if(i < pathParts.size()-1) {
-                    if(!filter.startsWith(part, filterIndex) && !part.contains("_" + filter.substring(filterIndex)) && !(i == 0 && skipNamespaces && part.startsWith(filter.substring(filterIndex)))) {
+                    if(!filter.startsWith(part, filterIndex) && (filter.length() == filterIndex || !part.contains("_" + filter.substring(filterIndex))) && !(i == 0 && skipNamespaces && part.startsWith(filter.substring(filterIndex)))) {
                         if(!(i == 0 && skipNamespaces)) {
                             enabled = false;
                             break;
