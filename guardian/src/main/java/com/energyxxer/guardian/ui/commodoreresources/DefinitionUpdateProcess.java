@@ -121,7 +121,7 @@ public class DefinitionUpdateProcess extends AbstractProcess {
             JsonObject commitOverview = commitOverviewRaw.getAsJsonObject();
 
             String commitMessage = commitOverview.getAsJsonObject("commit").get("message").getAsString();
-            if(!commitMessage.startsWith("[!]")) continue;
+            if(!(commitMessage.startsWith("[!]") || commitMessage.startsWith("[!!]"))) continue;
 
             String commitDateRaw = commitOverview.getAsJsonObject("commit").getAsJsonObject("committer").get("date").getAsString();
             if(Objects.equals(commitDateRaw, lastCheckedDefCommit)) continue;
