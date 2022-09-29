@@ -1,7 +1,5 @@
 package com.energyxxer.guardian.ui.editor.behavior.edits;
 
-import com.energyxxer.enxlex.suggestions.PairSuggestion;
-import com.energyxxer.enxlex.suggestions.Suggestion;
 import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.CustomDocument;
 import com.energyxxer.guardian.ui.editor.behavior.caret.Dot;
@@ -52,18 +50,12 @@ public class InsertionEdit extends Edit {
                 if(valueToWrite.length() == 1
                         && (Dot.SMART_KEYS_BRACES.get() && target.getIndentationManager().isOpeningBrace(valueToWrite) || Dot.SMART_KEYS_QUOTES.get() && "\"'".contains(valueToWrite))) {
                     if(target.getSuggestionInterface() != null && ((SuggestionDialog) target.getSuggestionInterface()).getLatestResults() != null) {
-                        for(Suggestion suggestion : ((SuggestionDialog) target.getSuggestionInterface()).getLatestResults().getSuggestions()) {
-                            if(
-                                    suggestion instanceof PairSuggestion
-                                            && ((PairSuggestion) suggestion).getStartIndex() <= previousProfile.get(i)
-                                            && previousProfile.get(i) <= ((PairSuggestion) suggestion).getEndIndex()
-                                            && ((PairSuggestion) suggestion).getOpenSymbol().equals(valueToWrite)
-                            ) {
-                                valueToWrite += ((PairSuggestion) suggestion).getCloseSymbol();
-                                caretOffset--;
-                                pairCompleted = true;
-                                break;
-                            }
+                        char charToWrite = valueToWrite.charAt(0);
+                        Character charToComplete = ((SuggestionDialog) target.getSuggestionInterface()).getLatestResults().getPairCompletionAtIndex(charToWrite, previousProfile.get(i));
+                        if(charToComplete != null) {
+                            valueToWrite += charToComplete;
+                            caretOffset--;
+                            pairCompleted = true;
                         }
                     }
                 }

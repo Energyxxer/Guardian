@@ -18,6 +18,7 @@ import com.energyxxer.guardian.ui.editor.behavior.AdvancedEditor;
 import com.energyxxer.guardian.ui.editor.behavior.IndentationManager;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionDialog;
 import com.energyxxer.guardian.ui.editor.inspector.Inspector;
+import com.energyxxer.prismarine.summaries.PrismarineProjectSummarizer;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.logger.Debug;
@@ -573,6 +574,24 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             public void handle(String[] args, String rawArgs) {
                 logHighlighterTimes = !logHighlighterTimes;
                 Debug.log("Logging of highlighter times is now: " + logHighlighterTimes);
+            }
+        });
+        ConsoleBoard.registerCommandHandler("debug.project_summary_times", new ConsoleBoard.CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Toggles logging of project summary times";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("DEBUG.PROJECT_SUMMARY_TIMES: Toggles logging of project summary times");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                PrismarineProjectSummarizer.logTimes = !PrismarineProjectSummarizer.logTimes;
+                Debug.log("Logging of project summary times is now: " + PrismarineProjectSummarizer.logTimes);
             }
         });
         ConsoleBoard.registerCommandHandler("debug.dump_tokens", new ConsoleBoard.CommandHandler() {

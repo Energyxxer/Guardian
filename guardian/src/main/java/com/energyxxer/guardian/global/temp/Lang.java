@@ -174,6 +174,8 @@ public class Lang {
             return null;
         }
 
+        long startTime = System.currentTimeMillis();
+
         Lexer lexer = this.lazy ? new LazyLexer(new TokenStream(true), patternMatch) : new EagerLexer(new TokenStream(true));
         TokenMatchResponse response = null;
         ArrayList<Notice> notices = new ArrayList<>();
@@ -185,7 +187,12 @@ public class Lang {
             suggestionModule.setLexer(lexer);
         }
         lexer.setInspectionModule(new InspectionModule());
+
+        if(logAnalysisTimes) Debug.log("Analysis setup time: " + (System.currentTimeMillis() - startTime) + " ms");
+        startTime = System.currentTimeMillis();
         lexer.start(new SourceFile(file), text, createProfile());
+        if(logAnalysisTimes) Debug.log("Lexer time: " + (System.currentTimeMillis() - startTime) + " ms");
+        startTime = System.currentTimeMillis();
 
         lexer.getStream().tokens.remove(0);
 
@@ -209,14 +216,41 @@ public class Lang {
                 }
             }
         }
+        if(logAnalysisTimes) Debug.log("Pattern matching time: " + (System.currentTimeMillis() - startTime) + " ms");
+        startTime = System.currentTimeMillis();
 
         if(summaryModule != null) {
             for(int pass = 0; ((PrismarineSummaryModule) summaryModule).runFileAwareProcessors(pass); pass++);
         }
+        if(logAnalysisTimes) Debug.log("File summary file-aware processor time: " + (System.currentTimeMillis() - startTime) + " ms");
+        startTime = System.currentTimeMillis();
 
         notices.addAll(lexer.getNotices());
 
         return new LangAnalysisResponse(lexer, response, lexer.getStream().tokens, notices);
+    }
+
+    private static boolean logAnalysisTimes = false;
+    static {
+
+        ConsoleBoard.registerCommandHandler("debug.analysis_times", new ConsoleBoard.CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Toggles logging of file analysis times";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("DEBUG.FILE_SUMMARY: Toggles logging of file analysis times");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                logAnalysisTimes = !logAnalysisTimes;
+                Debug.log("Logging of file analysis times is now: " + logAnalysisTimes);
+            }
+        });
     }
 
     @Override
