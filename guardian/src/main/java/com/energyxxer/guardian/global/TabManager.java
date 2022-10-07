@@ -36,6 +36,7 @@ public class TabManager {
 	private final ContentSwapper moduleComponent;
 	private boolean changeWindowInfo = false;
 	private String openTabSaveKey = null;
+	private String selectedTabSaveKey = null;
 
 	public static Preferences.SettingPref<Boolean> SAVE_OPEN_TABS = new Preferences.SettingPref<>("settings.behavior.save_open_tabs", true, Boolean::parseBoolean);
 	public static final Preferences.SettingPref<Integer> TAB_LIMIT = new Preferences.SettingPref<>("settings.behavior.tab_limit", 0, Integer::parseInt);
@@ -209,27 +210,32 @@ public class TabManager {
 		StringBuilder sb = new StringBuilder();
 		for(Tab tab : openTabs) {
 			if(tab.isTemporary()) continue;
-			if(selectedTab != tab) {
-				sb.append(tab.token.getIdentifier());
-				sb.append(File.pathSeparator);
-			}
-		}
-		if(selectedTab != null && !selectedTab.isTemporary()) {
-			sb.append(selectedTab.token.getIdentifier());
+			sb.append(tab.token.getIdentifier());
 			sb.append(File.pathSeparator);
 		}
 		Preferences.put(openTabSaveKey, sb.toString());
+		if(selectedTabSaveKey != null && selectedTab != null && !selectedTab.isTemporary()) {
+			Preferences.put(selectedTabSaveKey, selectedTab.token.getIdentifier());
+		}
 	}
 
 	public void openSavedTabs() {
 		if(openTabSaveKey == null) return;
 		if(!SAVE_OPEN_TABS.get()) return;
 		String savedTabs = Preferences.get(openTabSaveKey,null);
+		String selectedTab = selectedTabSaveKey != null ? Preferences.get(selectedTabSaveKey, null) : null;
 		if(savedTabs != null) {
 			String[] identifiers = savedTabs.split(Pattern.quote(File.pathSeparator));
 			for(String identifier : identifiers) {
 				ModuleToken created = ModuleToken.Static.createFromIdentifier(identifier);
 				if(created != null) openTab(created);
+			}
+		}
+		if(selectedTab != null) {
+			ModuleToken created = ModuleToken.Static.createFromIdentifier(selectedTab);
+			Tab tab = getTabForToken(created);
+			if(tab != null) {
+				setSelectedTab(tab, true);
 			}
 		}
 	}
@@ -248,6 +254,10 @@ public class TabManager {
 
 	public void setOpenTabSaveKey(String openTabSaveKey) {
 		this.openTabSaveKey = openTabSaveKey;
+	}
+
+	public void setSelectedTabSaveKey(String selectedTabSaveKey) {
+		this.selectedTabSaveKey = selectedTabSaveKey;
 	}
 
 	public Tab getTabForToken(ModuleToken token) {

@@ -116,6 +116,7 @@ public class GuardianWindow {
 		tabManager = new TabManager(tabList, c -> editArea.setContent(c));
 		tabManager.setChangeWindowInfo(true);
 		tabManager.setOpenTabSaveKey("open_tabs");
+		tabManager.setSelectedTabSaveKey("selected_tab");
 
 		welcomePane = new WelcomePane();
 
