@@ -23,6 +23,7 @@ import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.util.ConcurrencyUtil;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.util.Lazy;
+import com.energyxxer.util.PatternCache;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringUtil;
 import com.energyxxer.util.logger.Debug;
@@ -229,7 +230,7 @@ public class SuggestionDialog extends KeyFixDialog implements KeyListener, Focus
 
 
         if(suggestion instanceof SnippetSuggestion) {
-            text = text.replace("\n", "\n" + editor.getIndentationManager().indent(editor.getDocumentIndentationAt(editor.getCaretPosition())));
+            text = PatternCache.replace(text, "\n", "\n" + editor.getIndentationManager().indent(editor.getDocumentIndentationAt(editor.getCaretPosition())));
 
             Matcher matcher = snippetMarkerPattern.matcher(text);
             StringBuffer sb = new StringBuffer();

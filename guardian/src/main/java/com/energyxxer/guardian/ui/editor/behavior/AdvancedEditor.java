@@ -13,10 +13,7 @@ import com.energyxxer.guardian.ui.editor.behavior.edits.*;
 import com.energyxxer.guardian.ui.editor.completion.SuggestionInterface;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.guardian.util.linepainter.LinePainter;
-import com.energyxxer.util.Disposable;
-import com.energyxxer.util.StringLocation;
-import com.energyxxer.util.StringLocationCache;
-import com.energyxxer.util.StringUtil;
+import com.energyxxer.util.*;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.UnifiedDocumentListener;
@@ -451,7 +448,16 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 Object rawContents = clipboard.getData(DataFlavor.stringFlavor);
 
                 if(rawContents == null) return;
-                String contents = ((String) rawContents).replace("\t", StringUtil.repeat(" ", tabSize)).replace("\r","");
+                String contents =
+                        PatternCache.replace(
+                                PatternCache.replace(
+                                        ((String) rawContents),
+                                        "\t",
+                                        StringUtil.repeat(" ", tabSize)
+                                ),
+                                "\r",
+                                ""
+                        );
                 contents = validateBeforePaste(contents);
                 if(contents == null) return;
                 transactionManager.insertTransaction(new PasteEdit(contents, this));
