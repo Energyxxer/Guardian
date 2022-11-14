@@ -23,7 +23,7 @@ public class VersionFeatureResources {
                 if(file.isFile() && file.getName().endsWith(".json")) {
                     try (FileReader fr = new FileReader(file)) {
                         VersionFeatures featMap = VersionFeatureManager.loadFeatureMap(fr);
-                        descriptions.add(file.getName() + " (for " + featMap.getEdition() + " " + featMap.getVersionRegex() + ")");
+                        descriptions.add(file.getName() + " (for " + featMap.getEdition() + " " + featMap.getVersion() + ")");
                     } catch (Exception e) {
                         Debug.log(e.getMessage(), Debug.MessageType.ERROR);
                     }
