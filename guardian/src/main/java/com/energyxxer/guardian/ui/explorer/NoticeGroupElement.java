@@ -2,6 +2,7 @@ package com.energyxxer.guardian.ui.explorer;
 
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.NoticeType;
+import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerFlag;
 import com.energyxxer.guardian.ui.explorer.base.ExplorerMaster;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
@@ -26,6 +27,9 @@ public class NoticeGroupElement extends ExplorerElement {
     private Image icon = null;
     public int indentation = 0;
 
+    private int errorCount = 0;
+    private int warningCount = 0;
+
     public NoticeGroupElement(ExplorerMaster master, String label, List<Notice> notices) {
         super(master);
         this.label = label;
@@ -41,9 +45,16 @@ public class NoticeGroupElement extends ExplorerElement {
         this.x = master.getInitialIndent() + (indentation * master.getIndentPerLevel());
 
         for(Notice notice : notices) {
-            if(notice.getType() == NoticeType.ERROR) {
-                expand();
-                break;
+            switch(notice.getType()) {
+                case ERROR: {
+                    expand();
+                    errorCount++;
+                    break;
+                }
+                case WARNING: {
+                    warningCount++;
+                    break;
+                }
             }
         }
     }
@@ -120,6 +131,35 @@ public class NoticeGroupElement extends ExplorerElement {
 
         g.drawString(label, x, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight())/2));
         x += metrics.stringWidth(label);
+
+        x += 16;
+
+        //Errors and warnings
+        g.setFont(g.getFont().deriveFont(Font.PLAIN));
+        if(errorCount != 0) {
+            int margin = ((master.getRowHeight() - 16) / 2);
+            g.drawImage(Commons.getScaledIcon("error", 16, 16), x,y + margin,null);
+            x += 18;
+
+            String count = String.valueOf(errorCount);
+            g.drawString(count, x, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight())/2));
+
+            x += metrics.stringWidth(count);
+
+            x += 10;
+        }
+        if(warningCount != 0) {
+            int margin = ((master.getRowHeight() - 16) / 2);
+            g.drawImage(Commons.getScaledIcon("warn", 16, 16), x,y + margin,null);
+            x += 18;
+
+            String count = String.valueOf(warningCount);
+            g.drawString(count, x, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight())/2));
+
+            x += metrics.stringWidth(count);
+
+            x += 10;
+        }
 
         if(master.getFlag(ExplorerFlag.DEBUG_WIDTH)) {
             g.setColor(Color.YELLOW);

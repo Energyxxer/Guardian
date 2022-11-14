@@ -19,6 +19,7 @@ public class XDropdownMenu<T> extends XButton {
     private Factory<JPopupMenu> popupFactory = JPopupMenu::new;
     private Factory<JMenuItem> itemFactory = JMenuItem::new;
 
+    private final ArrayList<ChoiceListener<T>> manualChoiceListeners = new ArrayList<>();
     private final ArrayList<ChoiceListener<T>> choiceListeners = new ArrayList<>();
 
     public XDropdownMenu() {
@@ -78,11 +79,19 @@ public class XDropdownMenu<T> extends XButton {
 
     public void addChoiceListener(@NotNull ChoiceListener<T> l) {choiceListeners.add(l);}
 
+    public void addManualChoiceListener(@NotNull ChoiceListener<T> l) {manualChoiceListeners.add(l);}
+
     private void registerChoice(int index) {
         selected = index;
         updateOptions();
         T selected = options.get(index);
         for(ChoiceListener<T> listener : choiceListeners) listener.onChoice(selected);
+    }
+
+    private void registerManualChoice(int index) {
+        registerChoice(index);
+        T selected = options.get(index);
+        for(ChoiceListener<T> listener : manualChoiceListeners) listener.onChoice(selected);
     }
 
     public T getValue() {
@@ -134,7 +143,7 @@ public class XDropdownMenu<T> extends XButton {
             item.setText(option.toString());
             item.setIcon(icons.get(i));
             int choice = i;
-            item.addActionListener(arg0 -> registerChoice(choice));
+            item.addActionListener(arg0 -> registerManualChoice(choice));
             pm.add(item);
             height += item.getPreferredSize().getHeight();
             width = Math.max(width, item.getPreferredSize().width);

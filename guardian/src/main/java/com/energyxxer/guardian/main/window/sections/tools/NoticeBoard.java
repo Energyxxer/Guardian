@@ -22,43 +22,6 @@ public class NoticeBoard extends ToolBoard {
     public NoticeBoard(ToolBoardMaster parent) {
         super(parent);
         this.setLayout(new BorderLayout());
-        //this.setPreferredSize(new ScalableDimension(0, 25));
-        //tlm.addThemeChangeListener(t -> this.setBorder(BorderFactory.createMatteBorder(Math.max(t.getInteger(1, "NoticeBoard.header.border.thickness"),0), 0, 0, 0, t.getColor(new Color(200, 200, 200), "NoticeBoard.header.border.color"))));
-
-        //JPanel boardHeader = new JPanel(new BorderLayout());
-        //tlm.addThemeChangeListener(t -> boardHeader.setBackground(t.getColor(new Color(235, 235, 235), "NoticeBoard.header.background")));
-        //boardHeader.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-        //boardHeader.setPreferredSize(new ScalableDimension(0, 25));
-
-        //StyledLabel boardLabel = new StyledLabel("Notice Board", "NoticeBoard.header");
-        //boardHeader.add(boardLabel, BorderLayout.WEST);
-
-        //JPanel consoleActionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 2));
-        //consoleActionPanel.setOpaque(false);
-
-        //ToolbarButton toggle = new ToolbarButton("toggle", tlm);
-        //toggle.setHintText("Toggle Board");
-        //toggle.setPreferredHintPos(Hint.LEFT);
-        //toggle.setPreferredSize(new ScalableDimension(20,20));
-
-        /*toggle.addActionListener(e -> {
-            if (this.getPreferredSize().height == 25) {
-                expand();
-            } else {
-                collapse();
-            }
-        });*/
-
-        //ToolbarButton clear = new ToolbarButton("clear", tlm);
-        //clear.setHintText("Clear Board");
-        //clear.setPreferredHintPos(Hint.LEFT);
-        //clear.setPreferredSize(new ScalableDimension(20,20));
-
-        //consoleActionPanel.add(clear);
-        //consoleActionPanel.add(toggle);
-        //boardHeader.add(consoleActionPanel, BorderLayout.EAST);
-
-        //this.add(boardHeader, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(GuardianWindow.noticeExplorer = new NoticeExplorerMaster());
         sp.setBorder(new EmptyBorder(0,0,0,0));

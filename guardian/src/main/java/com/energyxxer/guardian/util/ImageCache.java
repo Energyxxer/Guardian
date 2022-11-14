@@ -13,26 +13,45 @@ import java.util.HashMap;
 
 public class ImageCache {
     private static HashMap<File, ImageCache> caches = new HashMap<>();
+    private static boolean ASYNC_ENABLED = false;
+    static {
+        try {
+            Class.forName("sun.awt.image.ToolkitImage");
+            ASYNC_ENABLED = true;
+            Debug.log("Asynchronous image loading is ON");
+        } catch(ClassNotFoundException x) {
+            ASYNC_ENABLED = false;
+            Debug.log("Asynchronous image loading is OFF due to sun.awt.image being inaccessible");
+        }
+    }
 
     public final File file;
     public final long readTime;
-    private AsyncImage image;
+    private Image image;
 
     private ImageCache(File file) {
         this.file = file;
-        image = new AsyncImage(Commons.getIcon("image"));
         readTime = file.lastModified();
-        AsyncImage.executor.execute(() -> {
-            if(SwingUtilities.isEventDispatchThread()) {
-                throw new IllegalStateException("Should not call new ImageCache(File file) on the Event Dispatch Thread");
-            }
+        if(ASYNC_ENABLED) {
+            image = new AsyncImage(Commons.getIcon("image"));
+            AsyncImage.executor.execute(() -> {
+                if(SwingUtilities.isEventDispatchThread()) {
+                    throw new IllegalStateException("Should not call new ImageCache(File file) on the Event Dispatch Thread");
+                }
+                try {
+                    ((AsyncImage) image).setImage(ImageIO.read(file));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    ((AsyncImage) image).setImage(Commons.getIcon("warn"));
+                }
+            });
+        } else {
             try {
-                image.setImage(ImageIO.read(file));
+                image = ImageIO.read(file);
             } catch (IOException e) {
-                e.printStackTrace();
-                image.setImage(Commons.getIcon("warn"));
+                image = Commons.getIcon("warn");
             }
-        });
+        }
     }
 
     public Image getImage() {

@@ -213,10 +213,10 @@ public class Hint extends JDialog implements MouseListener, Disposable {
     }
 
     public void show(Point loc, Confirmation visibilityCheck) {
+        if(timer >= 0) dismiss();
         this.x = loc.x;
         this.y = loc.y;
         this.visibilityCheck = visibilityCheck;
-        if(timer >= 0) dismiss();
         timer = -inDelay;
 
     }
@@ -243,6 +243,7 @@ public class Hint extends JDialog implements MouseListener, Disposable {
         this.setVisible(false);
         this.rollover = false;
         this.timer = 0;
+        this.visibilityCheck = null;
     }
 
     public void setContent(Component content) {

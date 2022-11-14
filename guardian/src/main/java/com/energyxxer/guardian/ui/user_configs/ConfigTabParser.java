@@ -18,18 +18,20 @@ public class ConfigTabParser {
         if(file.exists() && file.isFile()) {
             try(FileReader fr = new FileReader(file)) {
                 JsonObject root = new Gson().fromJson(fr, JsonObject.class);
-                JsonTraverser traverser = new JsonTraverser(root);
-
-                for(Map.Entry<String, JsonElement> rawTabEntry : traverser.get("tabs").iterateAsObject()) {
-                    JsonObject rawTabObj = traverser.reset(rawTabEntry.getValue()).asJsonObject();
-                    if(rawTabObj == null) continue;
-                    traverser.reset(rawTabObj);
-                    tabs.add(parseTab(traverser, rawTabEntry.getKey(), rawTabObj, project));
-                }
-
+                parseUserConfigTabs(root, tabs, project);
             } catch (IOException | JsonSyntaxException e) {
                 e.printStackTrace();
             }
+        }
+    }
+    public static void parseUserConfigTabs(JsonObject root, ArrayList<ConfigTab> tabs, Project project) {
+        JsonTraverser traverser = new JsonTraverser(root);
+
+        for(Map.Entry<String, JsonElement> rawTabEntry : traverser.get("tabs").iterateAsObject()) {
+            JsonObject rawTabObj = traverser.reset(rawTabEntry.getValue()).asJsonObject();
+            if(rawTabObj == null) continue;
+            traverser.reset(rawTabObj);
+            tabs.add(parseTab(traverser, rawTabEntry.getKey(), rawTabObj, project));
         }
     }
     private static ConfigTab parseTab(JsonTraverser traverser, String title, JsonObject rawTabObj, Project project) {
