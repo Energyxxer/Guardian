@@ -205,6 +205,7 @@ public class Commons {
             if(report.hasWarnings()) report.getWarnings().forEach(Console.warn::println);
             if(report.hasErrors()) report.getErrors().forEach(Console.err::println);
         });
+        long startTime = System.currentTimeMillis();
         process.addCompletionListener((p, success) -> {
             SwingUtilities.invokeLater(() -> {
                 GuardianWindow.consoleBoard.batchSubmitCommand(project.getBuildConfig().postActions);
@@ -212,6 +213,10 @@ public class Commons {
                     GuardianWindow.consoleBoard.batchSubmitCommand(project.getBuildConfig().postSuccessActions);
                 } else {
                     GuardianWindow.consoleBoard.batchSubmitCommand(project.getBuildConfig().postFailureActions);
+                }
+                //Garbage collect if compilation took longer than 10 seconds
+                if(System.currentTimeMillis() >= startTime + 10_000) {
+                    System.gc();
                 }
             });
         });

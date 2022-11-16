@@ -324,17 +324,19 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
             try {
                 if(analysis.response != null && parent != null && parent.hierarchicalStyles.size() > 0) {
+                    Stack<TokenPattern<?>> hierarchy = new Stack<>();
                     analysis.response.pattern.traverse(leaf -> {
                         if(parent == null || Thread.interrupted()) throw new InterruptedException();
                         for(EditorModule.HierarchicalStyle style : parent.hierarchicalStyles) {
                             if(style.parts[style.parts.length-1].equalsIgnoreCase(leaf.getName())) {
                                 int i = style.parts.length-2;
+                                int j = hierarchy.size()-1;
 
                                 boolean valid = true;
 
-                                TokenPattern<?> parent = leaf;
                                 while(i >= 0) {
-                                    parent = parent.parent;
+                                    j--;
+                                    TokenPattern<?> parent = hierarchy.get(j);
                                     if(parent.getName().equalsIgnoreCase(style.parts[i])) {
                                         i--;
                                     }
@@ -353,7 +355,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                                 }
                             }
                         }
-                    });
+                    }, hierarchy);
                 }
             } catch(InterruptedException x) {
                 return;
