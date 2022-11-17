@@ -6,9 +6,6 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 /**
  * Created by User on 4/8/2017.
  */
@@ -73,10 +70,10 @@ public class PropertiesLexerProfile extends LexerProfile {
                     //all whitespace, fail
                     if(firstNonWhitespaceChar == 0) return ScannerContextResponse.FAILED;
 
-                    return new ScannerContextResponse(true, str.substring(startIndex, i), tokenType);
+                    return ScannerContextResponse.success(str.substring(startIndex, i), tokenType);
                 } else if(stage == SEPARATOR) {
                     stage = VALUE;
-                    return new ScannerContextResponse(true, "=", SEPARATOR);
+                    return ScannerContextResponse.success("=", SEPARATOR);
                 } else if(stage == VALUE) {
                     stage = KEY;
                     int endIndex = str.indexOf('\n', startIndex);
@@ -84,14 +81,18 @@ public class PropertiesLexerProfile extends LexerProfile {
 
                     if(startIndex == endIndex) return ScannerContextResponse.FAILED;
 
-                    return new ScannerContextResponse(true, str.substring(startIndex, endIndex), VALUE);
+                    return ScannerContextResponse.success(str.substring(startIndex, endIndex), VALUE);
                 }
                 return null;
             }
 
             @Override
-            public Collection<TokenType> getHandledTypes() {
-                return Arrays.asList(KEY, SEPARATOR, VALUE, COMMENT);
+            public boolean handlesType(TokenType type) {
+                return type == KEY
+                        || type == SEPARATOR
+                        || type == VALUE
+                        || type == COMMENT
+                        ;
             }
         };
 

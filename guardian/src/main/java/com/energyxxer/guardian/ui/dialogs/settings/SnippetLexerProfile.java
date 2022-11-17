@@ -6,9 +6,6 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 public class SnippetLexerProfile extends LexerProfile {
 
     private static final TokenType VARIABLE_MARKER = new TokenType("VARIABLE_MARKER"); // $A$
@@ -26,7 +23,7 @@ public class SnippetLexerProfile extends LexerProfile {
                         if(c == '$') {
                             if(i != startIndex+1) {
                                 String content = str.substring(startIndex, i+1);
-                                return new ScannerContextResponse(true, content, content.equals("$END$") ? END_MARKER : VARIABLE_MARKER);
+                                return ScannerContextResponse.success(content, content.equals("$END$") ? END_MARKER : VARIABLE_MARKER);
                             } else {
                                 return ScannerContextResponse.FAILED;
                             }
@@ -39,8 +36,8 @@ public class SnippetLexerProfile extends LexerProfile {
             }
 
             @Override
-            public Collection<TokenType> getHandledTypes() {
-                return Arrays.asList(VARIABLE_MARKER, END_MARKER);
+            public boolean handlesType(TokenType type) {
+                return type == VARIABLE_MARKER || type == END_MARKER;
             }
         };
         contexts.add(endContext);

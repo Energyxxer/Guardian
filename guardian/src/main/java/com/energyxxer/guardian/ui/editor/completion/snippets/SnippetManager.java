@@ -13,6 +13,7 @@ import java.util.List;
 
 public final class SnippetManager {
     private static ArrayList<Snippet> snippets = new ArrayList<>();
+    private static boolean everLoaded = false;
 
     /**
      * SnippetManager should not be instantiated.
@@ -41,7 +42,10 @@ public final class SnippetManager {
         }
 
         String saveData = Preferences.get("snippets", null);
-        if(saveData == null) return;
+        if(saveData == null) {
+            everLoaded = true;
+            return;
+        }
         snippets.clear();
 
         while(saveData.length() > 0) {
@@ -72,9 +76,14 @@ public final class SnippetManager {
 
             snippets.add(snippet);
         }
+        everLoaded = true;
     }
 
     public static void save() {
+        if(!everLoaded) {
+            Debug.log("Not saving snippets, as they weren't loaded");
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         for(Snippet snippet : snippets) {
             sb.append(snippet.getSaveData());
