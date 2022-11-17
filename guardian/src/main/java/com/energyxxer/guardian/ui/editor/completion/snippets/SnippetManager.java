@@ -6,6 +6,7 @@ import com.energyxxer.enxlex.suggestions.Suggestion;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.temp.Lang;
 import com.energyxxer.guardian.global.temp.lang_defaults.presets.JSONLexerProfile;
+import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
 import com.energyxxer.util.logger.Debug;
 
 import java.util.ArrayList;
@@ -91,5 +92,33 @@ public final class SnippetManager {
         }
         Debug.log("Saving snippets: " + sb.toString());
         Preferences.put("snippets", sb.toString());
+    }
+
+    static {
+        ConsoleBoard.registerCommandHandler("snippets", new ConsoleBoard.CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Edits snippets";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("SNIPPETS: Edits snippets");
+                Debug.log();
+                Debug.log("Available subcommands:");
+                Debug.log("  > snippets reload                     (reloads snippets from preferences)");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                if(args.length <= 1) {
+                    printHelp();
+                } else if(args[1].equals("reload")) {
+                    load();
+                    Debug.log("Reloaded snippets");
+                } else printHelp();
+            }
+        });
     }
 }
