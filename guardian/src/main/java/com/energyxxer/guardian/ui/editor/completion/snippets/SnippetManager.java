@@ -42,10 +42,7 @@ public final class SnippetManager {
         }
 
         String saveData = Preferences.get("snippets", null);
-        if(saveData == null) {
-            everLoaded = true;
-            return;
-        }
+        if(saveData == null || saveData.isEmpty()) return;
         snippets.clear();
 
         while(saveData.length() > 0) {
@@ -58,19 +55,23 @@ public final class SnippetManager {
             response = JSONLexerProfile.STRING_LEXER_CONTEXT.analyze(saveData, 0, null);
             saveData = saveData.substring(response.value.length());
             snippet.setShorthand(CommandUtils.parseQuotedString(response.value));
+            response.unlock();
 
             response = JSONLexerProfile.STRING_LEXER_CONTEXT.analyze(saveData, 0, null);
             saveData = saveData.substring(response.value.length());
             snippet.setDescription(CommandUtils.parseQuotedString(response.value));
+            response.unlock();
 
             response = JSONLexerProfile.STRING_LEXER_CONTEXT.analyze(saveData, 0, null);
             saveData = saveData.substring(response.value.length());
             snippet.setText(CommandUtils.parseQuotedString(response.value));
+            response.unlock();
 
             while(saveData.charAt(0) != ';') {
                 response = JSONLexerProfile.STRING_LEXER_CONTEXT.analyze(saveData, 0, null);
                 saveData = saveData.substring(response.value.length());
                 snippet.setContextEnabled(SnippetContext.getContextForCode(CommandUtils.parseQuotedString(response.value)));
+                response.unlock();
             }
             saveData = saveData.substring(1);
 
