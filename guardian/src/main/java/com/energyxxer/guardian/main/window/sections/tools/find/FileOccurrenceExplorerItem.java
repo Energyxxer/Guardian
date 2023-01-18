@@ -5,6 +5,7 @@ import com.energyxxer.guardian.ui.explorer.base.ExplorerMaster;
 import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.util.ImageUtil;
+import com.energyxxer.xswing.ScalableGraphics2D;
 
 import java.awt.*;
 import java.io.File;
@@ -37,17 +38,18 @@ public class FileOccurrenceExplorerItem extends StandardExplorerItem {
         int y = master.getOffsetY();
         master.addToFlatList(this);
 
+        int w = (int)(master.getWidth() / ScalableGraphics2D.SCALE_FACTOR);
         this.x = (master.getIndentation() * master.getIndentPerLevel()) + master.getInitialIndent();
         int x = this.x;
 
         g.setColor((this.rollover || this.selected) ? master.getColors().get("item.rollover.background") : master.getColors().get("item.background"));
-        g.fillRect(0, master.getOffsetY(), master.getWidth(), master.getRowHeight());
+        g.fillRect(0, master.getOffsetY(), w, master.getRowHeight());
         if(this.selected) {
             g.setColor(master.getColors().get("item.selected.background"));
 
             switch(master.getSelectionStyle()) {
                 case "FULL": {
-                    g.fillRect(0, master.getOffsetY(), master.getWidth(), master.getRowHeight());
+                    g.fillRect(0, master.getOffsetY(), w, master.getRowHeight());
                     break;
                 }
                 case "LINE_LEFT": {
@@ -55,15 +57,15 @@ public class FileOccurrenceExplorerItem extends StandardExplorerItem {
                     break;
                 }
                 case "LINE_RIGHT": {
-                    g.fillRect(master.getWidth() - master.getSelectionLineThickness(), master.getOffsetY(), master.getSelectionLineThickness(), master.getRowHeight());
+                    g.fillRect(w - master.getSelectionLineThickness(), master.getOffsetY(), master.getSelectionLineThickness(), master.getRowHeight());
                     break;
                 }
                 case "LINE_TOP": {
-                    g.fillRect(0, master.getOffsetY(), master.getWidth(), master.getSelectionLineThickness());
+                    g.fillRect(0, master.getOffsetY(), w, master.getSelectionLineThickness());
                     break;
                 }
                 case "LINE_BOTTOM": {
-                    g.fillRect(0, master.getOffsetY() + master.getRowHeight() - master.getSelectionLineThickness(), master.getWidth(), master.getSelectionLineThickness());
+                    g.fillRect(0, master.getOffsetY() + master.getRowHeight() - master.getSelectionLineThickness(), w, master.getSelectionLineThickness());
                     break;
                 }
             }
@@ -107,7 +109,7 @@ public class FileOccurrenceExplorerItem extends StandardExplorerItem {
 
         if(master.getFlag(ExplorerFlag.DEBUG_WIDTH)) {
             g.setColor(Color.YELLOW);
-            g.fillRect(master.getContentWidth()-2, master.getOffsetY(), 2, master.getRowHeight());
+            g.fillRect((int)Math.round(master.getContentWidth()/ScalableGraphics2D.SCALE_FACTOR)-2, master.getOffsetY(), 2, master.getRowHeight());
             g.setColor(Color.GREEN);
             g.fillRect(x-2, master.getOffsetY(), 2, master.getRowHeight());
         }
@@ -116,9 +118,9 @@ public class FileOccurrenceExplorerItem extends StandardExplorerItem {
             File file = occurrence.file;
             String fileName = file.getName();
             fileName += " " + occurrence.lineNum;
-            if (!rollover || master.getWidth() - metrics.stringWidth(fileName) - 24 - 16 - 8 >= x) {
+            if (!rollover || w - metrics.stringWidth(fileName) - 24 - 16 - 8 >= x) {
                 if (this.icon != null) {
-                    int projectNameX = master.getWidth() - metrics.stringWidth(fileName) - 24;
+                    int projectNameX = w - metrics.stringWidth(fileName) - 24;
                     g.drawImage(this.icon, projectNameX - 16 - 8, y + margin + 8 - 8, 16, 16, null);
                     g.drawString(fileName, projectNameX, master.getOffsetY() + metrics.getAscent() + ((master.getRowHeight() - metrics.getHeight()) / 2));
                 }

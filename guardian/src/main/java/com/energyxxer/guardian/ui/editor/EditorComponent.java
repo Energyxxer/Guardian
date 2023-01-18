@@ -237,9 +237,9 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             if(parent == null || Thread.interrupted()) return;
 
             if(analysis.response != null && !analysis.response.matched) {
-                errorStatus.setMessage(analysis.response.getErrorMessage() + (analysis.response.faultyToken != null ? ". (line " + analysis.response.faultyToken.loc.line + " column " + analysis.response.faultyToken.loc.column + ")" : ""));
+                errorStatus.setMessage(analysis.response.getErrorMessage() + (analysis.response.faultyToken != null ? ". (line " + analysis.response.faultyToken.line + " column " + analysis.response.faultyToken.column + ")" : ""));
                 GuardianWindow.setStatus(errorStatus);
-                if(analysis.response.faultyToken != null && analysis.response.faultyToken.value != null && analysis.response.faultyToken.loc != null) sd.setCharacterAttributes(analysis.response.faultyToken.loc.index, analysis.response.faultyToken.value.length(), EditorComponent.this.getStyle("error"), true);
+                if(analysis.response.faultyToken != null && analysis.response.faultyToken.value != null) sd.setCharacterAttributes(analysis.response.faultyToken.index, analysis.response.faultyToken.value.length(), EditorComponent.this.getStyle("error"), true);
                 if(analysis.lexer instanceof LazyLexer) return;
             }
 
@@ -253,7 +253,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
             for(Token token : analysis.lexer.getStream().tokens) {
                 if(parent == null || Thread.interrupted()) return;
                 boolean shouldPaintStyles = true;
-                if(prevToken != null && prevToken.loc.line != token.loc.line) tokensInLine = 0;
+                if(prevToken != null && prevToken.line != token.line) tokensInLine = 0;
                 tokensInLine++;
                 if(tokensInLine > MAX_HIGHLIGHTED_TOKENS_PER_LINE) {
                     shouldPaintStyles = false;
@@ -262,13 +262,13 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
                 int previousTokenStylesIndex = previousTokenStyles.size();
 
-                int styleStart = token.loc.index;
+                int styleStart = token.index;
 
                 if(shouldPaintStyles) {
                     if(style != null)
-                        worker.setCharacterAttributes(token.loc.index, token.value.length(), style, true);
+                        worker.setCharacterAttributes(token.index, token.value.length(), style, true);
                     else
-                        worker.setCharacterAttributes(token.loc.index, token.value.length(), defaultStyle, true);
+                        worker.setCharacterAttributes(token.index, token.value.length(), defaultStyle, true);
 
                     if(token.getAttributes() != null) {
                         for(Map.Entry<String, Object> entry : token.getAttributes().entrySet()) {
@@ -277,11 +277,11 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                             if(attrStyle == null) continue;
 
                             if(prevToken != null && previousTokenStyles.contains(entry.getKey().toLowerCase(Locale.ENGLISH))) {
-                                styleStart = prevToken.loc.index + prevToken.value.length();
+                                styleStart = prevToken.index + prevToken.value.length();
                             }
                             previousTokenStyles.add(entry.getKey().toLowerCase(Locale.ENGLISH));
 
-                            worker.setCharacterAttributes(styleStart, token.value.length() + (token.loc.index - styleStart), attrStyle, false);
+                            worker.setCharacterAttributes(styleStart, token.value.length() + (token.index - styleStart), attrStyle, false);
                         }
                     }
                     if(token.getSubSections() != null) {
@@ -290,7 +290,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                             Style attrStyle = EditorComponent.this.getStyle("~" + entry.getValue().toLowerCase(Locale.ENGLISH));
                             if(attrStyle == null) continue;
 
-                            worker.setCharacterAttributes(token.loc.index + section.start, section.length, attrStyle, false);
+                            worker.setCharacterAttributes(token.index + section.start, section.length, attrStyle, false);
                         }
                     }
                 }
@@ -300,17 +300,17 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
                 }
 
                 if(getIndentationManager().getBraceMatcher().matcher(token.value).find() && !lang.isBraceToken(token)) {
-                    worker.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(IndentationManager.NULLIFY_BRACE_STYLE), false);
+                    worker.setCharacterAttributes(token.index, token.value.length(), getStyle(IndentationManager.NULLIFY_BRACE_STYLE), false);
                 } else if(lang.isBraceToken(token)) {
-                    worker.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(IndentationManager.FORCE_BRACE_STYLE), false);
+                    worker.setCharacterAttributes(token.index, token.value.length(), getStyle(IndentationManager.FORCE_BRACE_STYLE), false);
                 }
 
                 if(lang.isStringToken(token)) {
-                    worker.setCharacterAttributes(token.loc.index, token.value.length(), getStyle(AdvancedEditor.STRING_STYLE), false);
+                    worker.setCharacterAttributes(token.index, token.value.length(), getStyle(AdvancedEditor.STRING_STYLE), false);
 
                     if(token.getSubSections() != null) {
                         for(TokenSection section : token.getSubSections().keySet()) {
-                            worker.setCharacterAttributes(token.loc.index + section.start, section.length, getStyle(AdvancedEditor.STRING_ESCAPE_STYLE), false);
+                            worker.setCharacterAttributes(token.index + section.start, section.length, getStyle(AdvancedEditor.STRING_ESCAPE_STYLE), false);
                         }
                     }
                 }

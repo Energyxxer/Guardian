@@ -1,7 +1,6 @@
 package com.energyxxer.guardian.ui.editor.highlighters;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
-import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.find.FileOccurrence;
@@ -93,7 +92,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                     for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
                         if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
 
-                        StringBounds bounds = usage.pattern.getStringBounds();
+                        StringBounds bounds = usage.bounds;
 
                         SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
 
@@ -174,16 +173,16 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                                 for(PrismarineSummaryModule.SymbolUsage usage : lastSuccessfulSummary.getSymbolUsages()) {
                                     if(!usage.symbolName.equals(word)) continue; //filter out symbols that aren't the selected symbol's name
 
-                                    StringBounds bounds = usage.pattern.getStringBounds();
+                                    StringBounds bounds = usage.bounds;
 
                                     SummarySymbol thisUsageSymbol = usage.fetchSymbol(lastSuccessfulSummary);
 
                                     if(thisUsageSymbol != selectedSymbol) continue; //filter out identifiers that don't refer to the same symbol
 
-                                    if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getDeclarationPattern() != null) { //If this usage refers to the identifier that's currently selected...
+                                    if(bounds.start.index == wordStart && bounds.end.index == wordEnd && selectedSymbol.getStringBounds() != null) { //If this usage refers to the identifier that's currently selected...
                                         this.selectedSymbol = selectedSymbol;
-                                        selectedDeclaration = bounds.start.index == selectedSymbol.getDeclarationPattern().getStringLocation().index;
-                                        hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.pattern.getStringBounds())[0];
+                                        selectedDeclaration = bounds.start.index == selectedSymbol.getStringBounds().start.index;
+                                        hoveringRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, usage.bounds)[0];
                                         editor.repaint();
                                         break;
                                     }
@@ -192,7 +191,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                                 String documentation = ((EditorComponent) editor).getParentModule().getLanguage().formatDocumentation(selectedSymbol, lastSuccessfulSummary);
 
                                 if(documentation != null) {
-                                    Rectangle highlightedRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, highlightedUsage.pattern.getStringBounds())[0];
+                                    Rectangle highlightedRectangle = EditorSelectionPainter.getRectanglesForBounds(editor, highlightedUsage.bounds)[0];
                                     HintStylizer.style(docHint);
                                     docHint.setText(documentation);
                                     docHint.show(
@@ -256,8 +255,8 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                     navigateToUsages(selectedSymbolUsages);
                 } else {
                     //Looking at usage
-                    StringBounds bounds = selectedSymbol.getDeclarationPattern().getStringBounds();
-                    TokenSource source = selectedSymbol.getDeclarationPattern().getSource();
+                    StringBounds bounds = selectedSymbol.getStringBounds();
+                    TokenSource source = selectedSymbol.getSource();
                     File exactFile = source.getExactFile();
                     if(exactFile == null) {
                         GuardianWindow.showPopupMessage("Symbol '" + selectedSymbol.getName() + "' is native, or its declaration can't be found in any file");
@@ -276,9 +275,8 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
         if(selectedSymbolUsages.size() == 0) {
             GuardianWindow.showPopupMessage("No usages found");
         } else if(selectedSymbolUsages.size() == 1) {
-            TokenPattern<?> pattern = selectedSymbolUsages.get(0).pattern;
-            StringBounds bounds = pattern.getStringBounds();
-            File exactFile = pattern.getSource().getExactFile();
+            StringBounds bounds = selectedSymbolUsages.get(0).bounds;
+            File exactFile = selectedSymbolUsages.get(0).tokenSource.getExactFile();
             if(exactFile != null) {
                 GuardianWindow.tabManager.openTab(new FileModuleToken(exactFile), bounds.start.index, bounds.end.index-bounds.start.index);
             }
@@ -286,9 +284,9 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
             FindResults results = new FindResults();
 
             for(PrismarineSummaryModule.SymbolUsage usage : selectedSymbolUsages) {
-                File file = usage.pattern.getSource().getExactFile();
+                File file = usage.tokenSource.getExactFile();
                 if(file != null) {
-                    StringBounds bounds = usage.pattern.getStringBounds();
+                    StringBounds bounds = usage.bounds;
                     try {
                         String contents;
                         if(cachedFileContents.containsKey(file)) {
@@ -303,7 +301,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                         FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, contents.substring(lineStart, lineEnd), bounds.start.index-lineStart);
                         results.insertResult(fileOccurrence);
                     } catch (IOException x) {
-                        FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, usage.pattern.flatten(false), 0);
+                        FileOccurrence fileOccurrence = new FileOccurrence(file, bounds.start.index, bounds.end.index-bounds.start.index, bounds.start.line, usage.symbolName, 0);
                         results.insertResult(fileOccurrence);
                     }
                 }
@@ -321,7 +319,7 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
 
             SummarySymbol thisUsageSymbol = usage.fetchSymbol(fileSummary);
 
-            if(thisUsageSymbol == selectedSymbol && usage.pattern != thisUsageSymbol.getDeclarationPattern()) {
+            if(thisUsageSymbol == selectedSymbol && !(usage.tokenSource == thisUsageSymbol.getSource() && thisUsageSymbol.getStringBounds().equals(usage.bounds))) {
                 selectedSymbolUsages.add(usage);
             }
         }

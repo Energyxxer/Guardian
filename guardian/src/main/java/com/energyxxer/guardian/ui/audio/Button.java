@@ -103,12 +103,10 @@ public class Button extends FloatingPanel {
 
     protected void drawButtonContents(Graphics2D g, Rectangle bounds) {
         if(iconName != null) {
-            Image icon = Commons.getIcon(iconName);
-
             Composite oldComposite = g.getComposite();
 
             g.setComposite(new DrawMultipliedComposite(g.getColor()));
-            g.drawImage(icon.getScaledInstance((int) Math.ceil(bounds.width*0.6), (int) Math.ceil(bounds.height*0.6), Image.SCALE_SMOOTH), (int) (bounds.x + bounds.width*0.2), (int) (bounds.y + bounds.width*0.2), null);
+            g.drawImage(Commons.getScaledIcon(iconName, (int) Math.ceil(bounds.width*0.6), (int) Math.ceil(bounds.height*0.6)), (int) (bounds.x + bounds.width*0.2), (int) (bounds.y + bounds.width*0.2), null);
 
             g.setComposite(oldComposite);
         }

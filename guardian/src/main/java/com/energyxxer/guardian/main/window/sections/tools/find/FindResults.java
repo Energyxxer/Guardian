@@ -93,7 +93,7 @@ public class FindResults extends QueryResult {
 
         @Override
         public String getTitle(TokenContext context) {
-            return projectRoot.getName();
+            return projectRoot != null ? projectRoot.getName() : "<no project>";
         }
 
         @Override
