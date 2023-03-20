@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.modules;
 
+import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.FileManager;
 import com.energyxxer.guardian.global.Preferences;
@@ -7,6 +8,7 @@ import com.energyxxer.guardian.global.temp.Lang;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.langinterface.ProjectType;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.TextFileTooLargeModule;
@@ -152,6 +154,10 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
         if(associatedProject != null) {
             Image iconFromProject = associatedProject.getIconForFile(file);
             if(iconFromProject != null) return iconFromProject;
+        }
+        for(GuardianBinding binding : Guardian.bindings) {
+            Image iconFromBinding = binding.getIconForFile(file);
+            if(iconFromBinding != null) return iconFromBinding;
         }
         Lang associatedLang = file.isFile() ? Lang.getLangForFile(file.getPath()) : null;
         if(associatedLang != null) {

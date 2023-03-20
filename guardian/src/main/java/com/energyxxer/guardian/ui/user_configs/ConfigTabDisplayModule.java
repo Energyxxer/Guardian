@@ -119,13 +119,13 @@ public class ConfigTabDisplayModule extends JPanel implements DisplayModule, Dis
 
     public void apply(JsonTraverser traverser) {
         for(Consumer<JsonTraverser> event : applyEvents) {
-            event.accept(traverser);
+            event.accept(traverser.reset());
         }
     }
 
     public void open(JsonTraverser config) {
         for(Consumer<JsonTraverser> event : openEvents) {
-            event.accept(config);
+            event.accept(config.reset());
         }
     }
 }

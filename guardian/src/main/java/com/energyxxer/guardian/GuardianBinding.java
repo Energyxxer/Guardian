@@ -3,6 +3,7 @@ package com.energyxxer.guardian;
 import com.google.gson.JsonObject;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
 
@@ -26,4 +27,8 @@ public interface GuardianBinding {
     }
 
     default void setupSettingsSections(HashMap<String, JPanel> sectionPanes) {}
+
+    default Image getIconForFile(File file) {
+        return null;
+    }
 }

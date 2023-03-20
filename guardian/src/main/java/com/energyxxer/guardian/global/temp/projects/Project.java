@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.function.BiConsumer;
 
 public interface Project<T> {
 	ProjectType getProjectType();
@@ -97,12 +98,9 @@ public interface Project<T> {
 
 	Iterable<? extends ConfigTab> getBuildConfigTabs();
 	default void parseUserBuildConfigTabs(ArrayList<ConfigTab> tabs, boolean recursively) {
-		parseUserBuildConfigTabs(tabs);
-		if(recursively) {
-			for(Project dependency : getLoadedDependencies(new ArrayList<>(), true)) {
-				dependency.parseUserBuildConfigTabs(tabs);
-			}
-		}
+		runForSelf((ArrayList<ConfigTab> t, Project p) -> {
+			p.parseUserBuildConfigTabs(t);
+		}, tabs, recursively);
 	}
 	default void parseUserBuildConfigTabs(ArrayList<ConfigTab> tabs) {
 		File file = getRootDirectory().toPath().resolve(".guardian").resolve("build_config_fields.json").toFile();
@@ -111,21 +109,27 @@ public interface Project<T> {
 
 	Iterable<? extends ConfigTab> getProjectConfigTabs();
 	default void parseUserProjectConfigTabs(ArrayList<ConfigTab> tabs, boolean recursively) {
-		parseUserProjectConfigTabs(tabs);
-		if(recursively) {
-			for(Project dependency : getLoadedDependencies(new ArrayList<>(), true)) {
-				dependency.parseUserProjectConfigTabs(tabs);
-			}
-		}
+		runForSelf((ArrayList<ConfigTab> t, Project p) -> {
+			p.parseUserProjectConfigTabs(t);
+		}, tabs, recursively);
 	}
 	default void parseUserProjectConfigTabs(ArrayList<ConfigTab> tabs) {
 		File file = getRootDirectory().toPath().resolve(".guardian").resolve("project_config_fields.json").toFile();
 		ConfigTabParser.parseUserConfigTabs(file, tabs, this);
 	}
 
+	default <O> void runForSelf(BiConsumer<O, Project> consumer, O o, boolean andDependencies) {
+		consumer.accept(o, this);
+		if(andDependencies) {
+			for(Project dependency : getLoadedDependencies(new ArrayList<>(), true)) {
+				consumer.accept(o, dependency);
+			}
+		}
+	}
+
 	default void buildConfigUpdated(BuildConfiguration<T> config) {}
 
-    ArrayList<Project> getLoadedDependencies(ArrayList<Project> list, boolean recursively);
+    ArrayList<Project<?>> getLoadedDependencies(ArrayList<Project<?>> list, boolean recursively);
 
 	void refreshBuildConfigs();
 }

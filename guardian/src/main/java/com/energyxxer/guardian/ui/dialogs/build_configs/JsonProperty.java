@@ -13,7 +13,6 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
     }
 
     protected JsonTraverser traverseGet(JsonTraverser traverser) {
-        traverser.reset();
         for(String part : pathParts) {
             traverser.get(part);
         }
@@ -21,7 +20,7 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
     }
 
     protected JsonTraverser traverseSet(JsonTraverser traverser) {
-        traverser.reset().createOnTraversal();
+        traverser.createOnTraversal();
         for(String part : pathParts) {
             traverser.get(part);
         }
@@ -30,7 +29,7 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
 
     public static class JsonBooleanProperty extends JsonProperty<Boolean> {
 
-        public JsonBooleanProperty(String path, boolean defaultValue) {
+        public JsonBooleanProperty(String path, Boolean defaultValue) {
             super(path, defaultValue);
         }
 
@@ -41,7 +40,9 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
 
         @Override
         public void set(JsonTraverser subject, Boolean value) {
-            traverseSet(subject).set(value);
+            traverseSet(subject);
+            if(value != null) subject.set(value);
+            else subject.remove();
         }
     }
 
@@ -58,13 +59,15 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
 
         @Override
         public void set(JsonTraverser subject, String value) {
-            traverseSet(subject).set(value);
+            traverseSet(subject);
+            if(value != null) subject.set(value);
+            else subject.remove();
         }
     }
 
     public static class JsonIntProperty extends JsonProperty<Integer> {
 
-        public JsonIntProperty(String path, int defaultValue) {
+        public JsonIntProperty(String path, Integer defaultValue) {
             super(path, defaultValue);
         }
 
@@ -75,13 +78,15 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
 
         @Override
         public void set(JsonTraverser subject, Integer value) {
-            traverseSet(subject).set(value);
+            traverseSet(subject);
+            if(value != null) subject.set(value);
+            else subject.remove();
         }
     }
 
     public static class JsonDoubleProperty extends JsonProperty<Double> {
 
-        public JsonDoubleProperty(String path, double defaultValue) {
+        public JsonDoubleProperty(String path, Double defaultValue) {
             super(path, defaultValue);
         }
 
@@ -92,7 +97,9 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
 
         @Override
         public void set(JsonTraverser subject, Double value) {
-            traverseSet(subject).set(value);
+            traverseSet(subject);
+            if(value != null) subject.set(value);
+            else subject.remove();
         }
     }
 
@@ -111,7 +118,9 @@ public abstract class JsonProperty<T> implements Property<T, JsonTraverser> {
 
         @Override
         public void set(JsonTraverser subject, JsonArray value) {
-            traverseSet(subject).set(value);
+            traverseSet(subject);
+            if(value != null) subject.set(value);
+            else subject.remove();
         }
     }
 }
