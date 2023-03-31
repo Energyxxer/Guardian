@@ -21,6 +21,7 @@ public class CollapsibleDrawer extends OverlayBorderPanel implements Disposable 
     private boolean isOwnTLM = false;
     private JPanel header = new JPanel(new BorderLayout());
     private StyledLabel headerLabel;
+    private final JPanel controlsPanel;
 
     private boolean open = false;
     private ComponentResizer resizer;
@@ -66,17 +67,17 @@ public class CollapsibleDrawer extends OverlayBorderPanel implements Disposable 
 
         JPanel buttonWrapper0 = new JPanel(new GridBagLayout());
         buttonWrapper0.setOpaque(false);
-        JPanel buttonWrapper1 = new JPanel(new FlowLayout(FlowLayout.RIGHT,5,0));
-        buttonWrapper1.setOpaque(false);
+        controlsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT,5,0));
+        controlsPanel.setOpaque(false);
         {
             ToolbarButton hide = new ToolbarButton("toggle", tlm);
             hide.setHintText("Show/Hide");
             hide.setPreferredHintPos(Hint.ABOVE);
 
             hide.addActionListener(e -> toggle());
-            buttonWrapper1.add(hide);
+            controlsPanel.add(hide);
         }
-        buttonWrapper0.add(buttonWrapper1);
+        buttonWrapper0.add(controlsPanel);
         header.add(buttonWrapper0, BorderLayout.EAST);
 
 
@@ -96,6 +97,9 @@ public class CollapsibleDrawer extends OverlayBorderPanel implements Disposable 
     }
 
     public void open(JPanel content) {
+        if(lastShownContent != null) {
+            this.remove(lastShownContent);
+        }
         this.add(content, BorderLayout.CENTER);
         lastShownContent = content;
         this.revalidate();
@@ -113,6 +117,15 @@ public class CollapsibleDrawer extends OverlayBorderPanel implements Disposable 
         open = false;
         resizer.setEnabled(false);
         this.setPreferredSize(null);
+    }
+
+    public void addControl(JComponent component) {
+        Component[] oldComponents = controlsPanel.getComponents();
+        controlsPanel.removeAll();
+        controlsPanel.add(component);
+        for(Component oldComponent : oldComponents) {
+            controlsPanel.add(oldComponent);
+        }
     }
 
     public void setContent(JPanel content) {

@@ -14,7 +14,7 @@ public class ComponentResizer {
 	// The component that will be resized; this will also have mouse events added to it
 	private JComponent resizable = null;
 	// Optionally, a dialog to be resized AND moved. Mouse listeners will still be added to `resizable` though.
-	private JDialog dialog = null;
+	private Window dialog = null;
 
 	// Whether this resizer is enabled or not.
 	private boolean enabled = true;
@@ -38,7 +38,7 @@ public class ComponentResizer {
 		setResizable(component);
 	}
 
-	public ComponentResizer(JComponent resizable, JDialog dialog) {
+	public ComponentResizer(JComponent resizable, Window dialog) {
 		setResizable(resizable);
 		this.dialog = dialog;
 	}

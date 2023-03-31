@@ -1,8 +1,8 @@
 package com.energyxxer.guardian.ui;
 
+import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
-import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.util.Constant;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.ScalableGraphics2D;
@@ -144,6 +144,12 @@ public class ToolbarButton extends JButton implements MouseListener, MouseMotion
 
 	public ToolbarButton changeText(String text) {
 		setText(text);
+		return this;
+	}
+
+	public ToolbarButton setIconName(String iconName) {
+		this.icon = iconName;
+		updateSize();
 		return this;
 	}
 

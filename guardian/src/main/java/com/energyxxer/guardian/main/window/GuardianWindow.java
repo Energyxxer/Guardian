@@ -43,7 +43,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -82,6 +81,7 @@ public class GuardianWindow {
 
 	public static TabManager tabManager;
 	public static TabListMaster tabList;
+	private final java.util.List<Image> windowIcons;
 
 	public ThemeListenerManager tlm = new ThemeListenerManager();
 
@@ -190,11 +190,11 @@ public class GuardianWindow {
 		jframe.setPreferredSize(defaultSize);
 		jframe.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-		List<Image> icons = new ArrayList<>();
-		icons.add(
+		windowIcons = new ArrayList<>();
+		windowIcons.add(
 				ImageManager.load("/assets/logo/logo_icon.png").getScaledInstance(16, 16, java.awt.Image.SCALE_SMOOTH));
-		icons.add(ImageManager.load("/assets/logo/logo.png").getScaledInstance(32, 32, java.awt.Image.SCALE_SMOOTH));
-		jframe.setIconImages(icons);
+		windowIcons.add(ImageManager.load("/assets/logo/logo.png").getScaledInstance(32, 32, java.awt.Image.SCALE_SMOOTH));
+		jframe.setIconImages(windowIcons);
 
 		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		Point center = env.getCenterPoint();
@@ -208,6 +208,10 @@ public class GuardianWindow {
 			int borderThickness = Math.max(t.getInteger(1,"Tooltip.border.thickness"),0);
 			UIManager.put("ToolTip.border",BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(borderThickness, borderThickness, borderThickness, borderThickness, t.getColor(Color.BLACK, "Tooltip.border.color")),BorderFactory.createEmptyBorder(3,5,3,5)));
 		});
+	}
+
+	public java.util.List<Image> getWindowIcons() {
+		return windowIcons;
 	}
 
 	public static void setVisible(boolean b) {
