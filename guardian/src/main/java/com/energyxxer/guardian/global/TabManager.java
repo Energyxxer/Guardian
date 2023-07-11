@@ -97,6 +97,9 @@ public class TabManager {
 	private void selectLocation(Tab tab, int index, int length) {
 		if(tab.module instanceof EditorModule) {
 			((EditorModule) tab.module).editorComponent.getCaret().setProfile(new CaretProfile(index + length, index));
+			SwingUtilities.invokeLater(() -> {
+				((EditorModule) tab.module).ensureVisible(index);
+			});
 		}
 	}
 
