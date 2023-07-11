@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryDetails {
+    private static final Pattern LINE_ENDING_PATTERN = Pattern.compile("\r?\n");
     private String query;
     private boolean matchCase;
     private boolean wordsOnly;
@@ -62,6 +63,9 @@ public class QueryDetails {
             if(fileNameFilter.test(file)) {
                 try {
                     String content = new String(Files.readAllBytes(file.toPath()), Guardian.DEFAULT_CHARSET);
+                    //remove carriage returns
+                    content = LINE_ENDING_PATTERN.matcher(content).replaceAll("\n");
+
                     Matcher matcher = query.matcher(content);
                     while(matcher.find()) {
                         int snippetStart = content.lastIndexOf('\n', matcher.start()-1);
@@ -72,7 +76,7 @@ public class QueryDetails {
                             snippetStart = matcher.start();
                             snippetEnd = matcher.end();
                         }
-                        int line = content.substring(0, snippetStart).split("\n",-1).length;
+                        int line = LINE_ENDING_PATTERN.split(content.substring(0, snippetStart), -1).length;
                         results.insertResult(new FileOccurrence(file, matcher.start(), matcher.end() - matcher.start(), line, content.substring(snippetStart, snippetEnd), matcher.start() - snippetStart));
                         if(maxResults > 0 && results.getCount() >= maxResults) return;
                     }
