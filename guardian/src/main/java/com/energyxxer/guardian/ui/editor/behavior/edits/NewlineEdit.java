@@ -58,14 +58,19 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
 
 
 
-                String beforeCaret = text.substring(0, start - characterDrift).trim();
                 String afterCaret = text.substring(start - characterDrift);
                 char beforeCaretChar = '\0';
-                if(!beforeCaret.isEmpty()) {
-                    beforeCaretChar = beforeCaret.charAt(beforeCaret.length()-1);
+                for(int j = start - characterDrift - 1; j >= 0; j--) {
+                    char c = text.charAt(j);
+                    if(!Character.isWhitespace(c)) {
+                        beforeCaretChar = c;
+                        break;
+                    }
                 }
+
                 char afterCaretChar = '\0';
-                for(char c : afterCaret.toCharArray()) {
+                for(int j = start - characterDrift; j < text.length(); j++) {
+                    char c = text.charAt(j);
                     if(!Character.isWhitespace(c) || c == '\n') {
                         afterCaretChar = c;
                         break;
@@ -76,7 +81,7 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
 
                 if(Dot.SMART_KEYS_INDENT.get() && !afterCaret.isEmpty()) {
                     if(target.getIndentationManager().match(beforeCaretChar, afterCaretChar)) {
-                        placeAfterCaret = "\n" + StringUtil.repeat("    ", Math.max(tabs-1, 0));
+                        placeAfterCaret = '\n' + StringUtil.repeat(" ", target.tabSize * Math.max(tabs-1, 0));
                     } else if(target.getIndentationManager().isClosingBrace(afterCaret.charAt(0))) {
                         tabs--;
                     }
@@ -86,7 +91,7 @@ public class NewlineEdit extends Transaction<AdvancedEditor> {
 
                 //Debug.log(beforeCaretChar + "|" + afterCaretChar);
 
-                str += StringUtil.repeat("    ", tabs);
+                str += StringUtil.repeat(" ", target.tabSize * tabs);
                 str += placeAfterCaret;
 
                 modificationIndices.add(start);
