@@ -25,12 +25,12 @@ public class FloatingWindow extends JFrame implements WindowFocusListener, Windo
     private boolean pinned = false;
     private CompoundBorder border;
 
-    public FloatingWindow(String title, JPanel content, boolean pinnable) {
+    public FloatingWindow(String title, JPanel content, Dimension defaultSize, boolean pinnable) {
         super();
-        setup(title, content, pinnable);
+        setup(title, content, defaultSize, pinnable);
     }
 
-    private void setup(String title, JPanel content, boolean pinnable) {
+    private void setup(String title, JPanel content, Dimension defaultSize, boolean pinnable) {
         this.setUndecorated(true);
         this.setBackground(new Color(0,0,0,1));
 
@@ -62,7 +62,7 @@ public class FloatingWindow extends JFrame implements WindowFocusListener, Windo
 
         tlm.addThemeChangeListener(t -> {
             contentPanel.setMinimumSize(new ScalableDimension(400, 150));
-            contentPanel.setPreferredSize(new ScalableDimension(800, 600));
+            contentPanel.setPreferredSize(defaultSize);
             titleBar.setBackground(t.getColor(new Color(230, 230, 230), "FloatingWindow.header.background"));
             int thickness = Math.max(t.getInteger(1,"FloatingWindow.border.thickness"),0);
             border = new CompoundBorder(new EmptyBorder(ComponentResizer.DIST, ComponentResizer.DIST, ComponentResizer.DIST, ComponentResizer.DIST), BorderFactory.createMatteBorder(thickness, thickness, thickness, thickness, t.getColor(new Color(200, 200, 200), "FloatingWindow.border.color")));
@@ -71,6 +71,8 @@ public class FloatingWindow extends JFrame implements WindowFocusListener, Windo
 
         //this.addMouseListener(this);
         //this.addMouseMotionListener(this);
+
+        this.setSize(defaultSize);
 
         this.pack();
         Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();

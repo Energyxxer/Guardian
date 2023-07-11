@@ -82,10 +82,6 @@ public final class SnippetManager {
     }
 
     public static void save() {
-        if(!everLoaded) {
-            Debug.log("Not saving snippets, as they weren't loaded");
-            return;
-        }
         StringBuilder sb = new StringBuilder();
         for(Snippet snippet : snippets) {
             sb.append(snippet.getSaveData());

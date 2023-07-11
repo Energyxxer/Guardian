@@ -18,7 +18,6 @@ import com.energyxxer.guardian.main.window.sections.tools.process.ProcessBoard;
 import com.energyxxer.guardian.main.window.sections.tools.todo.TodoBoard;
 import com.energyxxer.guardian.ui.HintStylizer;
 import com.energyxxer.guardian.ui.common.KeyFixDialog;
-import com.energyxxer.guardian.ui.editor.completion.snippets.SnippetManager;
 import com.energyxxer.guardian.ui.explorer.NoticeExplorerMaster;
 import com.energyxxer.guardian.ui.explorer.ProjectExplorerMaster;
 import com.energyxxer.guardian.ui.misc.ExceptionHint;
@@ -311,7 +310,6 @@ public class GuardianWindow {
 		tabManager.saveOpenTabs();
 		projectExplorer.saveExplorerTree();
 		Resources.saveAll();
-		SnippetManager.save();
 		jframe.dispose();
 		if(restartingJar != null) {
 			try {

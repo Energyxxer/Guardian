@@ -8,6 +8,7 @@ import java.awt.image.WritableRaster;
 
 public class DrawMultipliedComposite implements Composite, CompositeContext {
     private Color tint;
+    private boolean ignoreSourceColor = false;
 
     public DrawMultipliedComposite(Color tint) {
         this.tint = tint;
@@ -78,17 +79,17 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
         int da = 255;
         int a = Math.min(255, sa + da);
 
-        int sb = (src) & 0xFF;
+        int sb = ignoreSourceColor ? 0xFF : (src) & 0xFF;
         sb = (sb * tint.getBlue()) / 255;
         int db = (dst) & 0xFF;
         int b = Math.min(Math.max(sb*sa/255 + db*da*(255-sa)/255/255, 0), 255);
 
-        int sg = (src >> 8) & 0xFF;
+        int sg = ignoreSourceColor ? 0xFF : (src >> 8) & 0xFF;
         sg = (sg * tint.getGreen()) / 255;
         int dg = (dst >> 8) & 0xFF;
         int g = Math.min(Math.max(sg*sa/255 + dg*da*(255-sa)/255/255, 0), 255);
 
-        int sr = (src >> 16) & 0xFF;
+        int sr = ignoreSourceColor ? 0xFF : (src >> 16) & 0xFF;
         sr = (sr * tint.getRed()) / 255;
         int dr = (dst >> 16) & 0xFF;
         int r = Math.min(Math.max(sr*sa/255 + dr*da*(255-sa)/255/255, 0), 255);
@@ -107,4 +108,8 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
 
     }
 
+    public DrawMultipliedComposite setIgnoreSourceColor(boolean ignoreSourceColor) {
+        this.ignoreSourceColor = ignoreSourceColor;
+        return this;
+    }
 }

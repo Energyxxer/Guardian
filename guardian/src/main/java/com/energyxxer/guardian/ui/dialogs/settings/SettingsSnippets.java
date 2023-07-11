@@ -185,6 +185,7 @@ public class SettingsSnippets extends JPanel implements ContentSwapper {
             Settings.addApplyEvent(() -> {
                 SnippetManager.getAll().clear();
                 SnippetManager.getAll().addAll(snippets);
+                SnippetManager.save();
             });
 
             Settings.addCloseEvent(() -> {
