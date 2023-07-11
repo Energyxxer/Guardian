@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Locale;
+import java.util.TimerTask;
 
 /**
  * Created by User on 12/15/2016.
@@ -93,6 +94,12 @@ public class StatusBar extends JPanel implements MouseListener {
     }
 
     public void setStatus(Status status) {
+        setStatus(status, -1);
+    }
+
+    private java.util.Timer statusTimer = new java.util.Timer();
+
+    public void setStatus(Status status, int timeout) {
         Theme t = GuardianWindow.getTheme();
 
         statusLabel.setForeground(t.getColor(Color.BLACK, "Status." + status.getType().toLowerCase(Locale.ENGLISH),"General.foreground"));
@@ -100,6 +107,20 @@ public class StatusBar extends JPanel implements MouseListener {
         statusLabel.setText(status.getMessage());
 
         setProgress(status.getProgress());
+
+        if(statusTimer != null) {
+            statusTimer.cancel();
+            statusTimer = null;
+        }
+
+        if(timeout > 0) {
+            statusTimer = new java.util.Timer();
+            statusTimer.schedule(new TimerTask() {
+                public void run() {
+                    GuardianWindow.dismissStatus(status);
+                }
+            }, timeout);
+        }
 
         this.currentStatus = status;
     }

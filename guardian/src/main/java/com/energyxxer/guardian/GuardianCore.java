@@ -110,4 +110,7 @@ public class GuardianCore {
     public URI getDocumentationURI() throws URISyntaxException {
         return null;
     }
+    public boolean useJavaImageCoordinates() {
+        return false;
+    }
 }

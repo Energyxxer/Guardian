@@ -7,16 +7,48 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 public class DrawMultipliedComposite implements Composite, CompositeContext {
-    private Color tint;
+    private int tintR;
+    private int tintG;
+    private int tintB;
+    private int tintA;
     private boolean ignoreSourceColor = false;
+    private boolean ignoreSourceAlpha = false;
 
     public DrawMultipliedComposite(Color tint) {
-        this.tint = tint;
+        this.tintR = tint.getRed();
+        this.tintG = tint.getGreen();
+        this.tintB = tint.getBlue();
+        this.tintA = tint.getAlpha();
     }
 
     protected void checkRasterCombination(Raster a, Raster b) {
         if (a.getSampleModel().getDataType() != b.getSampleModel().getDataType()) {
             throw new IllegalStateException("Expected consistent input raster data types: " + a.getSampleModel().getDataType() + ", " + b.getSampleModel().getDataType());
+        }
+    }
+
+    Object srcPixels;
+    Object dstPixels;
+
+    private void updatePixelArrays(int srcType, int dstType, int width) {
+        if(srcType == DataBuffer.TYPE_INT) {
+            if(!(srcPixels instanceof int[]) || (((int[]) srcPixels).length != width)) {
+                srcPixels = new int[width];
+            }
+        } else {
+            if(!(srcPixels instanceof byte[]) || (((byte[]) srcPixels).length != width*4)) {
+                srcPixels = new byte[width * 4];
+            }
+        }
+
+        if(dstType == DataBuffer.TYPE_INT) {
+            if(!(dstPixels instanceof int[]) || (((int[]) dstPixels).length != width)) {
+                dstPixels = new int[width];
+            }
+        } else {
+            if(!(dstPixels instanceof byte[]) || (((byte[]) dstPixels).length != width*4)) {
+                dstPixels = new byte[width * 4];
+            }
         }
     }
 
@@ -30,8 +62,7 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
         int width = Math.min(src.getWidth(), dstIn.getWidth());
         int height = Math.min(src.getHeight(), dstIn.getHeight());
         int x, y;
-        Object srcPixels = srcType == DataBuffer.TYPE_INT ? new int[width] : new byte[width * 4];
-        Object dstPixels = dstType == DataBuffer.TYPE_INT ? new int[width] : new byte[width * 4];
+        updatePixelArrays(srcType, dstType, width);
 
         for (y=0; y < height; y++) {
             src.getDataElements(0, y, width, 1, srcPixels);
@@ -74,25 +105,29 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
     }
 
     private int mixPixel(int src, int dst) {
-        int sa = (src >> 24) & 0xFF;
-        sa = (sa * tint.getAlpha()) / 255;
-        int da = 255;
-        int a = Math.min(255, sa + da);
+        //This operates on premultiplied colors
+        int srcPremultiplyAlpha = (src >> 24) & 0xFF;
+        if(srcPremultiplyAlpha == 0) srcPremultiplyAlpha = 0xFF;
+
+        int sa = ignoreSourceAlpha ? 0xFF : (src >> 24) & 0xFF;
+        sa = (sa * tintA) / 255;
+        int da = 0xFF;
+        int a = 0xFF;
 
         int sb = ignoreSourceColor ? 0xFF : (src) & 0xFF;
-        sb = (sb * tint.getBlue()) / 255;
+        sb = (sb * tintB) / srcPremultiplyAlpha;
         int db = (dst) & 0xFF;
-        int b = Math.min(Math.max(sb*sa/255 + db*da*(255-sa)/255/255, 0), 255);
+        int b = sb*sa/255 + db*da*(255-sa)/(255*255);
 
         int sg = ignoreSourceColor ? 0xFF : (src >> 8) & 0xFF;
-        sg = (sg * tint.getGreen()) / 255;
+        sg = (sg * tintG) / srcPremultiplyAlpha;
         int dg = (dst >> 8) & 0xFF;
-        int g = Math.min(Math.max(sg*sa/255 + dg*da*(255-sa)/255/255, 0), 255);
+        int g = sg*sa/255 + dg*da*(255-sa)/(255*255);
 
         int sr = ignoreSourceColor ? 0xFF : (src >> 16) & 0xFF;
-        sr = (sr * tint.getRed()) / 255;
+        sr = (sr * tintR) / srcPremultiplyAlpha;
         int dr = (dst >> 16) & 0xFF;
-        int r = Math.min(Math.max(sr*sa/255 + dr*da*(255-sa)/255/255, 0), 255);
+        int r = sr*sa/255 + dr*da*(255-sa)/(255*255);
 
         return (b) | (g << 8) | (r << 16) | (a << 24);
     }
@@ -110,6 +145,11 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
 
     public DrawMultipliedComposite setIgnoreSourceColor(boolean ignoreSourceColor) {
         this.ignoreSourceColor = ignoreSourceColor;
+        return this;
+    }
+
+    public DrawMultipliedComposite setIgnoreSourceAlpha(boolean ignoreSourceAlpha) {
+        this.ignoreSourceAlpha = ignoreSourceAlpha;
         return this;
     }
 }

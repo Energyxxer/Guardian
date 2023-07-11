@@ -1,7 +1,10 @@
 package com.energyxxer.guardian.ui.imageviewer;
 
+import com.energyxxer.guardian.global.Status;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.display.DisplayModule;
+import com.energyxxer.guardian.ui.floatingcanvas.DrawMultipliedComposite;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
@@ -10,6 +13,7 @@ import com.energyxxer.util.Disposable;
 import com.energyxxer.util.ImageManager;
 import com.energyxxer.util.StringUtil;
 import com.energyxxer.util.logger.Debug;
+import com.energyxxer.xswing.ScalableGraphics2D;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -44,10 +48,13 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
 
     private boolean initialized = false;
     private boolean crosshairVisible = false;
+    private boolean alphaEnabled = true;
 
     private Color crosshairColor = new Color(0, 0, 0, 64);
 
     private ThemeListenerManager tlm = new ThemeListenerManager();
+
+    private DrawMultipliedComposite composite = new DrawMultipliedComposite(Color.WHITE);
 
     public ImageViewer(File file) {
         this.file = file;
@@ -84,23 +91,50 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
 
         Rectangle rect = centerDimension();
         Shape originalBounds = g.getClipBounds();
+
+        drawBackground(g, rect);
+
         g.setClip(rect);
-
-        g.setColor(new Color(0x999999));
-        g.fillRect(rect.x, rect.y, rect.width, rect.height);
-        g.setColor(new Color(0x666666));
-
-        for(int x = rect.x > 0 ? rect.x : (rect.x-CHECK_PATTERN_SIZE) % (CHECK_PATTERN_SIZE*2); x < rect.x + rect.width; x += CHECK_PATTERN_SIZE * 2) {
-            for(int y = rect.y > 0 ? rect.y : (rect.y-CHECK_PATTERN_SIZE) % (CHECK_PATTERN_SIZE*2); y < rect.y + rect.height && y < this.getHeight(); y += CHECK_PATTERN_SIZE * 2) {
-                g.fillRect(x + CHECK_PATTERN_SIZE, y, CHECK_PATTERN_SIZE, CHECK_PATTERN_SIZE);
-                g.fillRect(x, y + CHECK_PATTERN_SIZE, CHECK_PATTERN_SIZE, CHECK_PATTERN_SIZE);
-            }
-        }
-
-        g.drawImage(img, rect.x, rect.y, rect.width, rect.height, null);
+        drawImage(g, rect);
 
         g.setClip(originalBounds);
 
+        drawOverlays(g, rect);
+    }
+
+    private void drawBackground(Graphics g, Rectangle rect) {
+        if(alphaEnabled) {
+            g.setClip(rect);
+            g.setColor(new Color(0x999999));
+            g.fillRect(rect.x, rect.y, rect.width, rect.height);
+            g.setColor(new Color(0x666666));
+
+            for(int x = rect.x > 0 ? rect.x : (rect.x-CHECK_PATTERN_SIZE) % (CHECK_PATTERN_SIZE*2); x < rect.x + rect.width; x += CHECK_PATTERN_SIZE * 2) {
+                for(int y = rect.y > 0 ? rect.y : (rect.y-CHECK_PATTERN_SIZE) % (CHECK_PATTERN_SIZE*2); y < rect.y + rect.height && y < this.getHeight(); y += CHECK_PATTERN_SIZE * 2) {
+                    g.fillRect(x + CHECK_PATTERN_SIZE, y, CHECK_PATTERN_SIZE, CHECK_PATTERN_SIZE);
+                    g.fillRect(x, y + CHECK_PATTERN_SIZE, CHECK_PATTERN_SIZE, CHECK_PATTERN_SIZE);
+                }
+            }
+        } else {
+            g.setColor(new Color(0xFF00FF));
+            int borderThickness = (int)Math.round(2 * ScalableGraphics2D.SCALE_FACTOR);
+            g.fillRect(rect.x - borderThickness, rect.y - borderThickness, rect.width + borderThickness*2, rect.height + borderThickness*2);
+        }
+    }
+
+    private void drawImage(Graphics g, Rectangle rect) {
+        g.setClip(rect);
+        if(alphaEnabled) {
+            g.drawImage(img, rect.x, rect.y, rect.width, rect.height, null);
+        } else {
+            Composite oldComposite = ((Graphics2D) g).getComposite();
+            ((Graphics2D) g).setComposite(composite.setIgnoreSourceAlpha(!alphaEnabled));
+            g.drawImage(img, rect.x, rect.y, rect.width, rect.height, null);
+            ((Graphics2D) g).setComposite(oldComposite);
+        }
+    }
+
+    private void drawOverlays(Graphics g, Rectangle rect) {
         if(crosshairVisible) {
             g.setColor(this.crosshairColor);
 
@@ -172,21 +206,23 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
 
     @Override
     public void displayCaretInfo() {
-        GuardianWindow.statusBar.setSelectionInfo("Pixel pos: " + posOnImage.x + ", " + posOnImage.y);
+        if(Guardian.core.useJavaImageCoordinates()) {
+            boolean animated = new File(file.getPath() + ".mcmeta").exists();
 
-        boolean animated = new File(file.getPath() + ".mcmeta").exists();
-
-        if(imgSize.width == imgSize.height) {
-            GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y  * 16) / imgSize.height),4)));
-        } else if(imgSize.width % imgSize.height == 0 || imgSize.height % imgSize.width == 0) {
-            String animationText = animated ? "Animated" : "Missing animation";
-            if(imgSize.width > imgSize.height) {
-                GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x % imgSize.height * 16) / imgSize.height, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y * 16) / imgSize.height),4)) + "    " + animationText);
+            if(imgSize.width == imgSize.height) {
+                GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y  * 16) / imgSize.height),4)));
+            } else if(imgSize.width % imgSize.height == 0 || imgSize.height % imgSize.width == 0) {
+                String animationText = animated ? "Animated" : "Missing animation";
+                if(imgSize.width > imgSize.height) {
+                    GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x % imgSize.height * 16) / imgSize.height, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y * 16) / imgSize.height),4)) + "    " + animationText);
+                } else {
+                    GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y % imgSize.width * 16) / imgSize.width),4)) + "    " + animationText);
+                }
             } else {
-                GuardianWindow.statusBar.setSelectionInfo("UV pos: " + StringUtil.stripDecimals(MathUtil.truncateDecimals((double) (posOnImage.x * 16) / imgSize.width, 4)) + ", " + StringUtil.stripDecimals(MathUtil.truncateDecimals(((double) (posOnImage.y % imgSize.width * 16) / imgSize.width),4)) + "    " + animationText);
+                GuardianWindow.statusBar.setSelectionInfo("Invalid aspect ratio");
             }
         } else {
-            GuardianWindow.statusBar.setSelectionInfo("Invalid aspect ratio");
+            GuardianWindow.statusBar.setSelectionInfo("Pixel pos: " + posOnImage.x + ", " + posOnImage.y);
         }
         GuardianWindow.statusBar.setCaretInfo(imgSize.width + "x" + imgSize.height);
     }
@@ -300,6 +336,23 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
         new_width = (int) Math.floor(new_width);
         new_height = (int) Math.floor(new_height);
         return new Dimension(new_width, new_height);
+    }
+
+    @Override
+    public void performModuleAction(String key) {
+        switch (key) {
+            case "editor.find": {
+                alphaEnabled = !alphaEnabled;
+                repaint();
+                GuardianWindow.statusBar.setStatus(new Status("Alpha rendering: " + (alphaEnabled ? "Enabled" : "Disabled")), 3000);
+                break;
+            }
+            case "editor.reload": {
+                updateImage();
+                repaint();
+                break;
+            }
+        }
     }
 
     @Override
