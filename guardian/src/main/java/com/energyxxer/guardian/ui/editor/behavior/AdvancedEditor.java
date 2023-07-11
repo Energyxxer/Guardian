@@ -90,7 +90,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
 
     private Style defaultParagraphStyle;
 
-    private int tabSize = 4;
+    public int tabSize = 4;
 
     public AdvancedEditor() {
         this(null);
@@ -822,7 +822,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                 if(text.charAt(j) == ' ') spaces++;
                 else break;
             }
-            return spaces / 4;
+            return spaces / tabSize;
         } catch (BadLocationException e) {
             e.printStackTrace();
             return 0;
@@ -836,6 +836,14 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
             painted = true;
             SwingUtilities.invokeLater(this::updateDefaultSize);
         }
+    }
+
+    public String getLineEnding() {
+        return (String) getDocument().getProperty(DefaultEditorKit.EndOfLineStringProperty);
+    }
+
+    public void setLineEnding(String ending) {
+        getDocument().putProperty(DefaultEditorKit.EndOfLineStringProperty, ending);
     }
 
     //Delegates and deprecated managers

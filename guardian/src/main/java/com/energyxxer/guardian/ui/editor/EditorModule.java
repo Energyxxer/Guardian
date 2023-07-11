@@ -34,18 +34,23 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Display module for the main text editor of the program.
  */
 public class EditorModule extends JPanel implements DisplayModule, UndoableEditListener, MouseListener, ThemeChangeListener, Disposable {
 
+    private static final Pattern NEWLINE_PATTERN = Pattern.compile("\n", Pattern.LITERAL);
     public static Preferences.SettingPref<Boolean> INSERT_TRAILING_NEWLINE = new Preferences.SettingPref<>("settings.editor.insert_trailing_newline", false, Boolean::parseBoolean);
     public static Preferences.SettingPref<Boolean> WORD_WRAP = new Preferences.SettingPref<>("settings.editor.word_wrap", false, Boolean::parseBoolean);
     public static Preferences.SettingPref<Integer> MAX_FILESIZE_MB = new Preferences.SettingPref<>("settings.editor.max_file_size_mb", 2, Integer::parseInt);
@@ -445,34 +450,39 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
     @Override
     public Object save() {
         if(file == null) return null;
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter(file, "UTF-8");
-
+        boolean success = false;
+        try(FileOutputStream fos = new FileOutputStream(file)){
             String text = getText();
+
+            String lineEnding = editorComponent.getLineEnding();
+            if(!"\n".equals(lineEnding)) {
+                text = NEWLINE_PATTERN.matcher(text).replaceAll(Matcher.quoteReplacement(lineEnding));
+            }
 
             if(INSERT_TRAILING_NEWLINE.get() && !text.endsWith("\n")) {
                 try {
                     editorComponent.getDocument().insertString(text.length(),"\n",null);
-                    text = text.concat("\n");
+                    text = text.concat(editorComponent.getLineEnding());
                 } catch(BadLocationException e) {
                     e.printStackTrace();
                 }
             }
 
-            writer.print(text);
-            writer.close();
+            fos.write(text.getBytes());
 
+            success = true;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(success) {
             Project associatedProject = ProjectManager.getAssociatedProject(file);
             if(associatedProject != null && associatedProject.getProjectType().isProjectIdentity(file)) {
                 ProjectManager.loadWorkspace();
             }
 
             Commons.index(associatedProject);
-
             return getValue();
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            e.printStackTrace();
         }
         return null;
     }

@@ -191,7 +191,7 @@ public class IndentationManager {
     }
 
     public String indent(int level) {
-        return StringUtil.repeat("    ", level);
+        return StringUtil.repeat(" ", editor.tabSize*level);
     }
 
     private static class IndentationChange {

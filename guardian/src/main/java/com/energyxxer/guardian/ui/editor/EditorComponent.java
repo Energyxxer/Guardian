@@ -448,7 +448,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
     }
 
     void displayCaretInfo() {
-        GuardianWindow.statusBar.setCaretInfo(getCaretInfo());
+        GuardianWindow.statusBar.setCaretInfo(getCaretInfo() + "    " + ("\r\n".equals(getLineEnding()) ? "CRLF" : "LF"));
         GuardianWindow.statusBar.setSelectionInfo(getSelectionInfo());
     }
 
