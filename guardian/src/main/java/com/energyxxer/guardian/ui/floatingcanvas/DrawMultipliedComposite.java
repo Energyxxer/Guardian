@@ -107,7 +107,7 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
     private int mixPixel(int src, int dst) {
         //This operates on premultiplied colors
         int srcPremultiplyAlpha = (src >> 24) & 0xFF;
-        if(srcPremultiplyAlpha == 0) srcPremultiplyAlpha = 0xFF;
+        if(srcPremultiplyAlpha == 0 || !ignoreSourceAlpha) srcPremultiplyAlpha = 0xFF;
 
         int sa = ignoreSourceAlpha ? 0xFF : (src >> 24) & 0xFF;
         sa = (sa * tintA) / 255;
