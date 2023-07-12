@@ -468,7 +468,7 @@ public class EditorModule extends JPanel implements DisplayModule, UndoableEditL
                 }
             }
 
-            fos.write(text.getBytes());
+            fos.write(text.getBytes(Guardian.DEFAULT_CHARSET));
 
             success = true;
         } catch (IOException e) {
