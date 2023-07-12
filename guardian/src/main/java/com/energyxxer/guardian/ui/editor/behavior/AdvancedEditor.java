@@ -839,7 +839,8 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
     }
 
     public String getLineEnding() {
-        return (String) getDocument().getProperty(DefaultEditorKit.EndOfLineStringProperty);
+        String lineEnding = (String) getDocument().getProperty(DefaultEditorKit.EndOfLineStringProperty);
+        return lineEnding != null ? lineEnding : "\n";
     }
 
     public void setLineEnding(String ending) {
