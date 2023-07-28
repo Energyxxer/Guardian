@@ -282,7 +282,7 @@ public class StandardOrderListItem extends OrderListElement implements ItemActio
         pressedStart = -1;
         if(!e.isConsumed() && e.isPopupTrigger()) {
             JPopupMenu menu = this.generatePopup();
-            if(menu != null) menu.show(e.getComponent(), e.getX(), e.getY());
+            if(menu != null) menu.show(e.getComponent(), (int) (e.getX() * ScalableGraphics2D.SCALE_FACTOR), (int) (e.getY() * ScalableGraphics2D.SCALE_FACTOR));
         }
     }
 

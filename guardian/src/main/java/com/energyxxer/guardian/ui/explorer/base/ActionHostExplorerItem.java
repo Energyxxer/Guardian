@@ -2,10 +2,10 @@ package com.energyxxer.guardian.ui.explorer.base;
 
 import com.energyxxer.guardian.ui.explorer.base.elements.ExplorerElement;
 import com.energyxxer.guardian.ui.modules.ModuleToken;
-import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.guardian.ui.orderlist.CompoundActionModuleToken;
 import com.energyxxer.guardian.ui.orderlist.ItemAction;
 import com.energyxxer.guardian.ui.orderlist.ItemActionHost;
+import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.guardian.util.ImageUtil;
 import com.energyxxer.util.StringUtil;
 import com.energyxxer.xswing.ScalableGraphics2D;
@@ -276,7 +276,7 @@ public class ActionHostExplorerItem extends ExplorerElement implements ItemActio
         pressedStart = -1;
         if(!e.isConsumed() && e.isPopupTrigger()) {
             JPopupMenu menu = this.generatePopup();
-            if(menu != null) menu.show(e.getComponent(), e.getX(), e.getY());
+            if(menu != null) menu.show(e.getComponent(), (int) (e.getX() * ScalableGraphics2D.SCALE_FACTOR), (int) (e.getY() * ScalableGraphics2D.SCALE_FACTOR));
         }
     }
 

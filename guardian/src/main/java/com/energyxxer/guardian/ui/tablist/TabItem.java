@@ -220,7 +220,7 @@ public class TabItem extends TabListElement {
         }
         if(e.isPopupTrigger() && token.isTabCloseable()) {
             StyledPopupMenu menu = this.generatePopup();
-            menu.show(e.getComponent(), e.getX(), e.getY());
+            menu.show(e.getComponent(), (int) (e.getX() * ScalableGraphics2D.SCALE_FACTOR), (int) (e.getY() * ScalableGraphics2D.SCALE_FACTOR));
         }
     }
 

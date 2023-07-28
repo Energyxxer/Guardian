@@ -248,7 +248,7 @@ public class StandardExplorerItem extends ExplorerElement {
         if(e.isPopupTrigger()) {
             if(!this.selected) master.setSelected(this, new MouseEvent(e.getComponent(), e.getID(), e.getWhen(), 0, e.getX(), e.getY(), e.getClickCount(), e.isPopupTrigger(), MouseEvent.BUTTON1));
             JPopupMenu menu = token.generateMenu(ModuleToken.TokenContext.EXPLORER);
-            if(menu != null) menu.show(e.getComponent(), e.getX(), e.getY());
+            if(menu != null) menu.show(e.getComponent(), (int) (e.getX() * ScalableGraphics2D.SCALE_FACTOR), (int) (e.getY() * ScalableGraphics2D.SCALE_FACTOR));
         }
     }
 

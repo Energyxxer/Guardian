@@ -2,6 +2,7 @@ package com.energyxxer.guardian.ui.explorer;
 
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
+import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
@@ -33,6 +34,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.energyxxer.xswing.ScalableDimension.descaleEvent;
 
 /**
  * Created by User on 5/16/2017.
@@ -339,6 +342,7 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
     @Override
     public void mousePressed(MouseEvent e) {
         super.mousePressed(e);
+        e = descaleEvent(e);
         if(e.isPopupTrigger() && getElementAtMousePos(e) == null) {
             showMenu(e);
         }
@@ -347,6 +351,7 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
     @Override
     public void mouseReleased(MouseEvent e) {
         super.mouseReleased(e);
+        e = descaleEvent(e);
         if(e.isPopupTrigger() && getElementAtMousePos(e) == null) {
             showMenu(e);
         }
@@ -355,7 +360,7 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
     private void showMenu(MouseEvent e) {
         StyledPopupMenu menu = new StyledPopupMenu();
 
-        menu.add(MenuItems.newMenu("New", type -> true, null, false));
+        menu.add(MenuItems.newMenu("New", type -> true, ProjectManager.getWorkspaceDir(), false));
 
         menu.addSeparator();
 
@@ -363,6 +368,6 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         openInSystemItem.addActionListener(a -> Commons.showInSystemExplorer(Preferences.getWorkspace().toString()));
         menu.add(openInSystemItem);
 
-        menu.show(this, e.getX(), e.getY());
+        menu.show(this, (int) (e.getX() * ScalableGraphics2D.SCALE_FACTOR), (int) (e.getY() * ScalableGraphics2D.SCALE_FACTOR));
     }
 }
