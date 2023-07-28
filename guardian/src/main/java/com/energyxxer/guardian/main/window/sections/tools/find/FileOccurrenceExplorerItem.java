@@ -92,8 +92,13 @@ public class FileOccurrenceExplorerItem extends StandardExplorerItem {
         //File Name
 
         if(!(master instanceof FindExplorerFilter) || ((FindExplorerFilter) master).highlightResult()) {
-            g.setColor(master.getColors().get("item.find.background"));
-            g.fillRect(x+metrics.stringWidth(occurrence.linePreview.substring(0, occurrence.previewOffset)), master.getOffsetY() + metrics.getAscent()/2 - 2, metrics.stringWidth(occurrence.linePreview.substring(occurrence.previewOffset, occurrence.previewOffset+occurrence.length)), metrics.getHeight());
+            try {
+                g.setColor(master.getColors().get("item.find.background"));
+                g.fillRect(x+metrics.stringWidth(occurrence.linePreview.substring(0, occurrence.previewOffset)), master.getOffsetY() + metrics.getAscent()/2 - 2, metrics.stringWidth(occurrence.linePreview.substring(occurrence.previewOffset, occurrence.previewOffset+occurrence.length)), metrics.getHeight());
+            } catch (StringIndexOutOfBoundsException ex) {
+                g.setColor(Color.RED);
+                g.fillRect(x, master.getOffsetY() + metrics.getAscent()/2 - 2, 10, metrics.getHeight());
+            }
         }
 
         if(this.selected) {

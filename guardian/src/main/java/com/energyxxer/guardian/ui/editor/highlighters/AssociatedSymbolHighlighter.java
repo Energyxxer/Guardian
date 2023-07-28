@@ -32,8 +32,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter, MouseMotionListener, MouseListener {
+    private static final Pattern LINE_ENDING_PATTERN = Pattern.compile("\r?\n");
 
     private AdvancedEditor editor;
 
@@ -293,6 +295,10 @@ public class AssociatedSymbolHighlighter implements Highlighter.HighlightPainter
                             contents = cachedFileContents.get(file);
                         } else {
                             contents = new String(Files.readAllBytes(file.toPath()), Guardian.DEFAULT_CHARSET);
+                            //remove carriage returns
+                            contents = LINE_ENDING_PATTERN.matcher(contents).replaceAll("\n");
+
+                            cachedFileContents.put(file, contents);
                         }
 
                         int lineStart = bounds.start.index - bounds.start.column;
