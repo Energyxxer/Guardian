@@ -52,6 +52,7 @@ public class QueryDetails {
     private void searchInFile(Pattern query, File file) {
         if(maxResults > 0 && results.getCount() >= maxResults) return;
         if(file.isDirectory()) {
+            if(!Guardian.core.isSearchableDirectory(file)) return;
             File[] files = file.listFiles();
             if(files != null) {
                 for(File child : files) {

@@ -3,16 +3,17 @@ package com.energyxxer.guardian.main.window.sections.quick_find;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.temp.projects.Project;
-import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
-import com.energyxxer.guardian.ui.modules.FileModuleToken;
-import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
-import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.actions.ActionManager;
 import com.energyxxer.guardian.main.window.actions.ProgramAction;
+import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
+import com.energyxxer.guardian.ui.modules.FileModuleToken;
+import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.StyledDropdownMenu;
 import com.energyxxer.guardian.ui.styledcomponents.StyledLabel;
 import com.energyxxer.guardian.ui.styledcomponents.StyledTextField;
+import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.xswing.*;
 
 import javax.swing.*;
@@ -188,6 +189,7 @@ public class QuickFindDialog extends JDialog implements WindowFocusListener, Act
 
     private void searchInFile(String query, File file) {
         if(file.isDirectory()) {
+            if(!Guardian.core.isSearchableDirectory(file)) return;
             File[] files = file.listFiles();
             if(files != null) {
                 for(File child : files) {

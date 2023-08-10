@@ -113,4 +113,8 @@ public class GuardianCore {
     public boolean useJavaImageCoordinates() {
         return false;
     }
+
+    public boolean isSearchableDirectory(File file) {
+        return !".git".equals(file.getName());
+    }
 }
