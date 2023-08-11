@@ -199,6 +199,18 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
 
         clearDragRollover();
 
+        Component parent = this.getParent();
+        if(parent instanceof JViewport) {
+            Point dropLocation = new Point(e.getLocation());
+
+            Rectangle visibleRect = ((JViewport) parent).getViewRect();
+            int margin = 50;
+            Rectangle safeRect = new Rectangle(visibleRect.x + margin, visibleRect.y + margin, visibleRect.width - 2*margin, visibleRect.height - 2*margin);
+            if(!safeRect.contains(dropLocation)) {
+                handleDragOverEdge(dropLocation, visibleRect, safeRect, (JViewport) parent);
+            }
+        }
+
         Point location = e.getLocation();
         location.setLocation(location.x / ScalableGraphics2D.SCALE_FACTOR, location.y / ScalableGraphics2D.SCALE_FACTOR);
 
@@ -244,6 +256,11 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         if(!canImport) e.rejectDrag();
         else e.acceptDrag(e.getDropAction());
         repaint();
+    }
+
+    private void handleDragOverEdge(Point location, Rectangle visibleRect, Rectangle safeRect, JViewport viewport) {
+        int range = 50;
+        viewport.scrollRectToVisible(new Rectangle(location.x - visibleRect.x - range, location.y - visibleRect.y - range, 2*range, 2*range));
     }
 
     private void clearDragRollover() {
