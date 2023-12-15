@@ -128,6 +128,7 @@ public class TodoBoard extends ToolBoard {
                     }
                 }
                 FindResultExplorerItem projectItem = new FindResultExplorerItem(projectResult, explorer, k -> true);
+                projectItem.setDetailed(true);
                 explorer.addElement(projectItem);
             } else {
                 String projectName = project.getName();
@@ -186,7 +187,7 @@ public class TodoBoard extends ToolBoard {
 
                     @Override
                     public String getTitle(TokenContext context) {
-                        return projectName + " - Project not yet indexed";
+                        return projectName;
                     }
 
                     @Override
@@ -196,7 +197,7 @@ public class TodoBoard extends ToolBoard {
 
                     @Override
                     public String getHint() {
-                        return null;
+                        return "Project not yet indexed";
                     }
 
                     @Override
@@ -239,6 +240,7 @@ public class TodoBoard extends ToolBoard {
                         return 0.5f;
                     }
                 }, explorer, null);
+                placeholderItem.setDetailed(true);
                 explorer.addElement(placeholderItem);
             }
         }
