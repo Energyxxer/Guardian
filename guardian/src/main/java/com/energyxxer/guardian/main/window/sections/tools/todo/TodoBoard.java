@@ -191,13 +191,18 @@ public class TodoBoard extends ToolBoard {
                     }
 
                     @Override
+                    public String getSubTitle() {
+                        return "Project not yet indexed";
+                    }
+
+                    @Override
                     public Image getIcon() {
                         return Commons.getIcon("project_unloaded");
                     }
 
                     @Override
                     public String getHint() {
-                        return "Project not yet indexed";
+                        return null;
                     }
 
                     @Override
@@ -237,7 +242,7 @@ public class TodoBoard extends ToolBoard {
 
                     @Override
                     public float getAlpha() {
-                        return 0.5f;
+                        return 0.8f;
                     }
                 }, explorer, null);
                 placeholderItem.setDetailed(true);
