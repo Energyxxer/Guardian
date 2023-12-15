@@ -2,6 +2,7 @@ package com.energyxxer.guardian.main.window.sections.tools.todo;
 
 import com.energyxxer.enxlex.lexical_analysis.summary.Todo;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSection;
+import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
@@ -11,19 +12,26 @@ import com.energyxxer.guardian.main.window.sections.tools.find.FileOccurrence;
 import com.energyxxer.guardian.main.window.sections.tools.find.FindExplorerFilter;
 import com.energyxxer.guardian.main.window.sections.tools.find.FindResultExplorerItem;
 import com.energyxxer.guardian.main.window.sections.tools.find.FindResults;
+import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.ToolbarButton;
+import com.energyxxer.guardian.ui.display.DisplayModule;
+import com.energyxxer.guardian.ui.explorer.base.StandardExplorerItem;
+import com.energyxxer.guardian.ui.modules.ModuleToken;
 import com.energyxxer.guardian.ui.scrollbar.OverlayScrollPane;
 import com.energyxxer.guardian.ui.styledcomponents.ButtonHintHandler;
 import com.energyxxer.guardian.ui.styledcomponents.Padding;
+import com.energyxxer.guardian.ui.styledcomponents.StyledPopupMenu;
 import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.hints.Hint;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 public class TodoBoard extends ToolBoard {
@@ -121,6 +129,117 @@ public class TodoBoard extends ToolBoard {
                 }
                 FindResultExplorerItem projectItem = new FindResultExplorerItem(projectResult, explorer, k -> true);
                 explorer.addElement(projectItem);
+            } else {
+                String projectName = project.getName();
+                StandardExplorerItem placeholderItem = new StandardExplorerItem(new ModuleToken() {
+                    private Collection<ModuleToken> hintTokens = Collections.singletonList(new ModuleToken() {
+                        @Override
+                        public String getTitle(TokenContext context) {
+                            return "Open one of the project files, wait for it to index and press Refresh on the TODO board";
+                        }
+
+                        @Override
+                        public Image getIcon() {
+                            return Commons.getIcon("info");
+                        }
+
+                        @Override
+                        public String getHint() {
+                            return null;
+                        }
+
+                        @Override
+                        public Collection<? extends ModuleToken> getSubTokens() {
+                            return null;
+                        }
+
+                        @Override
+                        public boolean isExpandable() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isModuleSource() {
+                            return false;
+                        }
+
+                        @Override
+                        public DisplayModule createModule(Tab tab) {
+                            return null;
+                        }
+
+                        @Override
+                        public StyledPopupMenu generateMenu(@NotNull TokenContext context) {
+                            return null;
+                        }
+
+                        @Override
+                        public String getIdentifier() {
+                            return null;
+                        }
+
+                        @Override
+                        public boolean equals(ModuleToken other) {
+                            return false;
+                        }
+                    });
+
+                    @Override
+                    public String getTitle(TokenContext context) {
+                        return projectName + " - Project not yet indexed";
+                    }
+
+                    @Override
+                    public Image getIcon() {
+                        return Commons.getIcon("project_unloaded");
+                    }
+
+                    @Override
+                    public String getHint() {
+                        return null;
+                    }
+
+                    @Override
+                    public Collection<? extends ModuleToken> getSubTokens() {
+                        return hintTokens;
+                    }
+
+                    @Override
+                    public boolean isExpandable() {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean isModuleSource() {
+                        return false;
+                    }
+
+                    @Override
+                    public DisplayModule createModule(Tab tab) {
+                        return null;
+                    }
+
+                    @Override
+                    public StyledPopupMenu generateMenu(@NotNull TokenContext context) {
+                        return null;
+                    }
+
+                    @Override
+                    public String getIdentifier() {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean equals(ModuleToken other) {
+                        return false;
+                    }
+
+                    @Override
+                    public float getAlpha() {
+                        return 0.5f;
+                    }
+                }, explorer, null);
+                explorer.addElement(placeholderItem);
             }
         }
     }

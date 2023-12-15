@@ -38,6 +38,7 @@ public class ProjectManager {
 
 		GuardianWindow.projectExplorer.refresh();
 		GuardianWindow.toolbar.updateActiveFile();
+		GuardianWindow.todoBoard.refresh();
 
 		JsonObject workspaceConfigObj = null;
 

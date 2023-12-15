@@ -58,6 +58,7 @@ public class FindResults extends QueryResult {
     public static class ProjectResult extends QueryResult implements NonStandardModuleToken {
         private String iconName = "folder";
         private File projectRoot;
+        private int total = 0;
         private final HashMap<String, SubProjectResult> subResults = new HashMap<>();
         private final ArrayList<FileOccurrence> loneResults = new ArrayList<>();
 
@@ -82,6 +83,7 @@ public class FindResults extends QueryResult {
                 }
                 subResults.get(subProject).insertResult(occurrence);
             }
+            total++;
         }
 
         @Override
@@ -93,7 +95,7 @@ public class FindResults extends QueryResult {
 
         @Override
         public String getTitle(TokenContext context) {
-            return projectRoot != null ? projectRoot.getName() : "<no project>";
+            return projectRoot != null ? projectRoot.getName() + " (" + total + ")"  : "<no project>";
         }
 
         @Override

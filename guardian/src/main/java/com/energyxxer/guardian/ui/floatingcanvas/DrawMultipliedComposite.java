@@ -117,17 +117,17 @@ public class DrawMultipliedComposite implements Composite, CompositeContext {
         int sb = ignoreSourceColor ? 0xFF : (src) & 0xFF;
         sb = (sb * tintB) / srcPremultiplyAlpha;
         int db = (dst) & 0xFF;
-        int b = sb*sa/255 + db*da*(255-sa)/(255*255);
+        int b = (sb*sa + db*da*(255-sa)/255)/255;
 
         int sg = ignoreSourceColor ? 0xFF : (src >> 8) & 0xFF;
         sg = (sg * tintG) / srcPremultiplyAlpha;
         int dg = (dst >> 8) & 0xFF;
-        int g = sg*sa/255 + dg*da*(255-sa)/(255*255);
+        int g = (sg*sa + dg*da*(255-sa)/255)/255;
 
         int sr = ignoreSourceColor ? 0xFF : (src >> 16) & 0xFF;
         sr = (sr * tintR) / srcPremultiplyAlpha;
         int dr = (dst >> 16) & 0xFF;
-        int r = sr*sa/255 + dr*da*(255-sa)/(255*255);
+        int r = (sr*sa + dr*da*(255-sa)/255)/255;
 
         return (b) | (g << 8) | (r << 16) | (a << 24);
     }
