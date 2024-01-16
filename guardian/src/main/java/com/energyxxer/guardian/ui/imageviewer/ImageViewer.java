@@ -146,20 +146,25 @@ public class ImageViewer extends JPanel implements DisplayModule, MouseWheelList
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        int rotation = e.getWheelRotation();
-        if(rotation == 0) return;
-        rotation = Math.max(-4,Math.min(4,rotation));
 
-        double newScale = scale * ((rotation < 0) ? 1.25 : 0.8);
-        if(newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
+        double accumulator = Math.abs(e.getPreciseWheelRotation());
+        int direction = (int) Math.signum(e.getPreciseWheelRotation());
 
-            Point.Double posOnImage = this.getPositionOnImage(cursorPoint, scale);
-            Point.Double newPosOnImage = this.getPositionOnImage(cursorPoint, newScale);
+        while(accumulator > 0) {
+            double amount = direction * Math.min(accumulator, 1);
+            accumulator -= 1;
 
-            this.offsetX += (newPosOnImage.x - posOnImage.x) * newScale;
-            this.offsetY += (newPosOnImage.y - posOnImage.y) * newScale;
+            double newScale = scale * Math.abs(amount) * ((amount < 0) ? 1.25 : 0.8);
+            if(newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
 
-            scale = newScale;
+                Point.Double posOnImage = this.getPositionOnImage(cursorPoint, scale);
+                Point.Double newPosOnImage = this.getPositionOnImage(cursorPoint, newScale);
+
+                this.offsetX += (newPosOnImage.x - posOnImage.x) * newScale;
+                this.offsetY += (newPosOnImage.y - posOnImage.y) * newScale;
+
+                scale = newScale;
+            }
         }
         repaint();
     }
