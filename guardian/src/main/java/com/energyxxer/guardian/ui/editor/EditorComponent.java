@@ -62,6 +62,7 @@ public class EditorComponent extends AdvancedEditor implements KeyListener, Care
 
 
     EditorComponent(EditorModule parent) {
+        super();
         this.parent = parent;
 
         this.setPaddingEnabled(true);

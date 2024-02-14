@@ -40,11 +40,7 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
         this.editor = editor;
         editor.addMouseMotionListener(this);
 
-        try
-        {
-            editor.getHighlighter().addHighlight(0, 0, this);
-        }
-        catch(BadLocationException ble) {}
+        editor.addHighlighter(this);
 
         hint.setInteractive(true);
 
@@ -63,7 +59,9 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
             for (Inspection item : inspectionModule.getInspections()) {
                 if(item.getSeverity() == null || item.getSeverity() == InspectionSeverity.HIDDEN) continue;
 
-                g.setColor(GuardianWindow.getTheme().getColor("Inspector." + item.getSeverity().name().toLowerCase()));
+                Color color = item.getForceColor();
+                if(color == null) color = GuardianWindow.getTheme().getColor("Inspector." + item.getSeverity().name().toLowerCase());
+                g.setColor(color);
 
                 try {
                     StringBounds bounds = new StringBounds(
@@ -135,6 +133,7 @@ public class Inspector implements Highlighter.HighlightPainter, MouseMotionListe
         for(Inspection inspection : inspectionModule.getInspections()) {
             if(inspection.getSeverity() != null
                     && inspection.getSeverity() != InspectionSeverity.HIDDEN
+                    && inspection.getSeverity() != InspectionSeverity.STYLING
                     && index >= inspection.getStartIndex()
                     && (
                     index < inspection.getEndIndex()

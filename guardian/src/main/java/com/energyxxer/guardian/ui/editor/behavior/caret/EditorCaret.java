@@ -52,6 +52,8 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
     private Timer flasher;
     private ActionListener flasherHandler;
     boolean visible = false;
+    private final ArrayList<Highlighter.HighlightPainter> selectionPainters = new ArrayList<>();
+    private final ArrayList<Object> selectionPainterTags = new ArrayList<>();
 
     private static Highlighter.HighlightPainter nullHighlighter = (g,p0,p1,bounds,c) -> {};
 
@@ -92,12 +94,29 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         bufferedDot = new Dot(0, 0, editor);
         addDot(bufferedDot);
 
+        selectionPainters.add(new EditorSelectionPainter(this));
+        selectionPainters.add(new BracePairHighlighter(editor, this));
+
+        addSelectionPainter();
+    }
+
+    public void addSelectionPainter() {
+        if(!selectionPainterTags.isEmpty()) return;
         try {
-            c.getHighlighter().addHighlight(0,0, new EditorSelectionPainter(this));
-            c.getHighlighter().addHighlight(0,0, new BracePairHighlighter(editor, this));
-        } catch(BadLocationException x) {
+            for(Highlighter.HighlightPainter painter : selectionPainters) {
+                Object tag = editor.getHighlighter().addHighlight(0,0, painter);
+                selectionPainterTags.add(tag);
+            }
+        } catch (BadLocationException x) {
             Debug.log(x.getMessage(), Debug.MessageType.ERROR);
         }
+    }
+
+    public void removeSelectionPainter() {
+        for(Object tag : selectionPainterTags) {
+            editor.getHighlighter().removeHighlight(tag);
+        }
+        selectionPainterTags.clear();
     }
 
     private void handleEvent(KeyEvent e) {

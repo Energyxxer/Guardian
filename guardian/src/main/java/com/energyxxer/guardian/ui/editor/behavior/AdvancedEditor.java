@@ -182,6 +182,16 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
         });
     }
 
+    public void addHighlighter(Highlighter.HighlightPainter highlighter) {
+        caret.removeSelectionPainter();
+        try {
+            getHighlighter().addHighlight(0, 0, highlighter);
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+        caret.addSelectionPainter();
+    }
+
     public CustomDocument getCustomDocument() {
         return (CustomDocument) super.getDocument();
     }
