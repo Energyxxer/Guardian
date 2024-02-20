@@ -302,6 +302,8 @@ public class SearchPathDialog extends JDialog implements WindowFocusListener, Ac
         commonTextFileEndings.add(".fsh");
         commonTextFileEndings.add(".glsl");
         commonTextFileEndings.add(".shader");
+        commonTextFileEndings.add(".js");
+        commonTextFileEndings.add(".material");
 
         for(Lang lang : Lang.values()) {
             commonTextFileEndings.addAll(lang.getExtensions());
