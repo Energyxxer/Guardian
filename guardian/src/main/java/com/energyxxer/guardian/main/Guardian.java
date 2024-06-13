@@ -3,6 +3,7 @@ package com.energyxxer.guardian.main;
 import com.energyxxer.commodore.versioning.ThreeNumberVersion;
 import com.energyxxer.guardian.GuardianBinding;
 import com.energyxxer.guardian.GuardianCore;
+import com.energyxxer.guardian.events.EventManager;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.Resources;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
@@ -69,6 +70,7 @@ public class Guardian {
 		}
 	}
 
+	public static EventManager events;
 	public static GuardianWindow window;
 
 	private Guardian() {
@@ -189,6 +191,7 @@ public class Guardian {
 
 	private static void start() {
 
+		events = new EventManager();
 		guardian = new Guardian();
 		System.setErr(new PrintStream(new OutputStream() {
 			StringBuilder sb = new StringBuilder();

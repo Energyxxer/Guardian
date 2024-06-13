@@ -1,7 +1,10 @@
 package com.energyxxer.guardian.global;
 
+import com.energyxxer.guardian.events.events.FileDeletedEvent;
+import com.energyxxer.guardian.events.events.FileRenamedEvent;
 import com.energyxxer.guardian.global.temp.projects.Project;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.Tab;
 import com.energyxxer.guardian.ui.dialogs.OptionDialog;
@@ -19,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -53,6 +57,34 @@ public class TabManager {
 	public TabManager(@NotNull TabListMaster tabList, @NotNull ContentSwapper moduleComponent) {
 		this.tabList = tabList;
 		this.moduleComponent = moduleComponent;
+	}
+
+	public void subscribeToFileEvents() {
+		Guardian.events.addEventHandler(FileRenamedEvent.class, (FileRenamedEvent evt) -> {
+			for(Tab tab : openTabs.toArray(new Tab[0])) {
+				if(tab.token instanceof FileModuleToken) {
+					Path tabPath = ((FileModuleToken) tab.token).getFile().toPath();
+					if(tabPath.equals(evt.oldPath)) {
+						tab.transform(new FileModuleToken(evt.newPath.toFile()));
+					} else if(tabPath.startsWith(evt.oldPath)) {
+						closeTab(tab, true);
+					}
+				}
+			}
+			saveOpenTabs();
+			tabList.repaint();
+			updateWindowTitle();
+		});
+		Guardian.events.addEventHandler(FileDeletedEvent.class, (FileDeletedEvent evt) -> {
+			for(Tab tab : openTabs.toArray(new Tab[0])) {
+				if(tab.token instanceof FileModuleToken && ((FileModuleToken) tab.token).getFile().toPath().equals(evt.oldPath)) {
+					closeTab(tab, true);
+				}
+			}
+			saveOpenTabs();
+			tabList.repaint();
+			updateWindowTitle();
+		});
 	}
 
 	public void openTab(ModuleToken token, int index) {
@@ -183,24 +215,35 @@ public class TabManager {
 		if (tab != null) {
 			selectedTab = tab;
 
-			String linkedProject = null;
-			if(tab.token.getAssociatedProjectRoot() != null) {
-				linkedProject = tab.token.getAssociatedProjectRoot().getName();
-			}
-			if(changeWindowInfo) GuardianWindow.setTitle(((linkedProject != null) ? linkedProject + " - " : "") + tab.getName());
 			moduleComponent.setContent(tab.getModuleComponent());
 			tab.onSelect(focus);
 		} else {
 			if(changeWindowInfo) {
 				GuardianWindow.statusBar.setCaretInfo(Commons.DEFAULT_CARET_DISPLAY_TEXT);
 				GuardianWindow.statusBar.setSelectionInfo(" ");
-				GuardianWindow.clearTitle();
 			}
             moduleComponent.setContent(null);
 		}
 
-		if(changeWindowInfo) Commons.updateActiveFile();
+		if(changeWindowInfo) {
+			updateWindowTitle();
+			Commons.updateActiveFile();
+		}
 		saveOpenTabs();
+	}
+
+	private void updateWindowTitle() {
+		if(changeWindowInfo) {
+			if(selectedTab != null) {
+				String linkedProject = null;
+				if(selectedTab.token.getAssociatedProjectRoot() != null) {
+					linkedProject = selectedTab.token.getAssociatedProjectRoot().getName();
+				}
+				GuardianWindow.setTitle(((linkedProject != null) ? linkedProject + " - " : "") + selectedTab.getName());
+			} else {
+				GuardianWindow.clearTitle();
+			}
+		}
 	}
 
 	public Tab getSelectedTab() {
@@ -268,16 +311,6 @@ public class TabManager {
 			if(tab.token.equals(token)) return tab;
 		}
 		return null;
-	}
-
-	public void checkForDeletion() {
-		for (int i = 0; i < openTabs.size(); i++) {
-			Tab tab = openTabs.get(i);
-			if(tab.token instanceof FileModuleToken && !((FileModuleToken) tab.token).getFile().exists()) {
-				closeTab(tab, true);
-				i--;
-			}
-		}
 	}
 
 	public void closeAllTabsForProject(Project activeProject) {

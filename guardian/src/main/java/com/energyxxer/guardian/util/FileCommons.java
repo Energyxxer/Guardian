@@ -1,5 +1,7 @@
 package com.energyxxer.guardian.util;
 
+import com.energyxxer.guardian.events.events.FileRenamedEvent;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
 import com.energyxxer.util.logger.Debug;
@@ -45,6 +47,7 @@ public class FileCommons {
                     } else {
                         Files.move(file.toPath(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
                         destinationFile.toFile().setLastModified(System.currentTimeMillis());
+                        Guardian.events.invoke(new FileRenamedEvent(file.toPath(), destinationFile));
                     }
                 } else {
                     allMoved = false;

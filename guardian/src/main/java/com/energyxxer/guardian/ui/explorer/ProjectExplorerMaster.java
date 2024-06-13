@@ -1,8 +1,11 @@
 package com.energyxxer.guardian.ui.explorer;
 
+import com.energyxxer.guardian.events.events.FileDeletedEvent;
+import com.energyxxer.guardian.events.events.FileRenamedEvent;
 import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.temp.projects.ProjectManager;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.sections.quick_find.StyledExplorerMaster;
 import com.energyxxer.guardian.ui.common.MenuItems;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
@@ -129,6 +132,20 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
         setSingleClickInteractAllowed(true);
 
         refresh();
+
+        Guardian.events.addEventHandler(FileRenamedEvent.class, (FileRenamedEvent evt) -> {
+            queueRefresh();
+        });
+        Guardian.events.addEventHandler(FileDeletedEvent.class, (FileDeletedEvent evt) -> {
+            queueRefresh();
+        });
+    }
+
+    private boolean refreshQueued = false;
+    public void queueRefresh() {
+        if(refreshQueued) return;
+        SwingUtilities.invokeLater(this::refresh);
+        refreshQueued = true;
     }
 
     @Override
@@ -139,6 +156,7 @@ public class ProjectExplorerMaster extends StyledExplorerMaster implements DropT
     }
 
     public void refresh(ArrayList<String> toOpen) {
+        refreshQueued = false;
         children.clear();
         flatList.clear();
         this.getExpandedElements().clear();

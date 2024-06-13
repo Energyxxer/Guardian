@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.main.window;
 
 import com.energyxxer.guardian.GuardianBinding;
+import com.energyxxer.guardian.events.EventManager;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.Resources;
 import com.energyxxer.guardian.global.Status;
@@ -77,6 +78,7 @@ public class GuardianWindow {
 
 	public static HintManager hintManager = new HintManager(jframe);
 	public static Hint exceptionHint = hintManager.createHint(ExceptionHint::new);
+	public static EventManager eventManager = new EventManager();
 
 	public static TabManager tabManager;
 	public static TabListMaster tabList;
@@ -116,6 +118,7 @@ public class GuardianWindow {
 		tabManager.setChangeWindowInfo(true);
 		tabManager.setOpenTabSaveKey("open_tabs");
 		tabManager.setSelectedTabSaveKey("selected_tab");
+		tabManager.subscribeToFileEvents();
 
 		welcomePane = new WelcomePane();
 

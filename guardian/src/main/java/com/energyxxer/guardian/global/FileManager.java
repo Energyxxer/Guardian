@@ -1,5 +1,7 @@
 package com.energyxxer.guardian.global;
 
+import com.energyxxer.guardian.events.events.FileDeletedEvent;
+import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.dialogs.ConfirmDialog;
 import com.energyxxer.guardian.ui.modules.FileModuleToken;
@@ -118,27 +120,31 @@ public class FileManager {
                 }
             }
         }
-        GuardianWindow.projectExplorer.refresh();
-        GuardianWindow.tabManager.checkForDeletion();
     }
 
     public static boolean deleteOrTrashFile(File file) {
-        if(!Files.isWritable(file.toPath())) return false;
-        if(FileModuleToken.DELETE_MOVES_TO_TRASH.get()) {
-            try {
-                if(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported((Desktop.Action) Desktop.Action.class.getField("MOVE_TO_TRASH").get(null))) {
-                    return (boolean) Desktop.class.getMethod("moveToTrash", File.class).invoke(Desktop.getDesktop(), file);
-                } else if(new ConfirmDialog("Move to Trash", "'Move to Trash' is not supported in your platform. Permanently delete '" + file + "'?").result) {
-                    return file.delete();
+        boolean result = false;
+        if (Files.isWritable(file.toPath())) {
+            if (FileModuleToken.DELETE_MOVES_TO_TRASH.get()) {
+                try {
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported((Desktop.Action) Desktop.Action.class.getField("MOVE_TO_TRASH").get(null))) {
+                        result = (boolean) Desktop.class.getMethod("moveToTrash", File.class).invoke(Desktop.getDesktop(), file);
+                    } else if (new ConfirmDialog("Move to Trash", "'Move to Trash' is not supported in your platform. Permanently delete '" + file + "'?").result) {
+                        result = file.delete();
+                    }
+                } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException |
+                         InvocationTargetException e) {
+                    GuardianWindow.showException(e);
+                    e.printStackTrace();
                 }
-            } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                GuardianWindow.showException(e);
-                e.printStackTrace();
+            } else {
+                result = file.delete();
             }
-            return false;
-        } else {
-            return file.delete();
         }
+        if(result) {
+            Guardian.events.invoke(new FileDeletedEvent(file.toPath()));
+        }
+        return result;
     }
 
     public static boolean deleteFolder(File folder) {

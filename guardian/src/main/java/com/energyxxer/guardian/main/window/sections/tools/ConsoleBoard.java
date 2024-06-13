@@ -28,9 +28,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by User on 12/15/2016.
@@ -322,6 +320,54 @@ public class ConsoleBoard extends ToolBoard {
             @Override
             public void handle(String[] args, String rawArgs) {
                 Debug.log();
+            }
+        });
+        registerCommandHandler("rand", new CommandHandler() {
+            @Override
+            public String getDescription() {
+                return "Generates a random value of various types";
+            }
+
+            @Override
+            public void printHelp() {
+                Debug.log();
+                Debug.log("RAND: Generates a random value of various types and copies to your clipboard.");
+                printAvailableOptions();
+            }
+
+            private void printAvailableOptions() {
+                Debug.log("Available options: uuid, hex");
+            }
+
+            @Override
+            public void handle(String[] args, String rawArgs) {
+                if(args.length <= 1) {
+                    Debug.log();
+                    printAvailableOptions();
+                } else {
+                    String generated = null;
+                    switch(args[1].toLowerCase(Locale.ENGLISH)) {
+                        case "uuid": {
+                            generated = UUID.randomUUID().toString();
+                            break;
+                        }
+                        case "hex": {
+                            StringBuilder generatedBuilder = new StringBuilder(Integer.toHexString(new Random().nextInt()));
+                            while(generatedBuilder.length() < 8) {
+                                generatedBuilder.insert(0, "0");
+                            }
+                            generated = generatedBuilder.toString();
+                            break;
+                        }
+                        default: {
+                            Debug.log("Invalid random option '" + args[1] + "'");
+                            printAvailableOptions();
+                            return;
+                        }
+                    }
+                    AdvancedEditor.copyToClipboard(generated);
+                    Debug.log("Copied to clipboard: " + generated);
+                }
             }
         });
     }

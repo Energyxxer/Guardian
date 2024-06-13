@@ -1,6 +1,7 @@
 package com.energyxxer.guardian.global.temp.projects;
 
 import com.energyxxer.guardian.GuardianBinding;
+import com.energyxxer.guardian.events.events.FileRenamedEvent;
 import com.energyxxer.guardian.langinterface.ProjectType;
 import com.energyxxer.guardian.main.Guardian;
 import com.energyxxer.guardian.main.window.GuardianWindow;
@@ -11,6 +12,7 @@ import com.google.gson.JsonObject;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -99,14 +101,17 @@ public class ProjectManager {
 	}
 	
 	public static boolean renameFile(File file, String newName) {
-		String path = file.getAbsolutePath();
-		String name = file.getName();
-		String pathToParent = path.substring(0, path.lastIndexOf(name));
-		
-		File newFile = new File(pathToParent + newName);
-		
-		boolean renamed = file.renameTo(newFile);
+		Path path = file.toPath().toAbsolutePath();
+		Path newPath = path.toAbsolutePath().getParent().resolve(newName);
 
+		boolean renamed = file.renameTo(newPath.toFile());
+
+		if(renamed) {
+			Guardian.events.invoke(new FileRenamedEvent(
+					path,
+					newPath
+			));
+		}
 		return renamed;
 	}
 

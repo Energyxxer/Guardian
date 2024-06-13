@@ -407,18 +407,7 @@ public class FileModuleToken implements ModuleToken, DraggableExplorerModuleToke
         }.result;
 
         if (newName != null) {
-            if (ProjectManager.renameFile(new File(pathToRename), newName)) {
-                GuardianWindow.projectExplorer.refresh();
-                GuardianWindow.tabManager.openTabs.forEach(
-                        tab -> {
-                            if(tab.token instanceof FileModuleToken && ((FileModuleToken) tab.token).getFile().equals(this.getFile())) {
-                                tab.transform(new FileModuleToken(new File(pathToParent + newName)));
-                            }
-                        }
-                );
-                GuardianWindow.tabManager.saveOpenTabs();
-                GuardianWindow.tabList.repaint();
-            } else {
+            if (!ProjectManager.renameFile(new File(pathToRename), newName)) {
                 JOptionPane.showMessageDialog(null,
                         "<html>The action can't be completed because the folder or file is open in another program.<br>Close the folder and try again.</html>",
                         "An error occurred.", JOptionPane.ERROR_MESSAGE);
