@@ -28,7 +28,7 @@ public class RepaintQueue implements Disposable, ActionListener {
         try {
             for (JComponent component : queuedComponents) {
                 if (component.isDisplayable()) {
-                    component.repaint();
+                    component.repaint(component.getVisibleRect());
                 }
             }
         } finally {

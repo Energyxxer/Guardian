@@ -111,8 +111,21 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
     @Override
     public void repaint() {
         if(this.getParent() instanceof JViewport && this.getParent().getParent() instanceof JScrollPane) {
-            this.getParent().getParent().repaint();
+            JScrollPane scrollPane = (JScrollPane) this.getParent().getParent();
+            scrollPane.repaint();
         } else super.repaint();
+    }
+
+    @Override
+    public void repaint(Rectangle r) {
+        if(this.getParent() instanceof JViewport && this.getParent().getParent() instanceof JScrollPane) {
+            JScrollPane scrollPane = (JScrollPane) this.getParent().getParent();
+            if(r != null && r.equals(getVisibleRect())) {
+                scrollPane.repaint(scrollPane.getVisibleRect());
+            } else {
+                scrollPane.repaint();
+            }
+        } else super.repaint(r);
     }
 
     protected ExplorerElement getElementAtMousePos(MouseEvent e) {

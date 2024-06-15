@@ -138,7 +138,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         visible = true;
         flasher.restart();
         readjustRect();
-        editor.repaint();
+        editor.repaint(editor.getVisibleRect());
         this.fireStateChanged();
     }
 
