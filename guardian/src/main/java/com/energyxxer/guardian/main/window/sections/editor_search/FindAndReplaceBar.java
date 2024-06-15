@@ -37,6 +37,7 @@ import static java.awt.Image.SCALE_SMOOTH;
 
 public class FindAndReplaceBar extends JPanel implements Disposable {
 
+    private static final Pattern REGEX_ESCAPED = Pattern.compile("[.*+?^${}()|\\[\\]\\\\]");
     private ThemeListenerManager tlm;
 
     private EditorModule editor;
@@ -510,6 +511,9 @@ public class FindAndReplaceBar extends JPanel implements Disposable {
     }
 
     public void setFindText(String text) {
+        if(regex) {
+            text = REGEX_ESCAPED.matcher(text).replaceAll("\\\\$0");
+        }
         findField.getCaret().setProfile(new CaretProfile(findField.getText().length(), 0));
         findField.getTransactionManager().insertTransaction(new InsertionEdit(text, findField));
     }
