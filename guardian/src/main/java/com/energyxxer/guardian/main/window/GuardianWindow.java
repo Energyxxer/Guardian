@@ -30,6 +30,7 @@ import com.energyxxer.guardian.ui.theme.change.ThemeListenerManager;
 import com.energyxxer.util.ImageManager;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.xswing.OverlayBorderLayout;
+import com.energyxxer.xswing.RepaintQueue;
 import com.energyxxer.xswing.ScalableDimension;
 import com.energyxxer.xswing.TemporaryConfirmation;
 import com.energyxxer.xswing.hints.Hint;
@@ -89,6 +90,7 @@ public class GuardianWindow {
 	private static KeyFixDialog recentlyShownDialog = null;
 
 	public static Robot robot;
+	public static RepaintQueue repaintQueue;
 
     public GuardianWindow() {
 		jframe = new JFrame();
@@ -108,6 +110,7 @@ public class GuardianWindow {
 		} catch (AWTException e) {
 			e.printStackTrace();
 		}
+		repaintQueue = new RepaintQueue();
 
 		tlm.addThemeChangeListener(t -> jframe.getContentPane().setBackground(t.getColor(new Color(215, 215, 215), "Window.background")));
 

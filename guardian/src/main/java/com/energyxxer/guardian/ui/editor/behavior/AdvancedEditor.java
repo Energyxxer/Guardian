@@ -4,6 +4,7 @@ import com.energyxxer.guardian.global.Commons;
 import com.energyxxer.guardian.global.Preferences;
 import com.energyxxer.guardian.global.keystrokes.KeyMap;
 import com.energyxxer.guardian.global.keystrokes.UserKeyBind;
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.main.window.sections.tools.ConsoleBoard;
 import com.energyxxer.guardian.ui.common.transactions.TransactionManager;
 import com.energyxxer.guardian.ui.editor.behavior.caret.CaretProfile;
@@ -1147,7 +1148,7 @@ public class AdvancedEditor extends JTextPane implements KeyListener, CaretListe
                     offsetGraphics.translate(0, lineOffset);
                     if(EDITOR_DO_BARREL_ROLL.get()) {
                         ((Graphics2D) offsetGraphics).rotate(((double) System.currentTimeMillis()) / 1000 * Math.PI, getWidth() / 2, getHeight() / 2);
-                        repaint();
+                        GuardianWindow.repaintQueue.queueRepaint(AdvancedEditor.this);
                     }
                     getRootView(AdvancedEditor.this).paint(offsetGraphics, alloc);
                 }

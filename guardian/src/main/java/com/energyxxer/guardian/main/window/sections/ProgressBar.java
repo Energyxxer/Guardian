@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.main.window.sections;
 
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.ui.theme.Theme;
 import com.energyxxer.guardian.ui.theme.change.ThemeChangeListener;
 
@@ -40,7 +41,7 @@ public class ProgressBar extends JPanel implements ThemeChangeListener {
         if(progress == -1) {
             scrollingProgress = ((float)(System.currentTimeMillis()%1000)/500)-0.5f;
             g.fillRect((int)(width * scrollingProgress), y, width / 2, height);
-            repaint();
+            GuardianWindow.repaintQueue.queueRepaint(this);
         } else {
             g.fillRect(0, y, (int)(width * progress), height);
         }
@@ -48,6 +49,6 @@ public class ProgressBar extends JPanel implements ThemeChangeListener {
 
     public void setProgress(float progress) {
         this.progress = progress;
-        repaint();
+        GuardianWindow.repaintQueue.queueRepaint(this);
     }
 }

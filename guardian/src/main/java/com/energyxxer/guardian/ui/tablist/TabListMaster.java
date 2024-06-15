@@ -251,7 +251,7 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
                 x += w;
             }
         }
-        repaint();
+        GuardianWindow.repaintQueue.queueRepaint(this);
     }
 
     @Override
@@ -262,12 +262,14 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
             rolloverElement.setRollover(false);
             if(rolloverElement != element) {
                 rolloverElement.mouseExited(e);
+                repaint();
             }
         }
         if(element != null) {
             element.setRollover(true);
             if(rolloverElement != element) {
                 element.mouseEntered(e);
+                repaint();
                 String text = element.getToolTipText();
                 if(text != null && (rolloverElement != null || !hint.isShowing())) {
                     hint.setText(text);
@@ -277,7 +279,7 @@ public class TabListMaster extends JComponent implements MouseListener, MouseMot
             }
             element.mouseMoved(e);
         }
-        repaint();
+        GuardianWindow.repaintQueue.queueRepaint(this);
         rolloverElement = element;
     }
 

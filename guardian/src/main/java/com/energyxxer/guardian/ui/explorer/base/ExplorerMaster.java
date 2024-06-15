@@ -203,11 +203,13 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
             rolloverItem.setRollover(false);
             if(rolloverItem != element) {
                 rolloverItem.mouseExited(e);
+                repaint();
             }
         }
         if(element != null) {
             element.setRollover(true);
             if(rolloverItem != element) {
+                repaint();
                 element.mouseEntered(e);
             }
             String text = element.getToolTipText();
@@ -221,7 +223,7 @@ public class ExplorerMaster extends JComponent implements MouseListener, MouseMo
         } else {
             rolloverText = null;
         }
-        repaint();
+        GuardianWindow.repaintQueue.queueRepaint(this);
         rolloverItem = element;
     }
 

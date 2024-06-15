@@ -1,5 +1,6 @@
 package com.energyxxer.guardian.ui.editor.behavior.caret;
 
+import com.energyxxer.guardian.main.window.GuardianWindow;
 import com.energyxxer.guardian.testing.LiveTestCase;
 import com.energyxxer.guardian.testing.LiveTestManager;
 import com.energyxxer.guardian.testing.LiveTestResult;
@@ -138,6 +139,15 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
         flasher.restart();
         readjustRect();
         editor.repaint();
+        this.fireStateChanged();
+    }
+
+    private void queueUpdate() {
+        editor.caretChanged();
+        visible = true;
+        flasher.restart();
+        readjustRect();
+        GuardianWindow.repaintQueue.queueRepaint(editor);
         this.fireStateChanged();
     }
 
@@ -679,7 +689,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
                 ex.printStackTrace();
             }
         }
-        update();
+        queueUpdate();
     }
 
     @Override
@@ -699,7 +709,7 @@ public class EditorCaret extends DefaultCaret implements DropTargetListener {
 
             dropLocation = editor.viewToModel(e.getLocation());
             readjustRect();
-            editor.repaint();
+            GuardianWindow.repaintQueue.queueRepaint(editor);
         } else {
             dropLocation = -1;
             if(editor.getTransferHandler() == null || !editor.getTransferHandler().canImport(new TransferHandler.TransferSupport(editor, e.getTransferable()))) {
